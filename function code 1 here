@@ -1,1 +1,16 @@
+//patchy patch 2
 
+int a = 4;
+int b = 7;
+
+void function1()
+{
+  int n = a - b;
+  return n;
+}
+
+void function2()
+{
+  int i = a + b;
+  return i;
+}
