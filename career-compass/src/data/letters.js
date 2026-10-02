@@ -167,7 +167,7 @@ Please feel free to say no if the timing is not right. Thank you either way.
 Warm regards,
 {{me}}`,
       tips: [
-        `Make it easy for them. The exact title, Job ID, link and CV together let them refer you in a few minutes.`,
+        `Make it easy for them. With the exact title, Job ID, link and CV in one message, the referral takes them very little time.`,
         `Ask people with a few years in the relevant team, rather than senior leaders who receive many requests.`,
         `If there is no reply, one gentle nudge after about five working days is enough. Thank them whatever the outcome.`,
       ],
@@ -337,7 +337,7 @@ This was a difficult decision. I appreciated our conversations and everything I 
 With best wishes,
 {{signature}}`,
       tips: [
-        `Send it once you have signed the new offer, so they can move on with other candidates.`,
+        `Send it once you have signed the new offer, so they can move on with other candidates. If joining depends on background verification, you may prefer to wait until that is complete.`,
         `If they had already made you an offer, add a line thanking them for it. There is no need to name the other company or the salary.`,
         `A warm exit is remembered, and the same company may be right for you later.`,
       ],
