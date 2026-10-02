@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Bundle src/ into the two files of the Google Apps Script project:
-   dist/apps-script/Code.gs         - server (Sheet storage, Drive saves, optional Claude helper)
-   dist/apps-script/Interface.html  - the whole page (styles, content, scripts); also opens offline in a browser
+   apps-script/Code.gs         - server (Sheet storage, Drive saves, optional Claude helper)
+   apps-script/Interface.html  - the whole page (styles, content, scripts); also opens offline in a browser
 """
 import os
 import shutil
@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).parent
 SRC = ROOT / "src"
-DIST = Path(os.environ.get("CC_DIST", ROOT / "dist"))
+DIST = Path(os.environ.get("CC_DIST", ROOT))
 DATA = Path(os.environ.get("CC_DATA_DIR", SRC / "data"))
 
 

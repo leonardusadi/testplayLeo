@@ -487,7 +487,7 @@
       return `https://in.indeed.com/jobs?q=${enc(q)}&l=${enc(anywhere ? 'India' : loc)}${sc}${recent ? '&fromage=7' : ''}`;
     },
     foundit: (q, loc, mode, recent, anywhere) => `https://www.foundit.in/srp/results?query=${enc(q)}${anywhere ? '' : `&locations=${enc(loc)}`}`,
-    google: (q, loc, mode) => `https://www.google.com/search?q=${enc(`${q} jobs ${loc === 'India' ? 'India' : loc}${mode === 'remote' ? ' remote' : mode === 'hybrid' ? ' hybrid' : ''}`)}&ibp=htl;jobs`,
+    google: (q, loc, mode) => `https://www.google.com/search?q=${enc(`${q} jobs ${loc === 'India' ? 'India' : loc}${mode === 'remote' ? ' remote' : mode === 'hybrid' ? ' hybrid' : ''}`)}&udm=8`,
   };
 
   function viewSearch() {
@@ -546,7 +546,7 @@
   const GLOBAL_BUILDERS = {
     linkedin: (q, loc, mode, recent) => `https://www.linkedin.com/jobs/search/?keywords=${enc(q)}&location=${enc(loc.linkedin || 'Worldwide')}${mode === 'remote' || loc.remote ? '&f_WT=2' : mode === 'hybrid' ? '&f_WT=3' : ''}${recent ? '&f_TPR=r604800&sortBy=DD' : ''}`,
     indeed: (q, loc, mode, recent) => (loc.indeed ? `https://${loc.indeed}/jobs?q=${enc(q)}&l=${enc(loc.indeedLoc || (loc.remote ? 'Remote' : ''))}${recent ? '&fromage=7' : ''}` : null),
-    google: (q, loc, mode) => `https://www.google.com/search?q=${enc(`${q} jobs ${loc.remote ? 'remote' : loc.label}${mode === 'hybrid' ? ' hybrid' : ''}`)}&ibp=htl;jobs`,
+    google: (q, loc, mode) => `https://www.google.com/search?q=${enc(`${q} jobs ${loc.remote ? 'remote' : loc.label}${mode === 'hybrid' ? ' hybrid' : ''}`)}&udm=8`,
   };
   function patternBuild(id, b, q, loc) {
     if (!b || !b.pattern) return null;

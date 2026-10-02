@@ -59,6 +59,20 @@ const SPEC = {
     helplines: A(T({ name: S, number: S, hours: S, languages: '', url: '' }), 2),
   }),
   explore: T({ intro: S, lanesNote: S, marketNotes: A(S, 3) }),
+  global: T({
+    intro: S,
+    search: T({
+      intro: S, linkCaveat: S,
+      locations: A(T({ id: S, label: S, linkedin: S, indeed: '', indeedLoc: '', remote: B }), 3),
+      platforms: A(T({ id: S, name: S, url: '', bestFor: S, tips: A(S, 2), linkNote: opt('') }), 5),
+      tips: A(T({ tip: S, why: S }), 3), scamsExtra: A(T({ flag: S, detail: S }), 3), safety: A(S, 3),
+    }),
+    companies: A(T({ id: S, name: S, category: S, cities: A(S, 1), hyd: B, careers: '', roles: A(S, 1), functions: S, work: S, lane: LANE, fit: S }), 10),
+    cv: T({ availability: S, rules: A(T({ rule: S, detail: S }), 3) }),
+    interview: T({ salary: A(S, 3), questions: A(T({ id: S, q: S, group: oneOf('Tender', 'Common', 'Role-specific'), why: S, answer: S }), 2) }),
+    plan: T({ title: S, points: A(T({ title: S, body: S }), 3), note: '' }),
+    letters: T({ availabilityLine: S }),
+  }),
   history: T({
     channels: S, appliedNote: S, pastNext: S,
     applied: A(T({ id: S, name: S, companyId: '' }), 1),
@@ -128,5 +142,15 @@ const ids = (arr, name) => { const seen = new Set(); for (const x of arr || []) 
 ids(D.roles, 'roles'); ids(D.companies, 'companies'); if (D.history) ids(D.history.applied, 'history.applied');
 if (D.history && D.companies) for (const x of [...D.history.applied, ...(D.history.ideas || [])]) if (x.companyId && !D.companies.some((c) => c.id === x.companyId)) errors.push(`history: unknown companyId ${x.companyId}`); ids(D.today && D.today.pool, 'today.pool'); ids(D.today && D.today.firstWeek, 'today.firstWeek'); ids(D.letters && D.letters.templates, 'letters.templates'); ids(D.interview && D.interview.questions, 'interview.questions');
 if (D.search && D.search.platforms) ids(D.search.platforms, 'search.platforms');
+if (D.global && D.global.search) {
+  const G = D.global.search;
+  ids(G.platforms, 'global.search.platforms'); ids(G.locations, 'global.search.locations'); ids(D.global.companies, 'global.companies');
+  const native = new Set(['linkedin', 'indeed', 'google']);
+  const locIds = new Set((G.locations || []).map((l) => l.id));
+  for (const p of G.platforms || []) {
+    if (p.build && !native.has(p.build) && !(G.builders && G.builders[p.build] && G.builders[p.build].pattern)) errors.push(`global.search.platforms.${p.id}: build '${p.build}' has no pattern`);
+    for (const r of p.regions || []) if (!locIds.has(r)) errors.push(`global.search.platforms.${p.id}: unknown region ${r}`);
+  }
+}
 if (errors.length) { console.log(`${errors.length} problem(s):\n- ${errors.slice(0, 80).join('\n- ')}`); process.exitCode = 1; }
 else console.log(`OK: ${only.length ? only.join(', ') : 'all parts'} valid`);

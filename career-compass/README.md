@@ -12,9 +12,9 @@ touches the data.
 
 Build them with `python3 build.py`:
 
-- `dist/apps-script/Code.gs` is the server. It saves to the Sheet's tabs (Applications, Messages, Store), saves
+- `apps-script/Code.gs` is the server. It saves to the Sheet's tabs (Applications, Messages, Store), saves
   files to a Drive folder, and runs an optional "Ask Claude" helper.
-- `dist/apps-script/Interface.html` is the whole page. It also opens offline in a browser, saving to that browser
+- `apps-script/Interface.html` is the whole page. It also opens offline in a browser, saving to that browser
   only.
 
 Setup steps are at the top of `Code.gs`. In short:
@@ -49,6 +49,6 @@ Setup steps are at the top of `Code.gs`. In short:
 node tests/validate-data.js                      # content matches the data contract
 node tests/gas-unit.js                           # Code.gs against in-memory Apps Script services
 python3 build.py
-node tests/e2e-gas.js dist/apps-script/Interface.html /tmp/e2e   # browser + mocked server, two devices
-node tests/smoke.js dist/apps-script/Interface.html /tmp/shots   # every view, phone and desktop, no server
+node tests/e2e-gas.js apps-script/Interface.html /tmp/e2e   # browser + mocked server, two devices
+node tests/smoke.js apps-script/Interface.html /tmp/shots   # every view, phone and desktop, no server
 ```

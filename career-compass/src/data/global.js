@@ -229,7 +229,7 @@ window.CC_DATA_PARTS.global = {
     ],
 
     scamsExtra: [
-      { flag: 'A visa, processing or placement fee', detail: 'In the UAE, Saudi Arabia and Qatar the law puts recruitment and visa costs on the employer. A common trick is a fake offer followed by a visa fee of about AED 5,000 that is described as refundable.' },
+      { flag: 'A visa, processing or placement fee', detail: 'In the UAE, Saudi Arabia and Qatar the law puts recruitment and visa costs on the employer. A common trick is a fake offer followed by a request for a visa or processing fee, sometimes up to AED 5,000 or more, described as refundable.' },
       { flag: 'An agent you cannot find on eMigrate', detail: 'Registered recruiting agents appear in the list of active agents on emigrate.gov.in, and 3,094 illegal agents had been listed there by October 2024. A registered agent may charge at most Rs 30,000 plus 18% GST, with a receipt.' },
       { flag: 'An overseas offer without a real interview', detail: 'Fake offer letters copy real company names and logos, and some come with fake company websites. Confirm the role on the company\'s own careers site.' },
       { flag: 'A visit visa presented as a work visa', detail: 'Some agents have edited visit visas to look like employment visas. You need a proper employment visa, arranged by the employer, before you start work.' },
@@ -491,7 +491,7 @@ window.CC_DATA_PARTS.global = {
       hyd: false,
       careers: 'https://hamad.qa/EN/Join-Us/HR/Pages/default.aspx',
       roles: ['Biomedical Engineer', 'Clinical Engineer', 'Biomedical Technician'],
-      functions: 'Qatar\'s main public hospital provider. It often recruits from India through agencies. Some biomedical engineering adverts ask for 3+ years on dialysis machines.',
+      functions: 'Qatar\'s main provider of secondary and tertiary hospital care. It often recruits from India through agencies. Some biomedical engineering adverts ask for 3+ years on dialysis machines.',
       work: 'On-site. Expatriates with an engineer job title in Qatar must register with the Ministry of Municipality (UPDA) and pass its exam.',
       lane: 'adjacent',
       fit: 'Use only agencies you can find on eMigrate, and trust a recruitment drive only when the hospital\'s own website announces it.',
@@ -538,12 +538,12 @@ window.CC_DATA_PARTS.global = {
 
   interview: {
     salary: [
-      'Gulf packages are usually split into basic pay plus housing and transport allowances. Basic is often 40-60% of the total, housing about 20-40% and transport about 5-15%. The law does not fix the split.',
-      'End-of-service gratuity is paid on basic pay only, so ask for a higher basic share. In the UAE it is 21 days\' basic pay per year for the first 5 years, then 30 days a year. In Saudi Arabia it is half a month\'s wage per year for the first 5 years, then a month a year. In Qatar it is at least 3 weeks\' basic pay per year after the first year.',
+      'Gulf packages are usually split into basic pay plus housing and transport allowances. Basic is often 40-60% of the total and housing about 25-40%, with transport on top. The law does not fix the split.',
+      'In the UAE and Qatar, end-of-service gratuity is worked out on basic pay only, so ask for a higher basic share. In the UAE it is 21 days\' basic pay per year for the first 5 years, then 30 days a year. In Qatar it is at least 3 weeks\' basic pay per year once you have completed a year. In Saudi Arabia it is half a month\'s wage per year for the first 5 years, then a month a year, based on your last wage, so check which allowances your contract counts.',
       'The UAE, Saudi Arabia and Qatar charge no personal income tax on salary. Also check medical insurance, the annual flight home, probation, notice period, and any car or fuel allowance for a field role.',
-      'These figures come from small samples, so treat them as rough. Dubai clinical application specialists report AED 13,000 to 29,000 a month in total pay on Glassdoor (median AED 23,000, only 4 reports). Al Faisaliah in Riyadh averages SAR 11,051 a month for Application Specialists on Bayt. Riyadh hospital biomedical engineers report SAR 7,000 to 11,000.',
+      'These figures come from small samples, so treat them as rough. Dubai clinical application specialists report AED 13,000 to 29,000 a month in total pay on Glassdoor (median AED 23,000, only 4 reports). Al Faisaliah in Riyadh averages SAR 11,051 a month for Application Specialist and Analyst roles on Bayt. Biomedical engineers in Riyadh report SAR 7,000 to 11,000 a month on Glassdoor.',
       'Pay for remote work done from India is taxable in India. Prefer employment through an Employer of Record, with Indian payslips, PF, tax deducted at source and Form 16, over a contractor agreement. Allow for currency conversion costs and EOR margins.',
-      'If you work as a contractor, presumptive tax counts 50% of receipts as profit (for receipts up to Rs 75 lakh), GST registration is needed above Rs 20 lakh a year, and you should keep the bank\'s e-FIRA for every payment. If you later move to the Gulf and spend fewer than 182 days a year in India, you generally become a non-resident, and your foreign salary is generally not taxed in India. Confirm both points with a chartered accountant.',
+      'If you work as a contractor, presumptive tax counts 50% of receipts as profit (for receipts up to Rs 75 lakh), GST registration is needed above Rs 20 lakh a year, and you should keep the bank\'s inward remittance certificate (FIRC or e-FIRA) for every payment. If you later move to the Gulf and spend fewer than 182 days a year in India, you generally become a non-resident, and your foreign salary is generally not taxed in India. Confirm both points with a chartered accountant.',
     ],
     questions: [
       {

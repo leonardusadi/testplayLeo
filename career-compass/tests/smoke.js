@@ -5,7 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const { chromium } = require(process.env.PW_PATH || '/opt/node22/lib/node_modules/playwright');
 
-const file = path.resolve(process.argv[2] || 'dist/apps-script/Interface.html');
+const file = path.resolve(process.argv[2] || 'apps-script/Interface.html');
 const out = path.resolve(process.argv[3] || '/tmp/claude-0/shots');
 fs.mkdirSync(out, { recursive: true });
 const ROUTES = ['today', 'paths', 'companies', 'abroad', 'search', 'cv', 'letters', 'tracker', 'interview', 'offer', 'care'];

@@ -89,7 +89,7 @@ window.CC_DATA_PARTS.search = {
     {
       id: 'google',
       name: 'Google Jobs',
-      url: 'https://www.google.com/search?q=jobs+in+Hyderabad&ibp=htl;jobs',
+      url: 'https://www.google.com/search?q=jobs+in+Hyderabad&udm=8',
       bestFor: 'One search across many job sites, including company pages',
       build: 'google',
       linkNote: 'Many sites at once; work pattern added as a word',
