@@ -16,6 +16,7 @@
       kits: {},
     },
     letters: { tpl: 'cover', fields: {}, appId: '' },
+    settings: { region: 'india' },
     daily: {},
     firstWeek: {},
     wins: [],
@@ -30,6 +31,11 @@
   });
 
   // ---------- small UI helpers ----------
+  const region = () => (S().settings && S().settings.region === 'global' && D.global ? 'global' : 'india');
+  const isGlobal = () => region() === 'global';
+  const G = () => D.global || {};
+  /** Region-specific variant of a text field: uses `<key>Global` in Global mode when present. */
+  const rv = (obj, key) => (isGlobal() && obj && obj[`${key}Global`]) || (obj && obj[key]);
   const ui = (key, fallback) => (S().ui && S().ui[key] != null ? S().ui[key] : fallback);
   const setUi = (key, value) => CC.update((s) => { s.ui = s.ui || {}; s.ui[key] = value; });
 
@@ -68,13 +74,15 @@
     const go = h('button', { type: 'button', class: 'btn primary small' }, icon('spark', 16), buttonLabel);
     const stop = h('button', { type: 'button', class: 'btn small', hidden: true }, 'Stop');
     const box = h('div', { class: 'ai-box no-print', hidden: true },
-      h('div', { class: 'row between' }, h('b', null, title), h('span', { class: 'pill plain' }, 'Uses your Claude account')),
+      h('div', { class: 'row between' }, h('b', null, title), h('span', { class: 'pill plain' }, 'Ask Claude')),
       h('p', { class: 'small muted' }, desc), ta, h('div', { class: 'row' }, go, stop), out);
-    CC.caps.sample.then((sample) => { if (sample) box.hidden = false; });
-    stop.onclick = () => ctl && ctl.abort();
+    CC.aiReady.then((ai) => { if (ai) box.hidden = false; });
+    let cancelled = false;
+    stop.onclick = () => { cancelled = true; ctl && ctl.abort(); go.disabled = false; stop.hidden = true; out.textContent = ''; };
     go.onclick = async () => {
-      const sample = await CC.caps.sample;
+      const sample = await CC.aiReady;
       if (!sample) return;
+      cancelled = false;
       const text = ta.value.trim();
       if (!text) { toast('Paste the text first.'); return; }
       ctl = new AbortController();
@@ -82,10 +90,11 @@
       out.replaceChildren('Thinking…');
       try {
         const result = await run(sample, text, ctl.signal, (t) => { out.textContent = t; });
+        if (cancelled) return;
         out.replaceChildren();
         if (render) out.append(render(result)); else out.textContent = result;
       } catch (e) {
-        if (e && e.code === 'cancelled') { out.textContent = e.text || ''; }
+        if (cancelled || (e && e.code === 'cancelled')) { out.textContent = ''; }
         else if (CC.aiHidden(e)) { box.hidden = true; }
         else { out.replaceChildren(h('p', { class: 'small' }, e && e.text ? e.text : ''), h('p', { class: 'small', style: { color: 'var(--rose)' } }, CC.aiError(e))); }
       } finally {
@@ -168,11 +177,11 @@
       tasks.push({ id: `fu-${a.id}`, title: `Follow up: ${a.company}`, sub: `${a.role || 'Application'} · applied ${CC.fmt(a.appliedOn)}. A short, friendly note is enough.`, href: '#tracker', minutes: 10 });
     }
     const fw = (D.today.firstWeek || []).filter((s) => !S().firstWeek[s.id]);
-    for (const s of fw.slice(0, energy === 'good' ? 2 : 1)) tasks.push({ id: `fw-${s.id}`, title: s.title, sub: s.sub, href: s.href, minutes: s.minutes });
+    for (const s of fw.slice(0, energy === 'good' ? 2 : 1)) tasks.push({ id: `fw-${s.id}`, title: rv(s, 'title'), sub: rv(s, 'sub'), href: s.href, minutes: s.minutes });
     const pool = (D.today.pool || []).filter((p) => p.energy.includes(energy));
     const start = dayOfYear() % Math.max(pool.length, 1);
     const rotated = [...pool.slice(start), ...pool.slice(0, start)];
-    for (const p of rotated) { if (tasks.length >= n) break; if (!tasks.some((t) => t.id === `p-${p.id}`)) tasks.push({ ...p, id: `p-${p.id}` }); }
+    for (const p of rotated) { if (tasks.length >= n) break; if (!tasks.some((t) => t.id === `p-${p.id}`)) tasks.push({ ...p, title: rv(p, 'title'), sub: rv(p, 'sub'), id: `p-${p.id}` }); }
     if (energy === 'low' && !tasks.some((t) => t.care)) {
       const care = (D.today.pool || []).find((p) => p.care);
       if (care) { if (tasks.length >= n) tasks.pop(); tasks.push({ ...care, id: `p-${care.id}` }); }
@@ -219,6 +228,7 @@
     };
     winInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') addWin(); });
     const due = followUpsDue();
+    const planData = isGlobal() && G().plan ? G().plan : D.today.plan;
 
     return h('div', { class: 'view' },
       h('section', { class: 'hero' }, canvas,
@@ -229,11 +239,11 @@
           h('p', { style: { fontWeight: 700 } }, 'How much energy do you have today?'),
           h('div', { class: 'energy' }, ['low', 'okay', 'good'].map(energyBtn)))),
 
-      D.today.plan ? h('details', { class: 'acc', open: !day.energy && !S().wins.length && !CC.apps().some((a) => !a.seed) },
-        h('summary', null, D.today.plan.title),
+      planData ? h('details', { class: 'acc', open: !day.energy && !S().wins.length && !CC.apps().some((a) => !a.seed) },
+        h('summary', null, planData.title),
         h('div', { class: 'acc-body' },
-          h('ol', { style: { margin: 0, paddingLeft: '1.2em', display: 'grid', gap: '8px' } }, D.today.plan.points.map((p) => h('li', null, h('b', null, p.title), ' ', h('span', { class: 'muted' }, p.body)))),
-          D.today.plan.note ? h('p', { class: 'small faint' }, D.today.plan.note) : null)) : null,
+          h('ol', { style: { margin: 0, paddingLeft: '1.2em', display: 'grid', gap: '8px' } }, planData.points.map((p) => h('li', null, h('b', null, p.title), ' ', h('span', { class: 'muted' }, p.body)))),
+          planData.note ? h('p', { class: 'small faint' }, planData.note) : null)) : null,
 
       day.energy ? h('section', { class: 'section' },
         sectionHead('Today’s gentle plan', D.today.energy[day.energy].note),
@@ -262,7 +272,7 @@
         h('div', { class: 'grid' }, due.map((a) => h('div', { class: 'card' },
           h('b', null, a.company), h('span', { class: 'small muted' }, `${a.role || ''} · applied ${CC.fmt(a.appliedOn)}`),
           h('div', { class: 'row' },
-            btn('Write follow-up', () => { CC.update((s) => { s.letters.tpl = 'followup'; s.letters.appId = a.id; s.letters.fields = { ...s.letters.fields, company: a.company, role: a.role, contact: a.contact || '' }; s.ui.apply = 'letters'; }); location.hash = '#letters'; }, 'small primary'),
+            btn('Write follow-up', () => { CC.update((s) => { s.letters.tpl = 'followup'; s.letters.appId = a.id; s.letters.fields = { ...s.letters.fields, company: a.company, role: a.role, contact: a.contact || '' }; s.ui.apply = 'letters'; }); go('letters'); }, 'small primary'),
             btn('Not now', () => { a.followUpOn = CC.addDays(t, 3); CC.upsertApp(a); }, 'small ghost')))))) : null,
 
       h('section', { class: 'section' },
@@ -277,7 +287,7 @@
         sectionHead('Your first week', `${fwDone} of ${(D.today.firstWeek || []).length} done. Do these in any order, at your own pace.`),
         h('ul', { class: 'tasks' }, (D.today.firstWeek || []).map((s) => h('li', { class: S().firstWeek[s.id] ? 'done' : '' },
           h('input', { type: 'checkbox', id: `fw-${s.id}`, checked: !!S().firstWeek[s.id], 'aria-label': `Done: ${s.title}`, style: { width: '20px', height: '20px', marginTop: '3px', accentColor: 'var(--primary)', flex: 'none' }, onchange: (e) => CC.update((st) => { st.firstWeek[s.id] = e.target.checked; }) }),
-          h('div', { class: 'stack', style: { gap: '2px', flex: '1' } }, h('span', { class: 't-title' }, s.title), h('span', { class: 't-sub' }, s.sub),
+          h('div', { class: 'stack', style: { gap: '2px', flex: '1' } }, h('span', { class: 't-title' }, rv(s, 'title')), h('span', { class: 't-sub' }, rv(s, 'sub')),
             s.href ? h('a', { href: s.href, class: 'small' }, s.hrefLabel || 'Open') : null))))),
 
       h('section', { class: 'section' },
@@ -294,6 +304,7 @@
     return h('div', { class: 'view' },
       h('div', { class: 'view-head' }, h('span', { class: 'eyebrow' }, 'Explore'), h('h1', null, 'Where you could go next'),
         h('p', { class: 'lede' }, D.explore.intro)),
+      isGlobal() && G().intro ? h('div', { class: 'note info' }, h('b', null, 'Global mode'), h('span', null, G().intro)) : null,
       subtabs('explore', [['paths', 'Role paths'], ['companies', 'Companies'], ['abroad', 'Remote & abroad']], 'paths'),
       tab === 'paths' ? viewPaths() : tab === 'companies' ? viewCompanies() : viewAbroad());
   }
@@ -317,7 +328,7 @@
       h('p', null, r.why),
       h('dl', { class: 'stack', style: { gap: '8px', margin: 0 } },
         r.gaps ? h('div', { class: 'kv' }, h('dt', null, 'To bridge'), h('dd', null, r.gaps)) : null,
-        r.salary ? h('div', { class: 'kv' }, h('dt', null, 'Typical pay (indicative)'), h('dd', null, r.salary)) : null,
+        r.salary && !isGlobal() ? h('div', { class: 'kv' }, h('dt', null, 'Typical pay in India (indicative)'), h('dd', null, r.salary)) : null,
         r.hybridWhy ? h('div', { class: 'kv' }, h('dt', null, 'Work pattern'), h('dd', null, r.hybridWhy)) : null),
       h('div', { class: 'kv' }, h('dt', { class: 'eyebrow' }, 'Search titles'), h('div', { class: 'chips' }, r.variants.map((v) => h('span', { class: 'chip static' }, v)))),
       r.upskill && r.upskill.length ? h('details', { class: 'acc' }, h('summary', null, 'Quick ways to upskill'),
@@ -325,17 +336,18 @@
           u.url ? ext(u.url, u.name) : h('b', null, u.name), h('span', { class: 'small muted' }, [u.provider, u.cost, u.duration].filter(Boolean).join(' · ')))))) : null,
       r.employers && r.employers.length ? h('p', { class: 'small muted' }, h('b', null, 'Who hires: '), r.employers.join(', ')) : null,
       h('div', { class: 'row' },
-        btn('Find these jobs', () => { CC.update((s) => { s.ui.searchQ = r.variants[0]; s.ui.apply = 'search'; }); location.hash = '#search'; }, 'small primary', 'send'),
-        btn('Matching CV', () => { CC.update((s) => { s.cv.track = r.lane; s.ui.apply = 'cv'; }); location.hash = '#cv'; }, 'small')));
+        btn('Find these jobs', () => { CC.update((s) => { s.ui.searchQ = r.variants[0]; s.ui.apply = 'search'; }); go('search'); }, 'small primary', 'send'),
+        btn('Matching CV', () => { CC.update((s) => { s.cv.track = r.lane; s.ui.apply = 'cv'; }); go('cv'); }, 'small')));
   }
 
   function viewCompanies() {
     const f = ui('cf', { q: '', lane: 'all', hyd: false, cat: 'all' });
-    const cats = [...new Set(D.companies.map((c) => c.category))].sort();
+    const source = isGlobal() && Array.isArray(G().companies) ? G().companies : D.companies;
+    const cats = [...new Set(source.map((c) => c.category))].sort();
     const q = (f.q || '').toLowerCase();
-    const list = D.companies.filter((c) =>
+    const list = source.filter((c) =>
       (f.lane === 'all' || c.lane === f.lane || (f.lane === 'saved' && S().saved.companies.includes(c.id))) &&
-      (!f.hyd || c.hyd) && (f.cat === 'all' || c.category === f.cat) &&
+      (isGlobal() || !f.hyd || c.hyd) && (f.cat === 'all' || c.category === f.cat) &&
       (!q || `${c.name} ${c.category} ${c.roles.join(' ')} ${c.functions}`.toLowerCase().includes(q)));
     const setF = (patch) => setUi('cf', { ...f, ...patch });
     const search = h('input', { type: 'search', id: 'company-q', placeholder: 'Search companies or roles', value: f.q || '' });
@@ -349,21 +361,22 @@
         h('div', { class: 'toolbar' }, search,
           h('select', { id: 'company-cat', 'aria-label': 'Category', value: f.cat, onchange: (e) => setF({ cat: e.target.value }) },
             h('option', { value: 'all' }, 'All categories'), cats.map((c) => h('option', { value: c }, c))),
-          h('label', { class: 'check', for: 'company-hyd' }, h('input', { type: 'checkbox', id: 'company-hyd', checked: !!f.hyd, onchange: (e) => setF({ hyd: e.target.checked }) }), 'Hyderabad office'),
-          h('span', { class: 'count-note num' }, `${list.length} of ${D.companies.length}`))),
+          isGlobal() ? null : h('label', { class: 'check', for: 'company-hyd' }, h('input', { type: 'checkbox', id: 'company-hyd', checked: !!f.hyd, onchange: (e) => setF({ hyd: e.target.checked }) }), 'Hyderabad office'),
+          h('span', { class: 'count-note num' }, `${list.length} of ${source.length}`))),
       h('div', { class: 'grid two' }, list.map(companyCard)),
-      D.explore.marketNotes && D.explore.marketNotes.length ? h('details', { class: 'acc' }, h('summary', null, 'What’s happening in the market (2025–26)'),
+      !isGlobal() && D.explore.marketNotes && D.explore.marketNotes.length ? h('details', { class: 'acc' }, h('summary', null, 'What’s happening in the market (2025–26)'),
         h('div', { class: 'acc-body' }, h('ul', { class: 'dots' }, D.explore.marketNotes.map((n) => h('li', null, n))))) : null);
   }
   function companyCard(c) {
     const starred = S().saved.companies.includes(c.id);
     const kw = c.roles[0] || '';
-    const li = `https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(`${c.name} ${kw}`)}&location=India`;
-    const reviews = `https://www.google.com/search?q=${encodeURIComponent(`${c.name} India reviews AmbitionBox Glassdoor`)}`;
+    const li = `https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(`${c.name} ${kw}`)}&location=${isGlobal() ? 'Worldwide' : 'India'}`;
+    const reviews = `https://www.google.com/search?q=${encodeURIComponent(`${c.name} ${isGlobal() ? '' : 'India '}reviews Glassdoor${isGlobal() ? '' : ' AmbitionBox'}`)}`;
+    const findCareers = `https://www.google.com/search?q=${encodeURIComponent(`${c.name} ${isGlobal() ? '' : 'India '}careers official site`)}`;
     const inTracker = CC.apps().some((a) => a.company === c.name);
     return h('article', { class: 'card' },
       h('div', { class: 'rc-top' }, h('div', { class: 'stack', style: { gap: '6px' } }, h('h3', null, c.name),
-        h('div', { class: 'rc-meta' }, lanePill(c.lane), h('span', { class: 'pill plain' }, c.category), c.hyd ? h('span', { class: 'pill good' }, 'Hyderabad') : null)),
+        h('div', { class: 'rc-meta' }, lanePill(c.lane), h('span', { class: 'pill plain' }, c.category), c.hyd && !isGlobal() ? h('span', { class: 'pill good' }, 'Hyderabad') : null)),
         starBtn(starred, () => CC.update((s) => { s.saved.companies = toggleIn(s.saved.companies, c.id); }), starred ? 'Unstar company' : 'Star company')),
       h('p', null, c.fit),
       h('dl', { class: 'stack', style: { gap: '8px', margin: 0 } },
@@ -373,12 +386,12 @@
       h('div', { class: 'kv' }, h('dt', { class: 'eyebrow' }, 'Titles to search on their site'), h('div', { class: 'chips' },
         c.roles.map((r) => h('button', { type: 'button', class: 'chip', title: 'Copy this title', onclick: () => CC.copy(r) }, r)))),
       h('div', { class: 'row' },
-        c.careers ? ext(c.careers, 'Careers site', 'btn small primary') : null,
+        c.careers ? ext(c.careers, 'Careers site', 'btn small primary') : ext(findCareers, 'Find careers page', 'btn small primary'),
         ext(li, 'LinkedIn jobs', 'btn small'),
         ext(reviews, 'Reviews', 'btn small ghost'),
         btn(inTracker ? 'In tracker' : 'Add to tracker', () => {
-          if (inTracker) { location.hash = '#tracker'; return; }
-          CC.upsertApp({ id: CC.uid(), company: c.name, role: kw, platform: 'Company site', link: c.careers || '', status: 'idea', createdAt: Date.now(), messages: [], followups: [] });
+          if (inTracker) { go('tracker'); return; }
+          CC.upsertApp({ id: CC.uid(), company: c.name, role: kw, platform: 'Company site', link: c.careers || '', status: 'idea', region: region(), createdAt: Date.now(), messages: [], followups: [] });
           toast(`${c.name} added to your tracker`);
         }, 'small ghost', inTracker ? 'check' : 'plus')));
   }
@@ -411,9 +424,9 @@
     const tab = ui('apply', 'search');
     return h('div', { class: 'view' },
       h('div', { class: 'view-head' }, h('span', { class: 'eyebrow' }, 'Apply'), h('h1', null, tab === 'cv' ? 'Your CV' : tab === 'letters' ? 'Letters & messages' : 'Find openings'),
-        h('p', { class: 'lede' }, tab === 'cv' ? D.cv.intro : tab === 'letters' ? D.letters.intro : D.search.intro)),
+        h('p', { class: 'lede' }, tab === 'cv' ? D.cv.intro : tab === 'letters' ? D.letters.intro : isGlobal() && G().search ? G().search.intro : D.search.intro)),
       subtabs('apply', [['search', 'Search'], ['cv', 'CV studio'], ['letters', 'Letters']], 'search'),
-      tab === 'cv' ? viewCV() : tab === 'letters' ? viewLetters() : viewSearch());
+      tab === 'cv' ? viewCV() : tab === 'letters' ? viewLetters() : isGlobal() && G().search ? viewSearchGlobal() : viewSearch());
   }
 
   const enc = encodeURIComponent;
@@ -490,13 +503,72 @@
         aiBox({
           id: 'ai-scam', title: 'Ask Claude: does this look safe?', desc: 'Paste a job message, email or offer. You will get a plain-language risk check. Remove personal numbers first if you prefer.',
           placeholder: 'Paste the message here', buttonLabel: 'Check it',
-          run: (sample, text, signal) => sample.json(`You help an experienced job seeker in India spot job scams. Assess the message below.\nReply with only JSON: {"risk":"low"|"medium"|"high","summary":string (2 sentences, plain and calm),"red_flags":[string],"checks":[string] (3-5 concrete verification steps, India-specific where useful, e.g. official careers page, MCA21, LinkedIn employee check, never pay fees, report at cybercrime.gov.in or 1930)}.\n\nMESSAGE:\n${text.slice(0, 8000)}`, { signal, modelTier: 'default' }),
+          run: (sample, text, signal) => sample.json(`You help an experienced job seeker in India spot job scams. Assess the message below.\nReply with only JSON: {"risk":"low"|"medium"|"high","summary":string (2 sentences, plain and calm),"red_flags":[string],"checks":[string] (3-5 concrete verification steps, India-specific where useful, e.g. official careers page, MCA21, LinkedIn employee check, never pay fees, report at cybercrime.gov.in or 1930)}.\n\nMESSAGE:\n${text.slice(0, 8000)}`, { signal, effort: 'low' }),
           render: (r) => h('div', { class: 'stack' },
             h('div', { class: 'row' }, h('span', { class: `pill ${r.risk === 'low' ? 'good' : r.risk === 'medium' ? 'warn' : 'rose'}` }, `Risk: ${r.risk}`)),
             h('p', null, r.summary || ''),
             (r.red_flags || []).length ? h('div', null, h('b', null, 'Red flags'), h('ul', { class: 'dots' }, r.red_flags.map((x) => h('li', null, String(x))))) : null,
             (r.checks || []).length ? h('div', null, h('b', null, 'Checks to do'), h('ul', { class: 'dots' }, r.checks.map((x) => h('li', null, String(x))))) : null),
         })));
+  }
+
+  const GLOBAL_BUILDERS = {
+    linkedin: (q, loc, mode, recent) => `https://www.linkedin.com/jobs/search/?keywords=${enc(q)}&location=${enc(loc.linkedin || 'Worldwide')}${mode === 'remote' || loc.remote ? '&f_WT=2' : mode === 'hybrid' ? '&f_WT=3' : ''}${recent ? '&f_TPR=r604800&sortBy=DD' : ''}`,
+    indeed: (q, loc, mode, recent) => (loc.indeed ? `https://${loc.indeed}/jobs?q=${enc(q)}&l=${enc(loc.indeedLoc || (loc.remote ? 'Remote' : ''))}${recent ? '&fromage=7' : ''}` : null),
+    google: (q, loc, mode) => `https://www.google.com/search?q=${enc(`${q} jobs ${loc.remote ? 'remote' : loc.label}${mode === 'hybrid' ? ' hybrid' : ''}`)}&ibp=htl;jobs`,
+  };
+  function patternBuild(id, b, q, loc) {
+    if (!b || !b.pattern) return null;
+    const ls = (loc.slugs && loc.slugs[id]) || loc.slug || slug(loc.label);
+    return b.pattern.replace(/\{qslug\}/g, slug(q)).replace(/\{q\}/g, enc(q)).replace(/\{locslug\}/g, ls).replace(/\{loc\}/g, enc(loc.label));
+  }
+  function viewSearchGlobal() {
+    const GS = G().search;
+    const locs = GS.locations || [];
+    const loc = locs.find((l) => l.id === ui('gLoc', '')) || locs[0];
+    const sq = ui('searchQ', D.roles[0].variants[0]);
+    const mode = ui('gMode', 'any');
+    const recent = ui('searchRecent', true);
+    const qInput = h('input', { type: 'search', id: 'gsearch-q', value: sq, placeholder: 'Job title or keywords' });
+    const linksBox = h('div', { class: 'links' });
+    const renderLinks = () => {
+      const q = qInput.value.trim() || sq;
+      const links = [];
+      for (const p of GS.platforms || []) {
+        if (!p.build || (Array.isArray(p.regions) && p.regions.length && !p.regions.includes(loc.id))) continue;
+        const url = GLOBAL_BUILDERS[p.build] ? GLOBAL_BUILDERS[p.build](q, loc, mode, recent) : patternBuild(p.build, (GS.builders || {})[p.build], q, loc);
+        if (url) links.push(h('a', { class: 'linkcard', href: url, target: '_blank', rel: 'noopener noreferrer' }, h('b', null, `${p.name} ↗`), h('span', null, p.linkNote || `${q} · ${loc.label}`)));
+      }
+      linksBox.replaceChildren(...links);
+    };
+    let tmr;
+    qInput.addEventListener('input', () => { renderLinks(); clearTimeout(tmr); tmr = setTimeout(() => CC.update((s) => { s.ui.searchQ = qInput.value; }, { silent: true }), 400); });
+    renderLinks();
+    const suggestions = [...new Set(D.roles.flatMap((r) => r.variants.slice(0, 1)))].slice(0, 12);
+    const flags = [...((D.search.scams && D.search.scams.flags) || []), ...(GS.scamsExtra || [])];
+    return h('div', { class: 'stack', style: { gap: '26px' } },
+      h('section', { class: 'section' },
+        sectionHead('Search builder', 'Pick a title and a place. Remote roles first; moving abroad takes longer, so keep India in view too.'),
+        h('div', { class: 'card' },
+          field('gsearch-q', 'Job title or keywords', qInput),
+          h('div', { class: 'chips' }, suggestions.map((x) => h('button', { type: 'button', class: 'chip', 'aria-pressed': String(sq === x), onclick: () => setUi('searchQ', x) }, x))),
+          h('div', { class: 'form-grid' },
+            field('gsearch-loc', 'Where', h('select', { id: 'gsearch-loc', value: loc ? loc.id : '', onchange: (e) => setUi('gLoc', e.target.value) }, locs.map((l) => h('option', { value: l.id }, l.label)))),
+            field('gsearch-mode', 'Work pattern', h('select', { id: 'gsearch-mode', value: mode, onchange: (e) => setUi('gMode', e.target.value) },
+              [['any', 'Any'], ['remote', 'Remote'], ['hybrid', 'Hybrid']].map(([v, l]) => h('option', { value: v }, l))))),
+          h('label', { class: 'check', for: 'gsearch-recent' }, h('input', { type: 'checkbox', id: 'gsearch-recent', checked: recent, onchange: (e) => setUi('searchRecent', e.target.checked) }), h('span', null, 'Only jobs posted in the last 7 days')),
+          linksBox,
+          h('p', { class: 'small faint' }, GS.linkCaveat || D.search.linkCaveat))),
+      (GS.tips || []).length ? h('section', { class: 'section' }, sectionHead('What works for global and remote roles', null),
+        h('div', { class: 'grid' }, GS.tips.map((t) => h('div', { class: 'card soft' }, h('b', null, t.tip), h('p', { class: 'small muted' }, t.why))))) : null,
+      h('section', { class: 'section' }, sectionHead('Platform playbook', 'Where each site helps, and how to use it.'),
+        h('div', { class: 'stack', style: { gap: '0' } }, (GS.platforms || []).map((p) => h('details', { class: 'acc' },
+          h('summary', null, h('span', null, p.name, h('span', { class: 'small faint', style: { fontWeight: 400 } }, ` · ${p.bestFor}`))),
+          h('div', { class: 'acc-body' }, h('ul', { class: 'dots' }, (p.tips || []).map((t) => h('li', null, t))), p.url ? ext(p.url, `Open ${p.name}`, 'small') : null))))),
+      h('section', { class: 'section' }, sectionHead('Working abroad safely', 'Real employers and registered agents never ask you to pay for a job.'),
+        h('div', { class: 'grid two' },
+          h('div', { class: 'card' }, h('h4', null, 'Red flags'), h('ul', { class: 'dots' }, flags.map((f) => h('li', null, h('b', null, f.flag), ' — ', f.detail)))),
+          (GS.safety || []).length ? h('div', { class: 'card' }, h('h4', null, 'Steps that keep you safe'), h('ol', { style: { margin: 0, paddingLeft: '1.2em', display: 'grid', gap: '6px' } }, GS.safety.map((v) => h('li', null, v)))) : null)));
   }
 
   // ----- CV studio -----
@@ -513,6 +585,7 @@
     };
     const quiet = (fn) => { CC.update(fn, { silent: true }); refresh(); };
     const contact = { ...D.cv.contact, ...(st.contact || {}) };
+    if (isGlobal()) contact.availability = (st.contact || {}).availabilityGlobal != null ? st.contact.availabilityGlobal : ((G().cv || {}).availability || contact.availability);
 
     const editorJobs = D.cv.jobs.map((job) => {
       const list = CV.bullets(job, track);
@@ -552,7 +625,7 @@
 
     const contactEd = h('details', { class: 'acc' }, h('summary', null, 'Contact line'),
       h('div', { class: 'acc-body form-grid' }, [['name', 'Name'], ['city', 'City'], ['phone', 'Phone'], ['email', 'Email'], ['linkedin', 'LinkedIn URL'], ['availability', 'Availability']].map(([k, l]) =>
-        field(`c-${k}`, l, textInput(`c-${k}`, contact[k], (v) => quiet((s) => { s.cv.contact[k] = v; }), k === 'linkedin' ? { placeholder: 'linkedin.com/in/your-name' } : {})))));
+        field(`c-${k}`, k === 'availability' && isGlobal() ? 'Availability (Global mode)' : l, textInput(`c-${k}`, contact[k], (v) => quiet((s) => { s.cv.contact[k === 'availability' && isGlobal() ? 'availabilityGlobal' : k] = v; }), k === 'linkedin' ? { placeholder: 'linkedin.com/in/your-name' } : {})))));
 
     const textBlock = (key, label, rows, limit) => {
       const val = CV.trackText(key, track);
@@ -572,6 +645,8 @@
     };
 
     return h('div', { class: 'stack', style: { gap: '22px' } },
+      isGlobal() && G().cv && (G().cv.rules || []).length ? h('details', { class: 'acc' }, h('summary', null, 'CVs for roles outside India'),
+        h('div', { class: 'acc-body' }, h('ul', { class: 'dots' }, G().cv.rules.map((r) => h('li', null, h('b', null, r.rule), ' — ', r.detail))))) : null,
       h('div', { class: 'card soft' },
         h('b', null, 'Choose the version for this application'),
         h('div', { class: 'chips', role: 'radiogroup' }, CV.TRACKS.map((k) => h('button', { type: 'button', class: 'chip', role: 'radio', 'aria-checked': String(track === k), 'aria-pressed': String(track === k), onclick: () => CC.update((s) => { s.cv.track = k; }) }, T[k].label))),
@@ -591,8 +666,9 @@
         h('div', { class: 'stack sticky-col', style: { gap: '12px' } },
           h('div', { class: 'row no-print' },
             btn('Download Word (.docx)', () => { const mm = CV.model(track); CC.saveFile(`${CV.fileBase(mm)}.docx`, new Blob([Docx.build(CV.toBlocks(mm), { title: `${mm.name} CV`, author: mm.name })], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' })); }, 'primary', 'download'),
+            CC.Remote.enabled ? btn('Save to Drive', () => { const mm = CV.model(track); CC.saveToDrive(`${CV.fileBase(mm)}.docx`, new Blob([Docx.build(CV.toBlocks(mm), { title: `${mm.name} CV`, author: mm.name })], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' })); }, '', 'download') : null,
             copyBtn(() => CV.toText(CV.model(track)), 'Copy as text', ''),
-            CC.standalone ? btn('Print / PDF', () => { document.body.classList.add('printing-cv'); window.print(); setTimeout(() => document.body.classList.remove('printing-cv'), 500); }, '') : null),
+            btn('Print / PDF', () => { document.body.classList.add('printing-cv'); try { window.print(); } catch { toast('Printing is not available here. Use the Word file instead.'); } setTimeout(() => document.body.classList.remove('printing-cv'), 800); }, 'ghost')),
           h('div', { class: 'print-root' }, previewBox),
           aiBox({
             id: 'ai-tailor', title: 'Ask Claude: tailor to a job description', desc: 'Paste a job description. You get the keywords you are missing and suggested edits that stay true to your experience. Nothing changes until you choose to apply it.',
@@ -631,6 +707,7 @@
       pitch: T.pitch, headline: CV.trackText('headline', st.cv.track), strengths: T.strengths, trackPara: T.coverPara,
       today: CC.fmtLong(CC.iso()),
       signature: [c.name, c.phone, c.email, c.linkedin].map((x) => (x || '').trim()).filter(Boolean).join('\n'),
+      availabilityLine: isGlobal() ? ((G().letters && G().letters.availabilityLine) || '') : (D.letters_availability_india || `I am based in ${c.city || 'Hyderabad'} and can join immediately.`),
     };
   }
   const LABELS = { company: 'Company', role: 'Role', contact: 'Name', source: 'where you saw it', why: 'why this company', mutual: 'mutual connection', topic: 'something you discussed', interviewDate: 'interview day', skill: 'a key requirement', newRole: 'the role you accepted' };
@@ -669,7 +746,7 @@
       const msg = { id: CC.uid(), date: t, tpl: tpl.id, label: tpl.label, kind: tpl.kind, subject: current.subject, text: current.body };
       let app = appsList.find((a) => a.id === S().letters.appId);
       if (!app) {
-        app = { id: CC.uid(), company: f.company || '(company)', role: f.role || '', platform: f.source || '', link: '', status: 'idea', contact: f.contact || '', createdAt: Date.now(), messages: [], followups: [], cvTrack: S().cv.track };
+        app = { id: CC.uid(), company: f.company || '(company)', role: f.role || '', platform: f.source || '', link: '', status: 'idea', contact: f.contact || '', region: region(), createdAt: Date.now(), messages: [], followups: [], cvTrack: S().cv.track };
       }
       app = { ...app, messages: [...(app.messages || []), msg] };
       if (tpl.logAs === 'applied' && (app.status === 'idea' || !app.status)) { app.status = 'applied'; app.appliedOn = t; app.followUpOn = CC.addDays(t, 7); app.cvTrack = S().cv.track; }
@@ -703,12 +780,17 @@
               const f = S().letters.fields || {};
               CC.saveFile(`Cover_Letter_${slug(f.company || 'company')}.docx`, new Blob([Docx.build(blocks, { title: 'Cover letter', author: D.person.full })], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' }));
             }, '', 'download') : null,
+            tpl.docx && CC.Remote.enabled ? btn('Save to Drive', () => {
+              const blocks = current.body.split(/\n{2,}/).map((p) => ({ type: 'p', text: p.replace(/\n/g, ' '), after: 160 }));
+              const f = S().letters.fields || {};
+              CC.saveToDrive(`Cover_Letter_${slug(f.company || 'company')}.docx`, new Blob([Docx.build(blocks, { title: 'Cover letter', author: D.person.full })], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' }));
+            }, '', 'download') : null,
             btn('Save to tracker', save, '', 'check')),
           h('p', { class: 'small faint' }, 'Highlighted words in [brackets] still need your details.'),
           aiBox({
             id: 'ai-letter', title: 'Ask Claude: write it for this job', desc: 'Paste the job description. Claude drafts this message from your CV, honestly, in a warm professional tone. Edit before sending.',
             placeholder: 'Paste the job description (or recruiter message) here', buttonLabel: 'Draft it',
-            run: (sample, jd, signal, onPartial) => sample(`Write a ${tpl.label.toLowerCase()} for an Indian professional applying to a multinational company. Tone: warm, confident, plain English, no clichés, no exaggeration. NEVER invent experience, numbers or certifications not in her CV; where a detail is unknown, write it as [placeholder]. ${tpl.limit ? `Hard limit: ${tpl.limit} characters.` : 'Keep it under 300 words.'} If the role is a career change, connect her real experience to it honestly. Do not mention the two short recent roles unless the text explicitly asks why she is looking.\n\nFields she gave: ${JSON.stringify(S().letters.fields || {})}\n\nHER CV:\n${CV.toText(CV.model()).slice(0, 8000)}\n\nJOB DESCRIPTION / MESSAGE:\n${jd.slice(0, 8000)}\n\nReturn only the message text${tpl.subject ? ', with a first line "Subject: ..."' : ''}.`, { signal, onText: ({ text }) => onPartial(text) }).then((r) => r.text),
+            run: (sample, jd, signal) => sample.text(`Write a ${tpl.label.toLowerCase()} for an Indian professional applying to a multinational company. Tone: warm, confident, plain English, no clichés, no exaggeration. NEVER invent experience, numbers or certifications not in her CV; where a detail is unknown, write it as [placeholder]. ${tpl.limit ? `Hard limit: ${tpl.limit} characters.` : 'Keep it under 300 words.'} If the role is a career change, connect her real experience to it honestly. Do not mention the two short recent roles unless the text explicitly asks why she is looking.\n\nFields she gave: ${JSON.stringify(S().letters.fields || {})}\n\nHER CV:\n${CV.toText(CV.model()).slice(0, 8000)}\n\nJOB DESCRIPTION / MESSAGE:\n${jd.slice(0, 8000)}\n\nReturn only the message text${tpl.subject ? ', with a first line "Subject: ..."' : ''}.`, { signal }),
             render: (text) => h('div', { class: 'stack' }, h('div', { class: 'letter-out' }, text), h('div', { class: 'row' }, copyBtn(text, 'Copy draft'))),
           }))));
   }
@@ -736,7 +818,7 @@
       h('div', { class: 'row between' },
         h('div', { class: 'row' }, h('span', { class: 'small faint' }, filter === 'open' ? 'Showing open applications' : filter === 'all' ? 'Showing everything' : `Showing: ${filter === 'due' ? 'follow-up due' : statusLabel[filter]}`),
           filter !== 'all' ? btn('Show all', () => setUi('tf', 'all'), 'small ghost') : null),
-        btn('Add application', () => { const id = CC.uid(); CC.upsertApp({ id, company: '', role: '', platform: '', status: 'idea', createdAt: Date.now(), messages: [], followups: [] }, { silent: true }); setUi('editApp', id); }, 'primary', 'plus')),
+        btn('Add application', () => { const id = CC.uid(); CC.upsertApp({ id, company: '', role: '', platform: '', status: 'idea', region: region(), createdAt: Date.now(), messages: [], followups: [] }, { silent: true }); setUi('editApp', id); }, 'primary', 'plus')),
       list.length ? h('div', { class: 'grid two' }, list.map((a) => (editing === a.id ? appEditor(a) : appCard(a, due(a)))))
         : h('div', { class: 'card soft' }, h('b', null, all.length ? 'Nothing in this view.' : 'Your tracker is empty.'), h('p', { class: 'small muted' }, 'Add companies from Explore, or save a letter from Letters, and they appear here.')),
       h('section', { class: 'section' },
@@ -751,6 +833,7 @@
       h('div', { class: 'rc-top' }, h('div', { class: 'stack', style: { gap: '2px' } }, h('h4', null, a.company || '(no company yet)'), h('span', { class: 'small muted' }, a.role || '')),
         h('span', { class: `pill ${a.status === 'offer' ? 'good' : a.status === 'interview' ? 'new' : a.status === 'applied' ? 'adjacent' : 'plain'}` }, statusLabel[a.status] || a.status)),
       h('div', { class: 'row small muted' },
+        a.region === 'global' ? h('span', { class: 'pill adjacent' }, 'Global') : null,
         a.platform ? h('span', null, a.platform) : null,
         a.appliedOn ? h('span', { class: 'num' }, `Applied ${CC.fmt(a.appliedOn)}`) : null,
         a.status === 'applied' && a.followUpOn ? h('span', { class: `num${isDue ? ' due' : ''}` }, isDue ? 'Follow-up due' : `Follow up ${CC.fmt(a.followUpOn)}`) : null,
@@ -794,7 +877,11 @@
 
   function dataPanel() {
     const st = CC.saveStatus;
-    const where = st.where === 'cloud' ? 'Saved privately to your Claude account, and on this device.' : st.where === 'device' ? 'Saved in this browser on this device.' : 'This browser is not saving. Download a backup before you close the page.';
+    const where = st.where === 'sheet' || st.where === 'syncing' ? 'Everything is saved to your own Google Sheet, and kept on this device for speed. Updates to this page never touch your data.'
+      : st.where === 'locked' ? 'This page needs its private link (the one with ?key=) to reach your Sheet.'
+      : st.where === 'device' ? (CC.Remote.available ? 'Saved on this device. It will sync to your Google Sheet when the connection returns.' : 'Saved in this browser on this device. Open the page from its Apps Script link to keep everything in your Google Sheet.')
+      : 'This browser is not saving. Download a backup before you close the page.';
+    const sheetUrl = CC.Remote.meta && CC.Remote.meta.sheetUrl;
     const fileIn = h('input', { type: 'file', id: 'import-file', accept: '.json,application/json', hidden: true });
     const confirmBox = h('div');
     fileIn.addEventListener('change', async () => {
@@ -818,9 +905,11 @@
       h('div', { class: 'row' },
         btn('Download tracker (.csv)', () => CC.saveFile(`job-tracker-${CC.iso()}.csv`, new Blob([`﻿${csv()}`], { type: 'text/csv' })), 'small', 'download'),
         btn('Download full backup (.json)', () => CC.saveFile(`career-compass-backup-${CC.iso()}.json`, new Blob([JSON.stringify(CC.state, null, 1)], { type: 'application/json' })), 'small', 'download'),
-        btn('Restore from backup', () => fileIn.click(), 'small ghost'), fileIn),
+        CC.Remote.enabled ? btn('Save backup to Drive', () => CC.saveToDrive(`career-compass-backup-${CC.iso()}.json`, new Blob([JSON.stringify(CC.state, null, 1)], { type: 'application/json' })), 'small', 'download') : null,
+        btn('Restore from backup', () => fileIn.click(), 'small ghost'), fileIn,
+        sheetUrl ? ext(sheetUrl, 'Open my Google Sheet', 'btn small ghost') : null),
       confirmBox,
-      h('p', { class: 'small faint' }, 'A weekly backup is a kind thing to do for your future self. Your data never leaves your device or your own Claude account.'));
+      h('p', { class: 'small faint' }, CC.Remote.enabled ? 'Your Sheet is your backup. The Applications and Messages tabs are readable tables, so you can open them any time.' : 'A weekly backup is a kind thing to do for your future self.'));
   }
 
   // ---------- PREPARE ----------
@@ -834,7 +923,7 @@
   }
   function viewInterview() {
     const track = S().cv.track;
-    const qs = D.interview.questions;
+    const qs = isGlobal() && G().interview && Array.isArray(G().interview.questions) ? [...D.interview.questions, ...G().interview.questions] : D.interview.questions;
     const pick = ui('practiceQ', 0) % qs.length;
     const timerEl = h('span', { class: 'num', style: { fontFamily: 'var(--font-display)', fontSize: '1.6rem' } }, '2:00');
     let tm = null;
@@ -875,7 +964,7 @@
         h('div', { class: 'grid two' }, D.interview.stories.map((s) => h('div', { class: 'card' }, h('h4', null, s.title), h('p', { class: 'small faint' }, `Use for: ${s.use}`),
           h('dl', { class: 'stack', style: { gap: '6px', margin: 0 } }, [['Situation', s.situation], ['What you did', s.action], ['Result', s.result]].map(([k, v]) => h('div', { class: 'kv' }, h('dt', null, k), h('dd', null, CV.marked(v))))))))),
       h('section', { class: 'section' }, sectionHead('Salary conversations', 'Know your number before they ask.'),
-        h('ul', { class: 'dots' }, D.interview.salary.map((x) => h('li', null, x)))));
+        h('ul', { class: 'dots' }, (isGlobal() && G().interview && G().interview.salary ? G().interview.salary : D.interview.salary).map((x) => h('li', null, x)))));
   }
   function viewOffer() {
     return h('div', { class: 'stack', style: { gap: '26px' } },
@@ -952,15 +1041,21 @@
   };
   const VIEWS = { today: viewToday, explore: viewExplore, apply: viewApply, tracker: viewTracker, prepare: viewPrepare, care: viewCare };
   let currentView = 'today';
-  function route(initial) {
-    const token = (location.hash || '#today').slice(1);
-    const r = ROUTES[token] || ROUTES.today;
+  const tokenFromHash = () => { try { return (location.hash || '').slice(1); } catch { return ''; } };
+  function route(token, initial) {
+    const t = ROUTES[token] ? token : 'today';
+    const r = ROUTES[t];
     const prev = currentView;
     currentView = r[0];
     if (r[1] && ui(r[1], null) !== r[2]) CC.update((s) => { s.ui = s.ui || {}; s.ui[r[1]] = r[2]; }, { silent: true });
     render();
     if (!initial && prev !== currentView) window.scrollTo({ top: 0 });
-    if (token === 'data') setTimeout(() => { const el = document.getElementById('your-data'); if (el) el.scrollIntoView({ behavior: 'smooth' }); }, 50);
+    if (t === 'data') setTimeout(() => { const el = document.getElementById('your-data'); if (el) el.scrollIntoView({ behavior: 'smooth' }); }, 50);
+  }
+  /** In-app navigation. Works inside the Apps Script iframe, where the page cannot rely on the top URL. */
+  function go(token) {
+    route(token);
+    try { if (tokenFromHash() !== token) history.pushState(null, '', `#${token}`); } catch { /* sandboxed frame: navigation still works */ }
   }
   function render() {
     const active = document.activeElement && document.activeElement.id;
@@ -973,13 +1068,22 @@
       if (el) { el.focus({ preventScroll: true }); try { if (sel != null && el.setSelectionRange) el.setSelectionRange(sel, sel); } catch { /* not a text field */ } }
     }
     renderStatus();
+    renderRegion();
   }
+  const STATUS_TEXT = { sheet: 'Saved to your Sheet', syncing: 'Saving…', locked: 'Private link needed', none: 'Not saving — back up' };
   function renderStatus() {
     const pill = document.getElementById('save-pill');
     if (!pill) return;
     const st = CC.saveStatus;
     pill.dataset.state = st.ok ? 'ok' : 'warn';
-    pill.querySelector('.txt').textContent = st.where === 'cloud' ? 'Synced privately' : st.where === 'device' ? 'Saved on this device' : 'Not saving — back up';
+    pill.querySelector('.txt').textContent = st.where === 'device' ? (st.ok ? 'Saved on this device' : 'Offline · saved on device') : STATUS_TEXT[st.where] || 'Saved on this device';
+    pill.title = st.where === 'sheet' ? 'Everything is saved to your Google Sheet' : st.where === 'device' ? 'Saved in this browser. It will sync to your Sheet when the connection returns.' : pill.querySelector('.txt').textContent;
+  }
+  function renderRegion() {
+    const r = region();
+    document.querySelectorAll('[data-region]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.region === r)));
+    const sub = document.getElementById('brand-sub');
+    if (sub) sub.textContent = `for ${D.person.full} · ${r === 'global' ? 'Global' : 'India'}`;
   }
 
   function buildNav() {
@@ -993,17 +1097,29 @@
   function start() {
     CC.load(defaultState);
     buildNav();
-    document.getElementById('brand-sub').textContent = `for ${D.person.full}`;
-    document.getElementById('save-pill').addEventListener('click', () => { location.hash = '#data'; if (location.hash === '#data') route(); });
+    document.getElementById('save-pill').addEventListener('click', () => go('data'));
+    document.querySelectorAll('[data-region]').forEach((b) => b.addEventListener('click', () => {
+      const next = b.dataset.region;
+      if (next === region()) return;
+      CC.update((s) => { s.settings.region = next; });
+      toast(next === 'global' ? 'Global mode: remote roles and work abroad' : 'India mode: roles across India');
+    }));
+    document.addEventListener('click', (e) => {
+      const a = e.target && e.target.closest ? e.target.closest('a[href^="#"]') : null;
+      if (!a) return;
+      const t = a.getAttribute('href').slice(1);
+      if (!ROUTES[t]) return;
+      e.preventDefault();
+      go(t);
+    });
     CC.on((kind) => { if (kind === 'status') renderStatus(); else render(); });
-    window.addEventListener('hashchange', () => route());
+    window.addEventListener('popstate', () => route(tokenFromHash()));
     if (window.matchMedia) {
       const mq = window.matchMedia('(prefers-color-scheme: dark)');
       if (mq.addEventListener) mq.addEventListener('change', () => { if (currentView === 'today') render(); });
     }
-    new MutationObserver(() => { if (currentView === 'today') render(); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-    route(true);
-    CC.Cloud.init();
+    route(tokenFromHash(), true);
+    CC.Remote.init();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
 })();

@@ -108,7 +108,7 @@ for (const [k, spec] of Object.entries(SPEC)) {
 }
 // cross-checks
 if (D.letters && Array.isArray(D.letters.templates)) {
-  const known = new Set(['company', 'role', 'contact', 'source', 'why', 'mutual', 'topic', 'interviewDate', 'skill', 'newRole', 'greeting', 'hi', 'me', 'phone', 'email', 'linkedin', 'pitch', 'headline', 'strengths', 'trackPara', 'today', 'city', 'signature']);
+  const known = new Set(['company', 'role', 'contact', 'source', 'why', 'mutual', 'topic', 'interviewDate', 'skill', 'newRole', 'greeting', 'hi', 'me', 'phone', 'email', 'linkedin', 'pitch', 'headline', 'strengths', 'trackPara', 'today', 'city', 'signature', 'availabilityLine']);
   for (const t of D.letters.templates) {
     for (const m of `${t.subject || ''} ${t.body || ''}`.matchAll(/\{\{(\w+)\}\}/g)) if (!known.has(m[1])) errors.push(`letters.${t.id}: unknown placeholder {{${m[1]}}}`);
     for (const u of t.uses || []) if (!D.letters.fields[u]) errors.push(`letters.${t.id}: uses field "${u}" not defined in letters.fields`);

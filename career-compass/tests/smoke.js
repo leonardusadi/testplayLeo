@@ -5,7 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const { chromium } = require(process.env.PW_PATH || '/opt/node22/lib/node_modules/playwright');
 
-const file = path.resolve(process.argv[2] || 'dist/career-compass.html');
+const file = path.resolve(process.argv[2] || 'dist/apps-script/Interface.html');
 const out = path.resolve(process.argv[3] || '/tmp/claude-0/shots');
 fs.mkdirSync(out, { recursive: true });
 const ROUTES = ['today', 'paths', 'companies', 'abroad', 'search', 'cv', 'letters', 'tracker', 'interview', 'offer', 'care'];
@@ -22,7 +22,7 @@ const ROUTES = ['today', 'paths', 'companies', 'abroad', 'search', 'cv', 'letter
     await page.goto(`file://${file}#today`);
     await page.waitForSelector('#main .view');
     for (const r of ROUTES) {
-      await page.evaluate((x) => { location.hash = `#${x}`; }, r);
+      await page.evaluate((x) => { history.pushState(null, '', `#${x}`); dispatchEvent(new PopStateEvent('popstate')); }, r);
       await page.waitForTimeout(150);
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       if (overflow > 1) problems.push(`[${w}] #${r}: horizontal overflow ${overflow}px`);
@@ -32,34 +32,34 @@ const ROUTES = ['today', 'paths', 'companies', 'abroad', 'search', 'cv', 'letter
     }
     if (w === 390) {
       // energy plan
-      await page.evaluate(() => { location.hash = '#today'; });
+      await page.evaluate(() => { history.pushState(null, '', '#today'); dispatchEvent(new PopStateEvent('popstate')); });
       await page.click('#energy-okay');
       await page.waitForTimeout(100);
       const tasks = await page.$$eval('.tasks li', (els) => els.length);
       if (tasks < 3) problems.push(`energy plan shows ${tasks} tasks`);
       // tracker: add from company card
-      await page.evaluate(() => { location.hash = '#companies'; });
+      await page.evaluate(() => { history.pushState(null, '', '#companies'); dispatchEvent(new PopStateEvent('popstate')); });
       await page.waitForTimeout(100);
       await page.click('text=Add to tracker >> nth=0');
-      await page.evaluate(() => { location.hash = '#tracker'; });
+      await page.evaluate(() => { history.pushState(null, '', '#tracker'); dispatchEvent(new PopStateEvent('popstate')); });
       await page.waitForTimeout(100);
       const cards = await page.$$eval('.app-card', (els) => els.length);
       if (cards < 1) problems.push('tracker: company not added');
       // letters: fill + save
-      await page.evaluate(() => { location.hash = '#letters'; });
+      await page.evaluate(() => { history.pushState(null, '', '#letters'); dispatchEvent(new PopStateEvent('popstate')); });
       await page.waitForTimeout(100);
       await page.fill('#lf-company', 'Medtronic');
       await page.fill('#lf-role', 'Complaint Handling Specialist');
       const letter = await page.textContent('#letter-out');
       if (!letter.includes('Medtronic')) problems.push('letters: field not applied to output');
       await page.click('text=Save to tracker');
-      await page.evaluate(() => { location.hash = '#tracker'; });
+      await page.evaluate(() => { history.pushState(null, '', '#tracker'); dispatchEvent(new PopStateEvent('popstate')); });
       await page.waitForTimeout(100);
       const txt = await page.textContent('#main');
       if (!txt.includes('Medtronic')) problems.push('letters: save to tracker failed');
       // downloads
       for (const [hash, label, ext] of [['#cv', 'Download Word (.docx)', '.docx'], ['#tracker', 'Download tracker (.csv)', '.csv'], ['#tracker', 'Download full backup (.json)', '.json']]) {
-        await page.evaluate((x) => { location.hash = x; }, hash);
+        await page.evaluate((x) => { history.pushState(null, '', x); dispatchEvent(new PopStateEvent('popstate')); }, hash);
         await page.waitForTimeout(150);
         const [dl] = await Promise.all([page.waitForEvent('download', { timeout: 5000 }), page.click(`text=${label}`)]);
         const target = path.join(out, `export${ext}`);

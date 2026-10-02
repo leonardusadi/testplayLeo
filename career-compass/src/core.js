@@ -59,13 +59,14 @@ const CC = (() => {
 
   const toastEl = () => document.getElementById('toast');
   let toastTimer;
-  function toast(msg) {
+  function toast(msg, link) {
     const el = toastEl();
     if (!el) return;
-    el.textContent = msg;
+    el.replaceChildren(msg);
+    if (link) el.append(' ', h('a', { href: link, target: '_blank', rel: 'noopener noreferrer' }, 'Open'));
     el.hidden = false;
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => { el.hidden = true; }, 2600);
+    toastTimer = setTimeout(() => { el.hidden = true; }, link ? 8000 : 2600);
   }
 
   // ---------- Dates ----------
@@ -80,12 +81,15 @@ const CC = (() => {
   const inThisWeek = (s) => { if (!s) return false; const ws = weekStart(); return s >= ws && s <= addDays(ws, 6); };
   const uid = () => (crypto.randomUUID ? crypto.randomUUID().replace(/-/g, '').slice(0, 16) : Math.random().toString(36).slice(2, 12) + Date.now().toString(36));
 
-  // ---------- Store ----------
+  // ---------- Store (local-first; synced to a Google Sheet when served by Apps Script) ----------
   const LS_KEY = 'career-compass-v1';
+  /** Top-level state keys saved to the Sheet's Store tab. `apps` has its own tabs; `ui` stays on this device. */
+  const CORE_KEYS = ['cv', 'letters', 'daily', 'firstWeek', 'wins', 'journal', 'saved', 'settings'];
   const listeners = new Set();
   let state = null;
   let defaults = () => ({});
   let saveStatus = { where: 'device', ok: true };
+  const snap = {};
 
   const clone = (o) => JSON.parse(JSON.stringify(o));
   function mergeDefaults(target, def) {
@@ -98,12 +102,22 @@ const CC = (() => {
   function lsGet() { try { return localStorage.getItem(LS_KEY); } catch { return null; } }
   function lsSet(v) { try { localStorage.setItem(LS_KEY, v); return true; } catch { return false; } }
 
+  function stampChanges() {
+    state._ts = state._ts || {};
+    const now = Date.now();
+    for (const k of CORE_KEYS) {
+      const str = JSON.stringify(state[k] === undefined ? null : state[k]);
+      if (snap[k] !== str) { snap[k] = str; state._ts[k] = now; }
+    }
+  }
   function load(defFn) {
     defaults = defFn;
     let saved = null;
     try { saved = JSON.parse(lsGet() || 'null'); } catch { saved = null; }
     state = mergeDefaults(saved || {}, defaults());
     if (!Array.isArray(state.apps)) state.apps = [];
+    state._ts = state._ts || {};
+    for (const k of CORE_KEYS) snap[k] = JSON.stringify(state[k] === undefined ? null : state[k]);
     return state;
   }
   function persistLocal() {
@@ -121,9 +135,9 @@ const CC = (() => {
   /** Mutate state. opts.silent: don't notify listeners (for text inputs). */
   function update(fn, opts = {}) {
     fn(state);
-    state.updatedAt = Date.now();
+    stampChanges();
     persistLocal();
-    Cloud.markCore();
+    Remote.schedule();
     if (!opts.silent) emit('state');
   }
   function upsertApp(app, opts = {}) {
@@ -131,7 +145,7 @@ const CC = (() => {
     const i = state.apps.findIndex((a) => a.id === app.id);
     if (i >= 0) state.apps[i] = app; else state.apps.push(app);
     persistLocal();
-    Cloud.markApp(app.id);
+    Remote.markApp(app.id);
     if (!opts.silent) emit('state');
   }
   function deleteApp(id) {
@@ -143,139 +157,210 @@ const CC = (() => {
   const apps = () => state.apps.filter((a) => !a.deleted);
 
   function replaceAll(next) {
-    const apps = Array.isArray(next.apps) ? next.apps : [];
+    const list = Array.isArray(next.apps) ? next.apps : [];
     state = mergeDefaults(next, defaults());
-    state.apps = apps;
-    state.updatedAt = Date.now();
-    for (const a of state.apps) { a.updatedAt = Date.now(); Cloud.markApp(a.id); }
+    state.apps = list;
+    const now = Date.now();
+    state._ts = {};
+    for (const k of CORE_KEYS) { state._ts[k] = now; snap[k] = JSON.stringify(state[k] === undefined ? null : state[k]); }
+    for (const a of state.apps) { a.updatedAt = now; Remote.markApp(a.id); }
     persistLocal();
-    Cloud.markCore();
+    Remote.forceCore();
     emit('state');
   }
 
-  // ---------- Cloud (claude.ai artifact db, private per viewer) ----------
-  const Cloud = (() => {
-    let coreRef = null;
-    let appsCol = null;
+  // ---------- Remote: the Google Sheet behind the Apps Script web app ----------
+  const Remote = (() => {
+    const gs = () => (window.google && window.google.script && window.google.script.run) || null;
     let enabled = false;
-    let coreDirty = false;
+    let key = '';
+    let meta = {};
+    const sent = {};
     const dirtyApps = new Set();
     let timer = null;
     let flushing = false;
+    let failures = 0;
 
-    const coreBody = () => { const { apps: _a, ui: _u, ...rest } = state; return clone(rest); };
-
+    function call(action, payload) {
+      return new Promise((resolve, reject) => {
+        const run = gs();
+        if (!run) { reject({ code: 'no_backend' }); return; }
+        run
+          .withSuccessHandler((res) => {
+            let r;
+            try { r = typeof res === 'string' ? JSON.parse(res) : res; } catch { reject({ code: 'bad_response' }); return; }
+            if (r && r.ok) resolve(r.data); else reject((r && r.error) || { code: 'server_error' });
+          })
+          .withFailureHandler((err) => reject({ code: 'network', message: String((err && err.message) || err) }))
+          .api(JSON.stringify({ action, key, payload: payload || null }));
+      });
+    }
+    function readKey() {
+      return new Promise((resolve) => {
+        const done = (v) => resolve(v || '');
+        try {
+          if (window.google && google.script && google.script.url) google.script.url.getLocation((loc) => done(loc && loc.parameter && loc.parameter.key));
+          else done('');
+        } catch { done(''); }
+        setTimeout(() => done(''), 4000);
+      });
+    }
+    function merge(data) {
+      const core = data.core || {};
+      for (const k of CORE_KEYS) {
+        const r = core[k];
+        if (!r) continue;
+        const localTs = (state._ts && state._ts[k]) || 0;
+        if ((r.updatedAt || 0) > localTs) {
+          state[k] = mergeDefaults(r.value, defaults()[k] === undefined ? r.value : defaults()[k]);
+          state._ts[k] = r.updatedAt;
+          snap[k] = JSON.stringify(state[k] === undefined ? null : state[k]);
+          sent[k] = snap[k];
+        } else if ((r.updatedAt || 0) === localTs) {
+          sent[k] = snap[k];
+        }
+      }
+      const local = new Map(state.apps.map((a) => [a.id, a]));
+      const remoteIds = new Set();
+      for (const r of data.apps || []) {
+        if (!r || !r.id) continue;
+        remoteIds.add(r.id);
+        const l = local.get(r.id);
+        if (!l || (r.updatedAt || 0) > (l.updatedAt || 0)) local.set(r.id, r);
+        else if ((l.updatedAt || 0) > (r.updatedAt || 0)) dirtyApps.add(l.id);
+      }
+      for (const a of local.values()) if (!remoteIds.has(a.id)) dirtyApps.add(a.id);
+      state.apps = [...local.values()];
+      persistLocal();
+    }
     async function init() {
-      if (!window.claude || typeof window.claude.use !== 'function') return;
+      if (!gs()) return;
+      setStatus({ where: 'syncing', ok: true });
+      if (!key) key = await readKey();
       try {
-        const [db, user] = await Promise.all([window.claude.use('db'), window.claude.use('user')]);
-        if (!db || !user) return;
-        const id = await user.id();
-        if (!id) return;
-        coreRef = db.doc(`data/users/${id}/compass`);
-        appsCol = coreRef.collection('apps');
-        const [coreSnap, appsSnap] = await Promise.all([coreRef.get(), appsCol.get()]);
-        const remote = coreSnap.exists ? coreSnap.data() : null;
-        if (remote && (remote.updatedAt || 0) > (state.updatedAt || 0)) {
-          const keepApps = state.apps;
-          const keepUi = state.ui;
-          state = mergeDefaults(clone(remote), defaults());
-          state.apps = keepApps;
-          state.ui = keepUi;
-        } else {
-          coreDirty = true;
-        }
-        const local = new Map(state.apps.map((a) => [a.id, a]));
-        for (const d of appsSnap.docs) {
-          const r = d.data();
-          if (!r || !r.id) continue;
-          const l = local.get(r.id);
-          if (!l || (r.updatedAt || 0) > (l.updatedAt || 0)) local.set(r.id, clone(r));
-          else if ((l.updatedAt || 0) > (r.updatedAt || 0)) dirtyApps.add(l.id);
-        }
-        const remoteIds = new Set(appsSnap.docs.map((d) => d.id));
-        for (const a of local.values()) if (!remoteIds.has(a.id)) dirtyApps.add(a.id);
-        state.apps = [...local.values()];
+        const data = await call('load');
+        meta = data.meta || {};
+        merge(data);
         enabled = true;
-        persistLocal();
-        setStatus({ where: 'cloud', ok: true });
+        failures = 0;
+        setStatus({ where: 'sheet', ok: true, note: '' });
+        resolveAi(meta.aiEnabled ? Ai : null);
         emit('state');
         schedule(200);
       } catch (e) {
-        console.warn('cloud init failed', e);
+        if (e && e.code === 'locked') { setStatus({ where: 'locked', ok: false }); resolveAi(null); return; }
+        failures += 1;
+        setStatus({ where: 'device', ok: false, note: 'offline' });
+        setTimeout(init, Math.min(60000, 5000 * failures));
       }
     }
-    function schedule(ms = 1200) {
+    function schedule(ms = 1500) {
       if (!enabled) return;
       clearTimeout(timer);
       timer = setTimeout(flush, ms);
     }
+    function pendingCore() {
+      const out = {};
+      for (const k of CORE_KEYS) {
+        if (sent[k] !== snap[k]) out[k] = { value: state[k] === undefined ? null : state[k], updatedAt: (state._ts && state._ts[k]) || Date.now() };
+      }
+      return out;
+    }
     async function flush() {
       if (!enabled || flushing) return;
+      const core = pendingCore();
+      const ids = [...dirtyApps];
+      if (!Object.keys(core).length && !ids.length) return;
       flushing = true;
+      ids.forEach((id) => dirtyApps.delete(id));
+      const appsOut = ids.map((id) => state.apps.find((a) => a.id === id)).filter(Boolean);
+      const coreStr = Object.fromEntries(Object.keys(core).map((k) => [k, JSON.stringify(core[k].value)]));
+      setStatus({ where: 'syncing', ok: true });
       try {
-        if (coreDirty) {
-          coreDirty = false;
-          await coreRef.set(coreBody());
-        }
-        for (const id of [...dirtyApps]) {
-          dirtyApps.delete(id);
-          const app = state.apps.find((a) => a.id === id);
-          if (!app) continue;
-          await appsCol.doc(id).set(clone(app));
-        }
-        if (saveStatus.where !== 'cloud' || !saveStatus.ok) setStatus({ where: 'cloud', ok: true });
+        await call('save', { core, apps: appsOut });
+        for (const k of Object.keys(coreStr)) sent[k] = coreStr[k];
+        failures = 0;
+        setStatus({ where: 'sheet', ok: true, note: '' });
       } catch (e) {
-        const code = e && e.code;
-        if (code === 'invalid_argument' || code === 'revoked' || code === 'not_granted' || code === 'quota_exceeded') {
-          enabled = false;
-          setStatus({ where: 'device', ok: true, note: code === 'quota_exceeded' ? 'Cloud storage is full; saving on this device.' : '' });
-        } else {
-          coreDirty = true;
-          setTimeout(() => { flushing = false; schedule(4000); }, 0);
-          return;
-        }
-      } finally {
+        ids.forEach((id) => dirtyApps.add(id));
+        failures += 1;
+        setStatus({ where: e && e.code === 'locked' ? 'locked' : 'device', ok: false, note: 'retrying' });
         flushing = false;
+        schedule(Math.min(60000, 4000 * failures));
+        return;
       }
-      if (coreDirty || dirtyApps.size) schedule(800);
+      flushing = false;
+      if (Object.keys(pendingCore()).length || dirtyApps.size) schedule(600);
     }
     return {
       init,
-      markCore() { coreDirty = true; schedule(); },
+      call,
+      schedule,
       markApp(id) { dirtyApps.add(id); schedule(); },
+      forceCore() { for (const k of CORE_KEYS) delete sent[k]; schedule(200); },
       get enabled() { return enabled; },
+      get meta() { return meta; },
+      get available() { return !!gs(); },
     };
   })();
 
-  // ---------- Capabilities ----------
-  const standalone = !(window.claude && typeof window.claude.use === 'function');
-  const capPromise = (name) => (standalone ? Promise.resolve(null) : window.claude.use(name).catch(() => null));
-  const caps = { downloads: capPromise('downloads'), sample: capPromise('sample') };
+  // ---------- Ask Claude (optional; only when the Sheet's script has an Anthropic API key) ----------
+  let resolveAi;
+  const aiReady = new Promise((r) => { resolveAi = r; });
+  if (!(window.google && window.google.script)) resolveAi(null);
+  const parseJson = (text) => {
+    const t = String(text || '').trim();
+    try { return JSON.parse(t); } catch { /* try harder */ }
+    const fence = t.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (fence) { try { return JSON.parse(fence[1]); } catch { /* next */ } }
+    const a = t.search(/[[{]/);
+    const b = Math.max(t.lastIndexOf('}'), t.lastIndexOf(']'));
+    if (a >= 0 && b > a) { try { return JSON.parse(t.slice(a, b + 1)); } catch { /* fall through */ } }
+    throw { code: 'invalid_json', text: t };
+  };
+  const Ai = {
+    async text(prompt, opts = {}) {
+      const r = await Remote.call('ai', { prompt, effort: opts.effort || 'medium' });
+      return r.text;
+    },
+    async json(prompt, opts = {}) {
+      const r = await Remote.call('ai', { prompt, effort: opts.effort || 'medium' });
+      return parseJson(r.text);
+    },
+  };
 
-  async function saveFile(filename, data, mime) {
+  // ---------- Files ----------
+  const blobToBase64 = (blob) => new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(String(r.result).split(',')[1] || '');
+    r.onerror = () => reject(r.error);
+    r.readAsDataURL(blob);
+  });
+  function saveFile(filename, data, mime) {
     const blob = data instanceof Blob ? data : new Blob([data], { type: mime || 'application/octet-stream' });
-    if (standalone) {
+    try {
       const url = URL.createObjectURL(blob);
       const a = h('a', { href: url, download: filename });
       document.body.append(a);
       a.click();
       setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1500);
-      toast(`Saved ${filename}`);
+      toast(`Downloading ${filename}`);
       return true;
-    }
-    const dl = await caps.downloads;
-    if (!dl) { toast('Downloads aren’t available in this view. Use Copy instead.'); return false; }
-    try {
-      const res = await dl.save({ filename, data: blob });
-      if (res && res.status === 'saved') toast(`Saved ${filename}`);
-      return true;
-    } catch (e) {
-      const code = e && e.code;
-      if (code === 'declined') return false;
-      if (code === 'rate_limited') toast('A save is already waiting for you to confirm.');
-      else toast('That file couldn’t be saved here. Use Copy instead.');
+    } catch {
+      toast('This browser blocked the download. Try Save to Drive instead.');
       return false;
+    }
+  }
+  async function saveToDrive(filename, data, mime) {
+    const blob = data instanceof Blob ? data : new Blob([data], { type: mime || 'application/octet-stream' });
+    toast('Saving to your Google Drive…');
+    try {
+      const res = await Remote.call('saveFile', { name: filename, mime: blob.type || mime || 'application/octet-stream', base64: await blobToBase64(blob) });
+      toast('Saved in Google Drive, folder "Career Compass".', res && res.url);
+      return res;
+    } catch (e) {
+      toast(e && e.code === 'locked' ? 'This page needs its private link to save.' : 'Could not save to Drive just now. Try again in a moment.');
+      return null;
     }
   }
 
@@ -306,19 +391,17 @@ const CC = (() => {
     });
   }
 
-  // ---------- Ask Claude (optional) ----------
   const AI_ERRORS = {
-    not_granted: 'Claude isn’t allowed for this page, so this helper is switched off.',
-    sampling_disabled: 'Claude isn’t available on this account.',
-    rate_limited: 'Claude is busy or your usage limit was reached. Try again a little later.',
-    session_expired: 'Please sign in to Claude again, then retry.',
-    refused: 'Claude couldn’t help with that text. Try rephrasing or trimming it.',
-    prompt_too_large: 'That text is too long. Paste a shorter part of it.',
+    ai_off: 'Claude is not switched on for this page.',
+    rate_limited: 'Claude is busy right now. Try again in a minute.',
+    refused: 'Claude could not help with that text. Try rephrasing or trimming it.',
+    too_long: 'That text is too long. Paste a shorter part of it.',
     invalid_json: 'The answer came back in an unexpected shape. Please try once more.',
-    empty_completion: 'No answer came back. Try a shorter request.',
+    network: 'The connection dropped. Check your internet and try again.',
+    locked: 'This page needs its private link.',
   };
   const aiError = (e) => AI_ERRORS[e && e.code] || 'Something interrupted the answer. You can try again.';
-  const aiHidden = (e) => ['not_granted', 'sampling_disabled', 'not_declared', 'capability_disabled', 'capability_removed'].includes(e && e.code);
+  const aiHidden = (e) => ['ai_off', 'locked'].includes(e && e.code);
 
   const csvCell = (v) => {
     const s = String(v ?? '');
@@ -329,6 +412,6 @@ const CC = (() => {
   return {
     h, icon, svg, ICONS, toast, iso, parseISO, addDays, fmt, fmtLong, weekStart, inThisWeek, uid,
     load, update, upsertApp, deleteApp, apps, replaceAll, on, get state() { return state; }, get saveStatus() { return saveStatus; },
-    Cloud, caps, standalone, saveFile, copy, readFile, aiError, aiHidden, toCSV, clone,
+    Remote, aiReady, saveFile, saveToDrive, copy, readFile, aiError, aiHidden, toCSV, clone, CORE_KEYS,
   };
 })();

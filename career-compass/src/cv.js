@@ -53,6 +53,10 @@ const CV = (() => {
     const d = D();
     const st = S();
     const c = { ...d.contact, ...(st.contact || {}) };
+    const G = window.CC_DATA.global;
+    if (CC.state.settings && CC.state.settings.region === 'global' && G) {
+      c.availability = (st.contact || {}).availabilityGlobal != null ? st.contact.availabilityGlobal : ((G.cv || {}).availability || c.availability);
+    }
     const missing = [];
     const contactBits = [c.city, c.phone, c.email, c.linkedin, c.availability].map((x) => (x || '').trim()).filter(Boolean);
     const experience = [];

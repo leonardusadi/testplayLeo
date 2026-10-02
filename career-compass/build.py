@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Bundle src/ into two single-file outputs:
-   dist/index.html            - artifact body (the claude.ai publisher adds the document skeleton)
-   dist/career-compass.html   - standalone page that opens offline in any browser
+"""Bundle src/ into the two files of the Google Apps Script project:
+   dist/apps-script/Code.gs         - server (Sheet storage, Drive saves, optional Claude helper)
+   dist/apps-script/Interface.html  - the whole page (styles, content, scripts); also opens offline in a browser
 """
 import os
+import shutil
 from pathlib import Path
 
 ROOT = Path(__file__).parent
@@ -22,7 +23,7 @@ def data_js() -> str:
     return body + "\nwindow.CC_DATA = Object.assign({}, window.CC_DATA_PARTS);\n"
 
 
-def bundle() -> str:
+def body() -> str:
     html = read("shell.html")
     parts = {
         "/*@@CSS@@*/": read("styles.css"),
@@ -34,12 +35,12 @@ def bundle() -> str:
     }
     for marker, content in parts.items():
         assert marker in html, marker
-        assert "</script" not in content.lower() or marker == "/*@@CSS@@*/", f"{marker} contains </script"
+        assert "</script" not in content.lower(), f"{marker} contains </script"
         html = html.replace(marker, content)
     return html
 
 
-STANDALONE_HEAD = """<!doctype html>
+HEAD = """<!DOCTYPE html>
 <html lang="en-IN">
 <head>
 <meta charset="utf-8">
@@ -51,11 +52,12 @@ STANDALONE_HEAD = """<!doctype html>
 
 
 def main() -> None:
-    DIST.mkdir(exist_ok=True)
-    body = bundle()
-    (DIST / "index.html").write_text(body, encoding="utf-8")
-    (DIST / "career-compass.html").write_text(STANDALONE_HEAD + body + "\n</body>\n</html>\n", encoding="utf-8")
-    print(f"index.html {len(body.encode()) // 1024} KB; career-compass.html written")
+    out = DIST / "apps-script"
+    out.mkdir(parents=True, exist_ok=True)
+    page = HEAD + body() + "\n</body>\n</html>\n"
+    (out / "Interface.html").write_text(page, encoding="utf-8")
+    shutil.copyfile(SRC / "apps-script" / "Code.gs", out / "Code.gs")
+    print(f"Interface.html {len(page.encode()) // 1024} KB, Code.gs {(out / 'Code.gs').stat().st_size // 1024} KB -> {out}")
 
 
 if __name__ == "__main__":
