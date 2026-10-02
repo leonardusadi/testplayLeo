@@ -214,12 +214,12 @@
     const start = dayOfYear() % Math.max(pool.length, 1);
     const rotated = [...pool.slice(start), ...pool.slice(0, start)];
     for (const p of rotated) { if (tasks.length >= n) break; if (!tasks.some((t) => t.id === `p-${p.id}`)) tasks.push({ ...p, title: rv(p, 'title'), sub: rv(p, 'sub'), id: `p-${p.id}` }); }
-    // One theosophical practice a day at most; on low days it is the one thing that is for her.
+    // One theosophical practice a day at most, rotating by day; on low days it is the one thing that is for her.
     const theoPool = theoOn() ? (TH().pool || []).filter((p) => p.energy.includes(energy)) : [];
     if (theoPool.length) {
-      const pick = (energy === 'low' && theoPool.find((p) => p.care)) || theoPool[dayOfYear() % theoPool.length];
+      const pick = theoPool[dayOfYear() % theoPool.length];
       if (tasks.length >= n) tasks.pop();
-      tasks.push({ ...pick, id: `th-${pick.id}`, theo: true });
+      tasks.push({ ...pick, id: `th-${pick.id}`, theo: true, care: pick.care || energy === 'low' });
     }
     if (energy === 'low' && !tasks.some((t) => t.care)) {
       const care = (D.today.pool || []).find((p) => p.care);
@@ -872,7 +872,7 @@
               CC.saveToDrive(`Cover_Letter_${slug(f.company || 'company')}.docx`, new Blob([Docx.build(blocks, { title: 'Cover letter', author: D.person.full })], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' }));
             }, '', 'download') : null,
             btn('Save to tracker', save, '', 'check')),
-          moment('beforeSend') ? h('p', { class: 'small muted theo-line' }, icon('lotus', 16), h('span', null, moment('beforeSend'))) : null,
+          moment('beforeSend') ? h('p', { class: 'small muted theo-line no-print' }, icon('lotus', 16), h('span', null, moment('beforeSend'))) : null,
           h('p', { class: 'small faint' }, 'Highlighted words in [brackets] still need your details.'),
           aiBox({
             id: 'ai-letter', title: 'Ask Claude: write it for this job', desc: 'Paste the job description. Claude drafts this message from your CV, honestly, in a warm professional tone. Edit before sending.',
@@ -1103,7 +1103,8 @@
     const on = theoOn();
     return h('div', { class: `note ${on ? '' : 'warm'} theo-toggle` },
       h('div', { class: 'row between' }, h('b', null, icon('lotus', 18), ` ${TH().label}: ${on ? 'on' : 'off'}`), btn(on ? 'Turn off' : 'Turn on', () => setTheo(!on), 'small')),
-      h('span', { class: 'small' }, on ? TH().toggleOn : TH().toggleOff));
+      h('span', { class: 'small' }, on ? TH().toggleOn : TH().toggleOff),
+      on ? h('div', { class: 'row' }, btn('Go to the helplines', () => { const el = document.getElementById('helplines'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 'small ghost')) : null);
   }
   function theoCare() {
     const TC = TH().care;
@@ -1181,7 +1182,7 @@
       h('section', { class: 'section' }, sectionHead('Things that are true about you', null),
         h('div', { class: 'grid' }, C.affirmations.map((a) => h('div', { class: 'card soft' }, h('p', { style: { fontFamily: 'var(--font-display)', fontSize: '1.1rem' } }, a))))),
       tc ? tc.slice(3) : null,
-      h('section', { class: 'section' }, sectionHead('If it gets heavy', C.helpIntro),
+      h('section', { class: 'section', id: 'helplines' }, sectionHead('If it gets heavy', C.helpIntro),
         theoOn() ? h('div', { class: 'note care' }, h('span', null, TH().care.balance)) : null,
         h('div', { class: 'grid' }, C.helplines.map((x) => h('div', { class: 'card' }, h('b', null, x.name),
           h('div', { class: 'row' }, h('a', { href: `tel:${x.number.replace(/[^+\d]/g, '')}`, target: '_top', class: 'num', style: { fontSize: '1.25rem', fontWeight: 700 } }, x.number), copyBtn(x.number, 'Copy number')),
