@@ -88,6 +88,7 @@ const CC = (() => {
   const CORE_KEYS = ['cv', 'letters', 'daily', 'firstWeek', 'wins', 'journal', 'saved', 'settings'];
   const listeners = new Set();
   let state = null;
+  let freshDevice = false; // no saved copy on this device: the Sheet's copy wins on the first load
   let defaults = () => ({});
   let saveStatus = { where: 'device', ok: true };
   const snap = {};
@@ -115,6 +116,7 @@ const CC = (() => {
     defaults = defFn;
     let saved = null;
     try { saved = JSON.parse(lsGet() || 'null'); } catch { saved = null; }
+    freshDevice = !saved;
     state = mergeDefaults(saved || {}, defaults());
     if (!Array.isArray(state.apps)) state.apps = [];
     state._ts = state._ts || {};
@@ -206,13 +208,18 @@ const CC = (() => {
         setTimeout(() => done(''), 4000);
       });
     }
-    function merge(data) {
+    /** Keep the newer copy of each part. On the first load on a device that had no saved copy, the Sheet's
+        copy always wins, so a tap made before the Sheet arrived cannot replace a whole section with defaults. */
+    function merge(data, first) {
       const core = data.core || {};
+      const sheetWins = !!first && freshDevice;
+      let replaced = false;
       for (const k of CORE_KEYS) {
         const r = core[k];
         if (!r) continue;
         const localTs = (state._ts && state._ts[k]) || 0;
-        if ((r.updatedAt || 0) > localTs) {
+        if (sheetWins || (r.updatedAt || 0) > localTs) {
+          if (sheetWins && localTs && JSON.stringify(state[k]) !== JSON.stringify(r.value)) replaced = true;
           state[k] = mergeDefaults(r.value, defaults()[k] === undefined ? r.value : defaults()[k]);
           state._ts[k] = r.updatedAt;
           snap[k] = JSON.stringify(state[k] === undefined ? null : state[k]);
@@ -227,12 +234,14 @@ const CC = (() => {
         if (!r || !r.id) continue;
         remoteIds.add(r.id);
         const l = local.get(r.id);
-        if (!l || (r.updatedAt || 0) > (l.updatedAt || 0)) local.set(r.id, r);
+        if (!l || sheetWins || (r.updatedAt || 0) > (l.updatedAt || 0)) local.set(r.id, r);
         else if ((l.updatedAt || 0) > (r.updatedAt || 0)) dirtyApps.add(l.id);
       }
       for (const a of local.values()) if (!remoteIds.has(a.id)) dirtyApps.add(a.id);
       state.apps = [...local.values()];
       persistLocal();
+      if (first) freshDevice = false;
+      return replaced;
     }
     /** Re-read the Sheet and keep whichever copy of each part is newer. */
     async function pull() {
@@ -257,15 +266,20 @@ const CC = (() => {
       try {
         const data = await call('load');
         meta = data.meta || {};
-        merge(data);
+        const replaced = merge(data, true);
         enabled = true;
         failures = 0;
         setStatus({ where: 'sheet', ok: true, note: '' });
         resolveAi(meta.aiEnabled ? Ai : null);
         emit('state');
         schedule(200);
+        if (replaced) toast('Your saved data has loaded from your Sheet. If you changed something in the last few seconds, please do it again.');
       } catch (e) {
-        if (e && e.code === 'locked') { setStatus({ where: 'locked', ok: false }); resolveAi(null); return; }
+        if (e && e.code === 'locked') {
+          // A slow phone can miss the ?key in the 4-second window: read it once more before showing the lock.
+          if (!key) { key = await readKey(); if (key) { init(); return; } }
+          setStatus({ where: 'locked', ok: false }); resolveAi(null); return;
+        }
         failures += 1;
         setStatus({ where: 'device', ok: false, note: 'offline' });
         setTimeout(init, Math.min(60000, 5000 * failures));
@@ -366,8 +380,8 @@ const CC = (() => {
       const a = h('a', { href: url, download: filename });
       document.body.append(a);
       a.click();
-      setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1500);
-      toast(`Downloading ${filename}`);
+      setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 40000); // iPhone asks before saving; an early revoke breaks that
+      toast(`Downloading ${filename}. On an iPhone it goes to Files > Downloads.`);
       return true;
     } catch {
       toast('This browser blocked the download. Try Save to Drive instead.');

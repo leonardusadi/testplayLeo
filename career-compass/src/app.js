@@ -968,7 +968,7 @@
 
   function dataPanel() {
     const st = CC.saveStatus;
-    const where = st.where === 'sheet' || st.where === 'syncing' ? 'Everything is saved to your own Google Sheet, and kept on this device for speed. Updates to this page never touch your data.'
+    const where = st.where === 'sheet' || st.where === 'syncing' ? 'Everything is saved to your own Google Sheet. A copy is kept on this device for speed; an iPhone may clear that copy, and the Sheet still has everything. Updates to this page never touch your data.'
       : st.where === 'locked' ? 'This page needs its private link (the one with ?key=) to reach your Sheet.'
       : st.where === 'device' ? (CC.Remote.available ? 'Saved on this device. It will sync to your Google Sheet when the connection returns.' : 'Saved in this browser on this device. Open the page from its Apps Script link to keep everything in your Google Sheet.')
       : 'This browser is not saving. Download a backup before you close the page.';

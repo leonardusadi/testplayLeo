@@ -13,26 +13,28 @@ const problems = [];
 const check = (cond, msg) => { if (!cond) problems.push(msg); };
 
 /** Installs a google.script.run / google.script.url shim that forwards api() calls to the mocked server. */
-async function openDevice(browser, gas, { key = '', width = 390, scheme = 'light' } = {}) {
+async function openDevice(browser, gas, { key = '', width = 390, scheme = 'light', slowLoad = 0 } = {}) {
   const ctx = await browser.newContext({ viewport: { width, height: 860 }, colorScheme: scheme, acceptDownloads: true });
   const page = await ctx.newPage();
   page.on('pageerror', (e) => problems.push(`pageerror: ${e.message}`));
   page.on('console', (m) => { if (m.type() === 'error' && !/Failed to load resource/.test(m.text())) problems.push(`console: ${m.text()}`); });
   await page.route(/fonts\.(googleapis|gstatic)\.com/, (r) => r.abort());
   await page.exposeFunction('__gasApi', (req) => gas.api(req));
-  await page.addInitScript((k) => {
+  await page.addInitScript(([k, slow]) => {
+    let loads = 0;
     const make = (ok, fail) => new Proxy({}, {
       get(_, prop) {
         if (prop === 'withSuccessHandler') return (f) => make(f, fail);
         if (prop === 'withFailureHandler') return (f) => make(ok, f);
         return (...args) => {
           if (prop !== 'api') { if (fail) fail(new Error(`unknown server function ${String(prop)}`)); return; }
-          window.__gasApi(args[0]).then((r) => setTimeout(() => ok && ok(r), 15), (e) => fail && fail(e));
+          const first = slow && JSON.parse(args[0]).action === 'load' && loads++ === 0; // a slow first load, as on a phone
+          window.__gasApi(args[0]).then((r) => setTimeout(() => ok && ok(r), first ? slow : 15), (e) => fail && fail(e));
         };
       },
     });
     window.google = { script: { run: make(null, null), url: { getLocation: (cb) => setTimeout(() => cb({ parameter: k ? { key: k } : {}, hash: '' }), 5) } } };
-  }, key);
+  }, [key, slowLoad]);
   await page.goto(`file://${file}`);
   await page.waitForSelector('#main .view');
   return { ctx, page };
@@ -163,6 +165,18 @@ const nav = (page, token) => page.evaluate((t) => { const a = document.querySele
   await nav(p1, 'tracker');
   await p1.waitForTimeout(150);
   check((await p1.textContent('#main')).includes('Recruiter called on Monday'), 'device1 sees the edit made on device2');
+
+  // ---- A new phone (empty browser storage) whose first load is slow: a tap before the Sheet arrives
+  // must not replace whole sections on the Sheet.
+  const winsBefore = Object.fromEntries(gas.sheet('Store').table().map((r) => [r.key, r.value])).wins || '';
+  const d6 = await openDevice(browser, gas, { slowLoad: 2500 });
+  await d6.page.fill('#win-input', 'Tapped before the Sheet loaded');
+  await d6.page.click('text=Add win');
+  await d6.page.click('#energy-low');
+  await waitSynced(d6.page, 'slow new device');
+  const winsAfter = Object.fromEntries(gas.sheet('Store').table().map((r) => [r.key, r.value])).wins || '';
+  check(winsBefore.includes('Updated my CV') && winsAfter.includes('Updated my CV'), `a new device's early tap keeps the Sheet's wins (before: ${winsBefore.slice(0, 60)}, after: ${winsAfter.slice(0, 60)})`);
+  await d6.ctx.close();
 
   // ---- Interface update: rebuilt page, same Sheet -> everything still there
   const d3 = await openDevice(browser, gas);

@@ -15,15 +15,33 @@
  *  5. Deploy > New deployment > gear icon > Web app.
  *       Execute as: Me
  *       Who has access: Only myself      (she must be signed in to this Google account to open it)
- *     Click Deploy and open the Web app URL. Bookmark it; on a phone use "Add to Home screen".
+ *     Click Deploy and open the Web app URL. Bookmark it.
  *
  * UPDATING THE PAGE LATER
  *  Paste the new Interface.html (and this file if it changed), then Deploy > Manage deployments >
  *  pencil icon > Version: New version > Deploy. The link and the data stay the same.
+ *  (Deploy > New deployment would make a second, different link. Always edit the existing one.)
  *
- * IF SOMEONE ELSE HOSTS IT FOR HER (optional)
- *  Deploy with "Who has access: Anyone", then run createPrivateLink() once and send her only the link
- *  it prints in the log. Without the ?key=... part, the page cannot read or write the Sheet.
+ * OPENING IT ON A PHONE
+ *  With "Only myself", the phone's browser must be signed in to this same Google account, and ideally
+ *  to no other. If it is signed in to a different account, or to several, Google shows its own page
+ *  "Sorry, unable to open the file at present" before this script even runs. Quick test: open the link
+ *  in a Chrome Incognito tab (or a Safari private tab) and sign in with only this account. To avoid
+ *  sign-in altogether, use the private link below.
+ *  Home Screen icon on an iPhone: open the page first, then Share > Add to Home Screen. On iOS 26 turn
+ *  off "Open as Web App" in that dialog, so the icon opens in the browser where you are signed in.
+ *
+ * PRIVATE LINK (any phone, no Google sign-in; also when someone else hosts it for her)
+ *  1. Run createPrivateLink() once. The log shows the key. Do this BEFORE step 2, so the page is never
+ *     open without a lock.
+ *  2. Deploy > Manage deployments > pencil icon > Who has access: Anyone > Version: New version > Deploy.
+ *     The link stays the same. (If "Anyone" is missing, check Execute as: Me. A Google Workspace admin
+ *     can also block "Anyone"; then use a personal Gmail account for the whole setup.)
+ *  3. Copy the Web app URL from Deploy > Manage deployments (it ends in /exec, never /dev) and add
+ *     ?key=<the key>. Use that full link on every device, this computer included. Without ?key the
+ *     page only says it is private and cannot read or write the Sheet.
+ *  Treat the full link like a password. To change it, delete the ACCESS_KEY script property
+ *  (Project Settings > Script properties) and run createPrivateLink() again.
  *
  * OPTIONAL "ASK CLAUDE" HELPERS (tailor CV to a job ad, scam check, interview feedback)
  *  Project Settings (gear) > Script properties > Add: ANTHROPIC_API_KEY = a key from console.anthropic.com.
@@ -59,8 +77,9 @@ function doGet(e) {
   const want = props_().getProperty('ACCESS_KEY');
   const given = e && e.parameter && e.parameter.key;
   if (want && given !== want) {
-    return HtmlService.createHtmlOutput('<p style="font-family:sans-serif;padding:24px">This page is private. Please use the full link you were given.</p>')
-      .setTitle(APP_TITLE);
+    return HtmlService.createHtmlOutput('<p style="font-family:sans-serif;padding:24px;font-size:18px">This page is private. Please open it with the full link you were given, including the part that starts with ?key=</p>')
+      .setTitle('Private page')
+      .addMetaTag('viewport', 'width=device-width, initial-scale=1');
   }
   return HtmlService.createHtmlOutputFromFile('Interface')
     .setTitle(APP_TITLE)
@@ -115,8 +134,10 @@ function createPrivateLink() {
   if (!existing) props_().setProperty('ACCESS_KEY', key);
   const url = ScriptApp.getService().getUrl();
   Logger.log((existing ? 'A private key already exists (unchanged): ' : 'Private key created: ') + key);
-  Logger.log('Send her: <your Web app URL, ending in /exec>?key=' + key);
-  if (url && /\/exec$/.test(url)) Logger.log('For this deployment that is: ' + url + '?key=' + key);
+  Logger.log('The link to use on every device: the Web app URL from Deploy > Manage deployments (it ends in /exec), then ?key=' + key);
+  Logger.log('If not done yet: Deploy > Manage deployments > pencil icon > Who has access: Anyone > Deploy. The link stays the same.');
+  // getUrl() can return the test (/dev) link or a stale one when run from the editor, so only offer it as a cross-check.
+  if (url && /\/exec$/.test(url)) Logger.log('Cross-check: it should match ' + url + '?key=' + key);
   Logger.log('To remove the lock, delete the ACCESS_KEY script property (Project Settings > Script properties).');
 }
 

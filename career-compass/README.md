@@ -34,7 +34,7 @@ Setup steps are at the top of `Code.gs`. In short:
 
 Do all four steps signed in to Smitapragyan's own Google account, ideally in a private window with no other
 Google account signed in. With "Only myself", only that account can open the page. To keep it in your own
-account instead, follow "If someone else hosts it for her" in `Code.gs`.
+account instead, or to open it on any phone without signing in, follow "Private link" in `Code.gs`.
 
 ## How data stays safe across updates
 
@@ -58,6 +58,11 @@ account instead, follow "If someone else hosts it for her" in `Code.gs`.
 - A free Google account allows each server call up to 6 minutes, and 20,000 outside requests (Ask Claude) a day.
   Normal use stays far below both.
 - Work or school (Workspace) accounts may not offer "Who has access: Anyone"; their admin decides.
+- Opens on the computer but a phone shows Google's "Sorry, unable to open the file at present": the phone's
+  browser is signed in to a different Google account, or to several. Open the link in an Incognito or private
+  tab and sign in with only the account that owns the script. To skip sign-in on phones altogether, use the
+  private link (see "Private link" in `Code.gs`). Also check the phone has the whole link from
+  Deploy > Manage deployments (ending in /exec, with no /u/1/ in it).
 - If saving or a helper fails, open Apps Script > Executions (left sidebar). Each run is listed with its error.
 - After a `Code.gs` update that needs new permissions, run `setup` once in the editor. Until then the page shows
   an authorisation error.
