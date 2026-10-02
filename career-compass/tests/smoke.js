@@ -68,6 +68,21 @@ const ROUTES = ['today', 'paths', 'companies', 'abroad', 'search', 'cv', 'letter
         await dl.saveAs(target);
         if (!target.endsWith(ext) || fs.statSync(target).size < 50) problems.push(`download ${label} too small`);
       }
+      // CV print shows the CV paper and nothing else
+      await page.evaluate(() => { history.pushState(null, '', '#cv'); dispatchEvent(new PopStateEvent('popstate')); });
+      await page.waitForTimeout(150);
+      await page.evaluate(() => document.body.classList.add('printing-cv'));
+      await page.emulateMedia({ media: 'print' });
+      const pr = await page.evaluate(() => {
+        const paper = document.querySelector('.print-root .paper');
+        const visible = (el) => !!el && el.getClientRects().length > 0 && getComputedStyle(el).visibility !== 'hidden';
+        const stray = [...document.querySelectorAll('main button, main h1, .epigraph, .footer, .tabbar')].filter(visible).length;
+        return { h: paper ? paper.getBoundingClientRect().height : 0, stray };
+      });
+      await page.emulateMedia({ media: 'screen' });
+      await page.evaluate(() => document.body.classList.remove('printing-cv'));
+      if (pr.h < 200) problems.push(`CV print: paper not visible (height ${pr.h})`);
+      if (pr.stray) problems.push(`CV print: ${pr.stray} other elements would print`);
       // theosophical layer: on by default, never in the CV, can be switched off and on
       if (await page.evaluate(() => !!(window.CC_DATA && window.CC_DATA.theosophy))) {
         const T = await page.evaluate(() => window.CC_DATA.theosophy);

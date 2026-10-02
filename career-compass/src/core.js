@@ -85,10 +85,10 @@ const CC = (() => {
   // ---------- Store (local-first; synced to a Google Sheet when served by Apps Script) ----------
   const LS_KEY = 'career-compass-v1';
   /** Top-level state keys saved to the Sheet's Store tab. `apps` has its own tabs; `ui` stays on this device. */
-  const CORE_KEYS = ['cv', 'letters', 'daily', 'firstWeek', 'wins', 'journal', 'saved', 'settings'];
+  const CORE_KEYS = ['cv', 'letters', 'daily', 'firstWeek', 'wins', 'journal', 'saved', 'settings', 'prefs'];
   const listeners = new Set();
   let state = null;
-  let freshDevice = false; // no saved copy on this device: the Sheet's copy wins on the first load
+  let freshDevice = false; // this device has never merged with the Sheet (kept in state._fresh across reloads)
   let defaults = () => ({});
   let saveStatus = { where: 'device', ok: true };
   const snap = {};
@@ -116,8 +116,9 @@ const CC = (() => {
     defaults = defFn;
     let saved = null;
     try { saved = JSON.parse(lsGet() || 'null'); } catch { saved = null; }
-    freshDevice = !saved;
+    freshDevice = !saved || !!saved._fresh;
     state = mergeDefaults(saved || {}, defaults());
+    if (freshDevice) state._fresh = true;
     if (!Array.isArray(state.apps)) state.apps = [];
     state._ts = state._ts || {};
     for (const k of CORE_KEYS) snap[k] = JSON.stringify(state[k] === undefined ? null : state[k]);
@@ -163,6 +164,8 @@ const CC = (() => {
     const list = Array.isArray(next.apps) ? next.apps : [];
     state = mergeDefaults(next, defaults());
     state.apps = list;
+    freshDevice = false; // a restore is a deliberate overwrite, so it wins over the Sheet
+    delete state._fresh;
     const now = Date.now();
     state._ts = {};
     for (const k of CORE_KEYS) { state._ts[k] = now; snap[k] = JSON.stringify(state[k] === undefined ? null : state[k]); }
@@ -208,21 +211,53 @@ const CC = (() => {
         setTimeout(() => done(''), 4000);
       });
     }
-    /** Keep the newer copy of each part. On the first load on a device that had no saved copy, the Sheet's
-        copy always wins, so a tap made before the Sheet arrived cannot replace a whole section with defaults. */
+    const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+    const isObj = (o) => !!o && typeof o === 'object' && !Array.isArray(o);
+    const idOf = (x) => JSON.stringify(isObj(x) && x.id !== undefined ? x.id : x);
+    /** Sections whose lists are sets (wins, done tasks, starred items), so items from both sides are kept. */
+    const UNION_KEYS = ['wins', 'daily', 'saved', 'firstWeek'];
+    /** Lay the changes `mine` made to `base` over `theirs`: changed fields win, new set items are added. */
+    function rebase(base, mine, theirs, union) {
+      if (mine === undefined || same(mine, base)) return theirs;
+      if (theirs === undefined || theirs === null) return mine;
+      if (isObj(mine) && isObj(theirs)) {
+        const out = { ...theirs };
+        for (const f of Object.keys(mine)) out[f] = rebase(isObj(base) ? base[f] : undefined, mine[f], theirs[f], union);
+        return out;
+      }
+      if (union && Array.isArray(mine) && Array.isArray(theirs)) {
+        const have = new Set(theirs.map(idOf));
+        const was = new Set((Array.isArray(base) ? base : []).map(idOf));
+        return [...mine.filter((x) => !have.has(idOf(x)) && !was.has(idOf(x))), ...theirs];
+      }
+      return mine;
+    }
+    /** Keep the newer copy of each part. On a device that has never merged with the Sheet, edits made here
+        (before the first load arrived, offline, or before a reload) are laid over the Sheet's copy instead, so
+        a near-empty new device can neither wipe the Sheet's history nor lose its own entries. */
     function merge(data, first) {
       const core = data.core || {};
-      const sheetWins = !!first && freshDevice;
-      let replaced = false;
+      const rebaseLocal = !!first && freshDevice;
+      let changed = false;
       for (const k of CORE_KEYS) {
         const r = core[k];
         if (!r) continue;
         const localTs = (state._ts && state._ts[k]) || 0;
-        if (sheetWins || (r.updatedAt || 0) > localTs) {
-          if (sheetWins && localTs && JSON.stringify(state[k]) !== JSON.stringify(r.value)) replaced = true;
+        if (rebaseLocal && localTs) {
+          const def = defaults()[k];
+          const val = rebase(def, state[k], r.value, UNION_KEYS.includes(k));
+          state[k] = mergeDefaults(val, def === undefined ? val : def);
+          state._ts[k] = Math.max(Date.now(), (r.updatedAt || 0) + 1);
+          snap[k] = JSON.stringify(state[k] === undefined ? null : state[k]);
+          changed = true;
+          continue; // sent[k] stays stale, so the merged copy is saved to the Sheet
+        }
+        if ((r.updatedAt || 0) > localTs) {
           state[k] = mergeDefaults(r.value, defaults()[k] === undefined ? r.value : defaults()[k]);
           state._ts[k] = r.updatedAt;
-          snap[k] = JSON.stringify(state[k] === undefined ? null : state[k]);
+          const str = JSON.stringify(state[k] === undefined ? null : state[k]);
+          if (snap[k] !== str) changed = true;
+          snap[k] = str;
           sent[k] = snap[k];
         } else if ((r.updatedAt || 0) === localTs) {
           sent[k] = snap[k];
@@ -234,22 +269,21 @@ const CC = (() => {
         if (!r || !r.id) continue;
         remoteIds.add(r.id);
         const l = local.get(r.id);
-        if (!l || sheetWins || (r.updatedAt || 0) > (l.updatedAt || 0)) local.set(r.id, r);
+        if (!l || (r.updatedAt || 0) > (l.updatedAt || 0)) { if (!l || !same(l, r)) changed = true; local.set(r.id, r); }
         else if ((l.updatedAt || 0) > (r.updatedAt || 0)) dirtyApps.add(l.id);
       }
       for (const a of local.values()) if (!remoteIds.has(a.id)) dirtyApps.add(a.id);
       state.apps = [...local.values()];
+      if (first) { freshDevice = false; delete state._fresh; }
       persistLocal();
-      if (first) freshDevice = false;
-      return replaced;
+      return changed;
     }
     /** Re-read the Sheet and keep whichever copy of each part is newer. */
     async function pull() {
       try {
         const data = await call('load');
         meta = data.meta || meta;
-        merge(data);
-        emit('state');
+        if (merge(data)) emit('state');
       } catch { /* the next save or visit will try again */ }
     }
     let lastPull = 0;
@@ -266,14 +300,13 @@ const CC = (() => {
       try {
         const data = await call('load');
         meta = data.meta || {};
-        const replaced = merge(data, true);
+        merge(data, true);
         enabled = true;
         failures = 0;
         setStatus({ where: 'sheet', ok: true, note: '' });
         resolveAi(meta.aiEnabled ? Ai : null);
         emit('state');
         schedule(200);
-        if (replaced) toast('Your saved data has loaded from your Sheet. If you changed something in the last few seconds, please do it again.');
       } catch (e) {
         if (e && e.code === 'locked') {
           // A slow phone can miss the ?key in the 4-second window: read it once more before showing the lock.

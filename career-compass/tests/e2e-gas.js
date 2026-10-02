@@ -13,13 +13,13 @@ const problems = [];
 const check = (cond, msg) => { if (!cond) problems.push(msg); };
 
 /** Installs a google.script.run / google.script.url shim that forwards api() calls to the mocked server. */
-async function openDevice(browser, gas, { key = '', width = 390, scheme = 'light', slowLoad = 0 } = {}) {
+async function openDevice(browser, gas, { key = '', width = 390, scheme = 'light', slowLoad = 0, gate = null } = {}) {
   const ctx = await browser.newContext({ viewport: { width, height: 860 }, colorScheme: scheme, acceptDownloads: true });
   const page = await ctx.newPage();
   page.on('pageerror', (e) => problems.push(`pageerror: ${e.message}`));
   page.on('console', (m) => { if (m.type() === 'error' && !/Failed to load resource/.test(m.text())) problems.push(`console: ${m.text()}`); });
   await page.route(/fonts\.(googleapis|gstatic)\.com/, (r) => r.abort());
-  await page.exposeFunction('__gasApi', (req) => gas.api(req));
+  await page.exposeFunction('__gasApi', async (req) => { if (gate && gate.offline) throw new Error('offline'); return gas.api(req); });
   await page.addInitScript(([k, slow]) => {
     let loads = 0;
     const make = (ok, fail) => new Proxy({}, {
@@ -129,7 +129,7 @@ const nav = (page, token) => page.evaluate((t) => { const a = document.querySele
     await p1.waitForTimeout(150);
     await p1.click('.theo-toggle button');
     await waitSynced(p1, 'device1 after turning theosophy off');
-    check(/"theo":false/.test(Object.fromEntries(gas.sheet('Store').table().map((r) => [r.key, r.value])).settings || ''), 'theosophy switch saved to Store');
+    check(/"theo":false/.test(Object.fromEntries(gas.sheet('Store').table().map((r) => [r.key, r.value])).prefs || ''), 'theosophy switch saved to Store');
   }
 
   // Drive save of the CV
@@ -176,7 +176,23 @@ const nav = (page, token) => page.evaluate((t) => { const a = document.querySele
   await waitSynced(d6.page, 'slow new device');
   const winsAfter = Object.fromEntries(gas.sheet('Store').table().map((r) => [r.key, r.value])).wins || '';
   check(winsBefore.includes('Updated my CV') && winsAfter.includes('Updated my CV'), `a new device's early tap keeps the Sheet's wins (before: ${winsBefore.slice(0, 60)}, after: ${winsAfter.slice(0, 60)})`);
+  check(winsAfter.includes('Tapped before the Sheet loaded'), 'a new device keeps the win it added before the Sheet loaded');
   await d6.ctx.close();
+
+  // ---- A new phone that starts offline, is used, then reloaded online: both sides' entries survive
+  const gate = { offline: true };
+  const d7 = await openDevice(browser, gas, { gate });
+  await d7.page.waitForFunction(() => /Offline/.test(document.querySelector('#save-pill .txt').textContent), null, { timeout: 8000 }).catch(() => problems.push('offline device: pill never showed Offline'));
+  await d7.page.fill('#win-input', 'Offline win on a new phone');
+  await d7.page.click('text=Add win');
+  gate.offline = false;
+  await d7.page.reload();
+  await d7.page.waitForSelector('#main .view');
+  await waitSynced(d7.page, 'offline new device after reload');
+  const winsOffline = Object.fromEntries(gas.sheet('Store').table().map((r) => [r.key, r.value])).wins || '';
+  check(winsOffline.includes('Updated my CV') && winsOffline.includes('Offline win on a new phone'), `offline-then-reload keeps both sides' wins (${winsOffline.slice(0, 120)})`);
+  check((await d7.page.textContent('#main')).includes('Offline win on a new phone'), 'offline win still shown on the new phone');
+  await d7.ctx.close();
 
   // ---- Interface update: rebuilt page, same Sheet -> everything still there
   const d3 = await openDevice(browser, gas);

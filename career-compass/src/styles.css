@@ -7,7 +7,7 @@
   --surface-3: #dbe5e2;
   --ink: #1b2a31;
   --ink-2: #4b5c63;
-  --ink-3: #6d7d83;
+  --ink-3: #57676d;
   --line: #cfdad7;
   --primary: #1f6a66;
   --primary-ink: #18534f;
@@ -466,6 +466,7 @@ ol.objects .obj { font-family: var(--font-display); font-size: 1.05rem; }
 .theo-toggle b { display: inline-flex; align-items: center; gap: 4px; }
 .t-title > span:first-child { vertical-align: -2px; margin-right: 6px; color: var(--marigold-ink); }
 .motto { font-family: var(--font-display); font-style: italic; color: var(--ink-2); }
+#helplines { scroll-margin-top: calc(80px + env(safe-area-inset-top, 0px)); }
 
 /* Toast */
 .toast {
@@ -501,6 +502,9 @@ ol.objects .obj { font-family: var(--font-display); font-size: 1.05rem; }
   .topbar, .tabbar, .no-print, .toast { display: none !important; }
   body { background: #fff; }
   .print-target { display: block !important; }
-  body.printing-cv .wrap > *:not(.print-root) { display: none !important; }
+  /* CV print: hide everything except the CV paper and the boxes that hold it */
+  body.printing-cv .wrap > :not(main),
+  body.printing-cv main :not(:has(.print-root), .print-root, .print-root *) { display: none !important; }
+  body.printing-cv main :has(.print-root) { display: block !important; position: static !important; padding: 0 !important; margin: 0 !important; border: 0 !important; box-shadow: none !important; }
   .paper { box-shadow: none; border: 0; padding: 0; min-width: 0 !important; }
 }

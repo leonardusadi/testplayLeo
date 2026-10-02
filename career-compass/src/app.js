@@ -35,6 +35,7 @@
     },
     letters: { tpl: 'cover', fields: {}, appId: '' },
     settings: { region: 'india' },
+    prefs: {},
     daily: {},
     firstWeek: {},
     wins: [],
@@ -55,7 +56,7 @@
 
   // ---------- theosophical reflections (on unless she turns them off in Care) ----------
   const TH = () => D.theosophy;
-  const theoOn = () => !!TH() && !(S().settings && S().settings.theo === false);
+  const theoOn = () => !!TH() && !(S().prefs && S().prefs.theo === false);
   const moment = (key) => (theoOn() && key && TH().moments[key]) || '';
   const withMoment = (base, key) => (moment(key) ? `${base} ${moment(key)}` : base);
   const seedOfDay = () => TH().seeds[dayOfYear() % TH().seeds.length];
@@ -67,7 +68,7 @@
       h('blockquote', null, e.quote), h('figcaption', null, e.source), e.note ? h('p', null, e.note) : null);
   }
   function setTheo(on) {
-    CC.update((s) => { s.settings.theo = on; });
+    CC.update((s) => { s.prefs = s.prefs || {}; s.prefs.theo = on; });
     toast(on ? 'Theosophical reflections are on.' : 'Theosophical reflections are off. You can turn them on again in Care.');
   }
 
@@ -218,7 +219,8 @@
     const theoPool = theoOn() ? (TH().pool || []).filter((p) => p.energy.includes(energy)) : [];
     if (theoPool.length) {
       const pick = theoPool[dayOfYear() % theoPool.length];
-      if (tasks.length >= n) tasks.pop();
+      const ci = energy === 'low' ? tasks.findIndex((t) => t.care) : -1;
+      if (ci >= 0) tasks.splice(ci, 1); else if (tasks.length >= n) tasks.pop();
       tasks.push({ ...pick, id: `th-${pick.id}`, theo: true, care: pick.care || energy === 'low' });
     }
     if (energy === 'low' && !tasks.some((t) => t.care)) {
@@ -1078,33 +1080,47 @@
   // ---------- CARE ----------
   let breathTimer = null;
   let seedTimer = null;
-  /** Sit with today's seed thought: a quiet countdown of 3, 5 or 10 minutes. */
+  let seedEnd = 0; // when the current sitting ends (ms); survives re-renders while Care stays open
+  /** Sit with today's seed thought: a quiet countdown of 3, 5 or 10 minutes, timed by the clock. */
   function seedSitting() {
     const mins = ui('seedMins', 3);
-    const clock = h('span', { class: 'num seed-clock', 'aria-live': 'off' }, `${mins}:00`);
-    let left = mins * 60;
-    const show = () => { clock.textContent = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`; };
-    const sit = btn('Sit quietly', () => {
-      if (seedTimer) { clearInterval(seedTimer); seedTimer = null; sit.lastChild.textContent = 'Sit quietly'; left = mins * 60; show(); return; }
+    const clock = h('span', { class: 'num seed-clock', 'aria-live': 'off' });
+    const left = () => (seedEnd ? Math.max(0, Math.ceil((seedEnd - Date.now()) / 1000)) : mins * 60);
+    const show = () => { const l = left(); clock.textContent = `${Math.floor(l / 60)}:${String(l % 60).padStart(2, '0')}`; };
+    const stop = () => { clearInterval(seedTimer); seedTimer = null; seedEnd = 0; };
+    const finish = () => { stop(); sit.lastChild.textContent = 'Sit quietly'; show(); toast('Time. Carry one line of it with you.'); };
+    const tick = () => {
+      if (!clock.isConnected) { clearInterval(seedTimer); seedTimer = null; return; }
+      if (left() <= 0) finish(); else show();
+    };
+    const sit = btn(seedEnd ? 'Stop' : 'Sit quietly', () => {
+      if (seedEnd) { stop(); sit.lastChild.textContent = 'Sit quietly'; show(); return; }
+      seedEnd = Date.now() + mins * 60000;
       sit.lastChild.textContent = 'Stop';
-      seedTimer = setInterval(() => {
-        if (!clock.isConnected) { clearInterval(seedTimer); seedTimer = null; return; }
-        left -= 1; show();
-        if (left <= 0) { clearInterval(seedTimer); seedTimer = null; sit.lastChild.textContent = 'Sit quietly'; left = mins * 60; toast('Time. Carry one line of it with you.'); }
-      }, 1000);
+      seedTimer = setInterval(tick, 1000);
     }, 'small primary', 'lotus');
+    show();
+    if (seedEnd) { if (left() <= 0) setTimeout(finish, 0); else { clearInterval(seedTimer); seedTimer = setInterval(tick, 1000); } }
     return h('div', { class: 'stack', style: { gap: '8px' } },
       h('p', { class: 'small' }, TH().care.seedNote),
       h('div', { class: 'row' }, clock, sit,
-        h('div', { class: 'chips', role: 'group', 'aria-label': 'Minutes' }, [3, 5, 10].map((m) => h('button', { type: 'button', class: 'chip', 'aria-pressed': String(m === mins), onclick: () => { clearInterval(seedTimer); seedTimer = null; setUi('seedMins', m); } }, `${m} min`)))));
+        h('div', { class: 'chips', role: 'group', 'aria-label': 'Minutes' }, [3, 5, 10].map((m) => h('button', { type: 'button', class: 'chip', 'aria-pressed': String(m === mins), onclick: () => { stop(); setUi('seedMins', m); } }, `${m} min`)))));
   }
   function theoToggle() {
     if (!TH()) return null;
     const on = theoOn();
     return h('div', { class: `note ${on ? '' : 'warm'} theo-toggle` },
-      h('div', { class: 'row between' }, h('b', null, icon('lotus', 18), ` ${TH().label}: ${on ? 'on' : 'off'}`), btn(on ? 'Turn off' : 'Turn on', () => setTheo(!on), 'small')),
+      h('div', { class: 'row between' }, h('b', null, icon('lotus', 18), ` ${TH().label}: ${on ? 'on' : 'off'}`),
+        btn(on ? 'Turn off' : 'Turn on', () => setTheo(!on), 'small', null, { id: 'theo-toggle', 'aria-label': `${on ? 'Turn off' : 'Turn on'} ${TH().label.toLowerCase()}` })),
       h('span', { class: 'small' }, on ? TH().toggleOn : TH().toggleOff),
-      on ? h('div', { class: 'row' }, btn('Go to the helplines', () => { const el = document.getElementById('helplines'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 'small ghost')) : null);
+      on ? h('div', { class: 'row' }, btn('Go to the helplines', () => {
+        const el = document.getElementById('helplines');
+        if (!el) return;
+        el.scrollIntoView({ behavior: window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+        const t = el.querySelector('h2') || el;
+        t.setAttribute('tabindex', '-1');
+        t.focus({ preventScroll: true });
+      }, 'small ghost')) : null);
   }
   function theoCare() {
     const TC = TH().care;
@@ -1218,6 +1234,7 @@
     const sel = active && document.activeElement.selectionStart;
     clearInterval(breathTimer);
     clearInterval(seedTimer); seedTimer = null;
+    if (currentView !== 'care' || !theoOn()) seedEnd = 0; // leaving Care ends a sitting
     main().replaceChildren(VIEWS[currentView]());
     document.querySelectorAll('[data-nav]').forEach((a) => a.setAttribute('aria-current', a.dataset.nav === currentView ? 'page' : 'false'));
     if (active) {
@@ -1232,7 +1249,15 @@
     const el = document.getElementById('cc-motto');
     if (!el) return;
     el.hidden = !theoOn();
-    if (theoOn()) { const m = TH().motto; el.textContent = `${m.text} · ${m.sanskrit}`; el.title = m.source; }
+    if (theoOn()) {
+      const m = TH().motto;
+      const [, deva, iast] = /^(.*?)\s*\((.*)\)$/.exec(m.sanskrit) || [0, m.sanskrit, ''];
+      el.replaceChildren(`${m.text} · `, h('span', { lang: 'sa' }, deva), ...(iast ? [' (', h('span', { lang: 'sa-Latn' }, iast), ')'] : []));
+      el.title = m.source;
+    }
+    const want = theoOn() ? 'lotus' : 'leaf';
+    const ci = document.querySelector('#tabbar a[data-nav="care"] > span');
+    if (ci && ci.dataset.ic !== want) { const n = icon(want, 22); n.dataset.ic = want; ci.replaceWith(n); }
   }
   const STATUS_TEXT = { sheet: 'Saved to your Sheet', syncing: 'Saving…', locked: 'Private link needed', none: 'Not saving — back up' };
   function renderStatus() {
@@ -1260,6 +1285,7 @@
 
   function start() {
     CC.load(defaultState);
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && seedEnd && currentView === 'care') render(); });
     buildNav();
     document.getElementById('save-pill').addEventListener('click', () => go('data'));
     document.querySelectorAll('[data-region]').forEach((b) => b.addEventListener('click', () => {
