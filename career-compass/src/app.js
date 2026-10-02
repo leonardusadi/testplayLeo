@@ -936,7 +936,7 @@
     return h('section', { class: 'section', id: 'your-data' },
       sectionHead('Your data', where),
       h('div', { class: 'row' },
-        btn('Download tracker (.csv)', () => CC.saveFile(`job-tracker-${CC.iso()}.csv`, new Blob([`﻿${csv()}`], { type: 'text/csv' })), 'small', 'download'),
+        btn('Download tracker (.csv)', () => CC.saveFile(`job-tracker-${CC.iso()}.csv`, new Blob([`\ufeff${csv()}`], { type: 'text/csv' })), 'small', 'download'),
         btn('Download full backup (.json)', () => CC.saveFile(`career-compass-backup-${CC.iso()}.json`, new Blob([JSON.stringify(CC.state, null, 1)], { type: 'application/json' })), 'small', 'download'),
         CC.Remote.enabled ? btn('Save backup to Drive', () => CC.saveToDrive(`career-compass-backup-${CC.iso()}.json`, new Blob([JSON.stringify(CC.state, null, 1)], { type: 'application/json' })), 'small', 'download') : null,
         btn('Restore from backup', () => fileIn.click(), 'small ghost'), fileIn,
@@ -1154,5 +1154,13 @@
     route(tokenFromHash(), true);
     CC.Remote.init();
   }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+  // The page's elements are all above this script, so start right away (no waiting on load events,
+  // which behave differently inside the Apps Script frame). Any failure is shown on screen.
+  try {
+    start();
+    window.__ccStarted = true;
+  } catch (err) {
+    if (window.__ccFail) window.__ccFail(err);
+    else throw err;
+  }
 })();
