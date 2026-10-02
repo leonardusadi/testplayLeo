@@ -4,6 +4,27 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}img{max-width:100%}[hidden]{display:none!important}</style>
+<script>
+/* Start-up watchdog: if the app cannot start, say so on screen instead of showing an empty page. */
+(function () {
+  var errs = [];
+  function show() {
+    if (window.__ccStarted) return;
+    var box = document.getElementById('cc-fail');
+    if (!box) return;
+    box.hidden = false;
+    var d = document.getElementById('cc-fail-detail');
+    if (d) d.textContent = errs.length ? errs.join(' | ') : 'No error message was reported.';
+  }
+  window.__ccFail = function (err) { errs.push(String((err && err.message) || err)); show(); };
+  window.addEventListener('error', function (e) { errs.push((e.message || 'Script error') + (e.lineno ? ' (line ' + e.lineno + ')' : '')); show(); });
+  setTimeout(function () {
+    if (window.__ccStarted) return;
+    if (!window.__ccLoaded) errs.push('The end of the page file did not load, so it was probably cut off when it was copied.');
+    show();
+  }, 4000);
+})();
+</script>
 </head>
 <body>
 <title>Smitapragyan's Career Compass</title>
@@ -499,15 +520,23 @@ table.data tr:last-child td { border-bottom: 0; }
   </div>
 </header>
 <div class="wrap">
+  <div id="cc-fail" class="note care" role="alert" hidden style="margin-top:24px">
+    <b>Career Compass could not start.</b>
+    <span>This usually means the Interface file was cut off or changed while it was copied into Apps Script.
+      Open Interface in the Apps Script editor, select everything, paste the whole file again, and save.
+      Then use Deploy &gt; Manage deployments &gt; pencil icon &gt; Version: New version &gt; Deploy.</span>
+    <span class="small">Details for whoever set this up: <span id="cc-fail-detail"></span></span>
+  </div>
   <main id="main" tabindex="-1"></main>
   <footer class="footer no-print">
     <span>Made with care for Smitapragyan. Facts were checked in October 2026. Job sites and visa rules change, so confirm details on official pages before acting.</span>
-    <span><a href="#data">Your data and backups</a></span>
+    <span><a href="#data">Your data and backups</a> &middot; Page version <span id="cc-version">67e561e</span></span>
   </footer>
 </div>
 <nav class="tabbar" id="tabbar" aria-label="Sections"></nav>
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 <script>
+(function () {
 window.CC_DATA_PARTS = window.CC_DATA_PARTS || {};
 window.CC_DATA_PARTS.care = {
   intro: 'Searching for work after two retrenchments in a row is hard, and some days will feel heavier than others. This page is for you, the person doing the searching, with small things that help and people you can call.',
@@ -521,10 +550,10 @@ window.CC_DATA_PARTS.care = {
     },
     {
       thought: 'Recruiters will see the two short roles and turn me down.',
-      reframe: 'Some will ask about them, and a few may move on. Many will accept a calm, factual answer, such as “The company let me go for business reasons within the first couple of months.” Your years at Alliance, Mindray and BPL show that you stay. Practise the line until it feels a little boring. Then it is ready.',
+      reframe: 'Some will ask about them, and a few may move on. Many will accept a calm, factual answer, such as \u201cThe company let me go for business reasons within the first couple of months.\u201d Your years at Alliance, Mindray and BPL show that you stay. Practise the line until it feels a little boring. Then it is ready.',
     },
     {
-      thought: 'I’m too experienced, or too old. They only want freshers.',
+      thought: 'I\u2019m too experienced, or too old. They only want freshers.',
       reframe: 'Fresher roles exist, and they are meant for other people. Roles marked Senior, Lead, Specialist or Trainer need someone who can train a room of doctors, steady an upset customer and troubleshoot a system without supervision. Your thirteen years fit what those job descriptions ask for, so filter your searches by experience level and aim there.',
     },
     {
@@ -540,31 +569,31 @@ window.CC_DATA_PARTS.care = {
       reframe: 'You have had a hard stretch after more than a decade of steady work. Every skill is still here, from clinical applications and training to demos, service and key accounts, in four working languages. A short rough patch becomes one line on a CV. Many careers bend like this and recover.',
     },
     {
-      thought: 'Everyone else is moving ahead. I’m falling behind.',
-      reframe: 'You see other people’s announcements and none of their waiting. Layoffs and long searches are common, and people rarely post about them. Compare this week with your own last week, and count what you did.',
+      thought: 'Everyone else is moving ahead. I\u2019m falling behind.',
+      reframe: 'You see other people\u2019s announcements and none of their waiting. Layoffs and long searches are common, and people rarely post about them. Compare this week with your own last week, and count what you did.',
     },
     {
-      thought: 'That rejection after the interview proves I’m not good enough.',
-      reframe: 'A rejection is one company’s decision about one role at one moment, often shaped by things you never see, such as an internal candidate, a budget freeze or a changed brief. Reaching the interview means your profile already convinced someone. Note one lesson if there is one, and let the rest go.',
+      thought: 'That rejection after the interview proves I\u2019m not good enough.',
+      reframe: 'A rejection is one company\u2019s decision about one role at one moment, often shaped by things you never see, such as an internal candidate, a budget freeze or a changed brief. Reaching the interview means your profile already convinced someone. Note one lesson if there is one, and let the rest go.',
     },
     {
       thought: 'I wasted 13 years in one field.',
       reframe: 'Those years built depth that is hard to find. You know how ultrasound systems behave in real hospitals, how clinicians think, and how to explain a fault to an engineer, a doctor and a sales manager. Clinical, quality, product support and training roles all need that, so the same 13 years point to more than one kind of role.',
     },
     {
-      thought: 'I’m a burden on my family.',
-      reframe: 'This thought often gets loud during a job search, especially when questions keep coming. Needing support for a while is part of family life, and it takes nothing away from what you have given. A short, steady update can ease everyone. For example, “I’m applying to MNC roles in Hyderabad and I have a plan each week.” You can also say when you would rather not discuss it. If this thought ever comes with not wanting to be here, please call Tele-MANAS on 14416 today.',
+      thought: 'I\u2019m a burden on my family.',
+      reframe: 'This thought often gets loud during a job search, especially when questions keep coming. Needing support for a while is part of family life, and it takes nothing away from what you have given. A short, steady update can ease everyone. For example, \u201cI\u2019m applying to MNC roles in Hyderabad and I have a plan each week.\u201d You can also say when you would rather not discuss it. If this thought ever comes with not wanting to be here, please call Tele-MANAS on 14416 today.',
     },
     {
       thought: 'Maybe I should just go back to a small firm.',
       reframe: 'That option stays open, and it could be the right choice one day. Before deciding, ask whether the thought comes from what you want or from tiredness. You set out to find a stable MNC role, and your record fits that aim, so it is reasonable to give that plan a fair run. If a smaller firm does come up, check its stability the same way you would check an MNC.',
     },
     {
-      thought: 'If I rest today, I’m wasting time.',
+      thought: 'If I rest today, I\u2019m wasting time.',
       reframe: 'Rest is part of the search. Studies of job seekers find that mood and effort tend to sag when searching turns into a daily grind. You think more clearly in letters and interviews when you are rested, so a planned day off is a sound decision.',
     },
     {
-      thought: 'I can’t do this anymore. Nothing is going to change.',
+      thought: 'I can\u2019t do this anymore. Nothing is going to change.',
       reframe: 'When thoughts feel this heavy, the job search can wait. Please talk to someone today. Tele-MANAS on 14416 is free, open day and night, and answers in many Indian languages. Reaching out when things are this hard is a sensible, strong step, and with support, things can shift.',
     },
   ],
@@ -572,7 +601,7 @@ window.CC_DATA_PARTS.care = {
   practices: [
     {
       name: 'Self-compassion break',
-      how: 'When a rejection or a memory of the retrenchments stings, put a hand on your chest and say three things slowly. “This is really hard right now.” “Many people go through job loss, and I am not alone in it.” “May I be kind to myself.” Then ask what you would say to a close friend in your place, and say it to yourself.',
+      how: 'When a rejection or a memory of the retrenchments stings, put a hand on your chest and say three things slowly. \u201cThis is really hard right now.\u201d \u201cMany people go through job loss, and I am not alone in it.\u201d \u201cMay I be kind to myself.\u201d Then ask what you would say to a close friend in your place, and say it to yourself.',
       minutes: 3,
       evidence: 'A review of 27 trials found that self-compassion training reduced self-criticism, rumination, stress, low mood and anxiety compared with control groups.',
     },
@@ -590,13 +619,13 @@ window.CC_DATA_PARTS.care = {
     },
     {
       name: 'Time-boxed search hours',
-      how: 'Choose tomorrow’s search hours, for example 10 am to 1 pm, and write them down. Turn off job-app notifications and check the boards at two set times a day. When the time ends, stop, even mid-task, and leave yourself a note on where to pick up.',
+      how: 'Choose tomorrow\u2019s search hours, for example 10 am to 1 pm, and write them down. Turn off job-app notifications and check the boards at two set times a day. When the time ends, stop, even mid-task, and leave yourself a note on where to pick up.',
       minutes: 2,
       evidence: 'Studies of people out of work link a regular daily structure with better wellbeing. In a two-week experiment, people who checked email only three times a day felt less stressed.',
     },
     {
       name: 'Effort goals instead of outcome goals',
-      how: 'On Monday, write the week’s goals as actions you control, such as about five tailored applications, three follow-ups and three people contacted. On Friday, count those and tick them off. Replies and offers depend on other people, so they stay off your scorecard.',
+      how: 'On Monday, write the week\u2019s goals as actions you control, such as about five tailored applications, three follow-ups and three people contacted. On Friday, count those and tick them off. Replies and offers depend on other people, so they stay off your scorecard.',
       minutes: 3,
       evidence: 'In a large review, job-search programmes that taught goal setting raised re-employment. Diary studies of job seekers link a sense of progress with better mood and steadier effort.',
     },
@@ -1141,7 +1170,7 @@ window.CC_DATA_PARTS.companies = [
   },
   {
     id: 'drager',
-    name: 'Dräger',
+    name: 'Dr\u00e4ger',
     category: 'MedTech devices',
     cities: ['Mumbai'],
     hyd: false,
@@ -1266,7 +1295,7 @@ window.CC_DATA_PARTS.cv = {
       ],
       pitch: 'I am a biomedical engineer with 13 years on the field side of medical devices, including seven years installing and repairing Philips ultrasound systems and later clinical application and product specialist roles at Mindray and BPL Medical Technologies.',
       strengths: 'careful fault-finding, clear written communication and a real understanding of how devices are used in hospitals',
-      coverPara: 'Complaint and vigilance work depends on understanding what actually happened to a device and describing it accurately. I spent seven years diagnosing faults on Philips ultrasound systems at customer sites, working to service deadlines, and later trained doctors and sonographers who reported problems to me in their own words. I know the gap between a user’s description and the technical cause, and I am used to closing it patiently and explaining it clearly to the next team.',
+      coverPara: 'Complaint and vigilance work depends on understanding what actually happened to a device and describing it accurately. I spent seven years diagnosing faults on Philips ultrasound systems at customer sites, working to service deadlines, and later trained doctors and sonographers who reported problems to me in their own words. I know the gap between a user\u2019s description and the technical cause, and I am used to closing it patiently and explaining it clearly to the next team.',
       linkedinHeadline: 'Biomedical Engineer | Medical device troubleshooting, product support & field feedback | 13 yrs ultrasound (Philips, Mindray, BPL) | Moving into complaint handling & product quality | Hyderabad',
       linkedinAbout: 'I have spent 13 years on the field side of medical devices, and I would like to bring that experience into product quality and complaint handling.\n\nI began as a service engineer on Philips ultrasound systems at Alliance Medical Systems, installing, repairing and inspecting equipment and diagnosing breakdowns under service deadlines. Later, as a clinical application specialist at Mindray and Focus Medical Systems and a senior product specialist at BPL Medical Technologies, I trained doctors, sonographers and partner teams, and kept customers and colleagues informed until their issues were resolved.\n\nThat combination matters in complaint and vigilance work. I know how a device problem looks to the user, how it looks to an engineer, and how to describe it accurately for both.\n\nB.Tech in Biomedical Engineering. Fluent in English, Hindi and Odia, with advanced Telugu. Based in Hyderabad, open to hybrid roles, and available immediately.',
       naukriHeadline: 'Biomedical Engineer | 13 yrs Medical Devices (Ultrasound) | Troubleshooting, Field Service & Product Support | Complaint Handling, Technical Documentation | Hyderabad | Immediate Joiner',
@@ -1345,8 +1374,8 @@ window.CC_DATA_PARTS.cv = {
       end: 'Jul 2022',
       bullets: [
         {
-          t: 'Configured and customised ultrasound systems to each customer’s clinical requirements.',
-          alt: { adjacent: 'Translated each customer’s clinical requirements into ultrasound system configuration.' },
+          t: 'Configured and customised ultrasound systems to each customer\u2019s clinical requirements.',
+          alt: { adjacent: 'Translated each customer\u2019s clinical requirements into ultrasound system configuration.' },
         },
         { t: 'Trained and guided doctors, sonographers and colleagues on ultrasound functions, answering technical and clinical queries.' },
         { t: 'Supported customers and teams in English, Hindi, Telugu and Odia.' },
@@ -1421,7 +1450,7 @@ window.CC_DATA_PARTS.cv = {
     year: '2011',
     note: 'First class, 7.1 CGPA',
   },
-  languages: 'English, Hindi, Odia (fluent)  ·  Telugu (advanced)  ·  Bengali (basic)',
+  languages: 'English, Hindi, Odia (fluent)  \u00b7  Telugu (advanced)  \u00b7  Bengali (basic)',
   certs: '',
   numbers: [
     { key: 'installs', q: 'Roughly how many Philips ultrasound systems did you install or service at Alliance?', hint: 'e.g. 150+' },
@@ -1438,7 +1467,7 @@ window.CC_DATA_PARTS.cv = {
     { rule: 'The top third does the work', detail: 'Recruiters skim the headline, summary and first job in a few seconds. That is why each version changes these first.' },
     { rule: 'Results, not duties', detail: 'Bullets start with a verb and add a number where you can give an honest one.' },
     { rule: 'Two pages for 13 years', detail: 'Older roles stay short. Detail goes to the work that matches the job.' },
-    { rule: 'Their words, where true', detail: 'Mirror the job description’s keywords for skills you really have. Leave out what you have not done.' },
+    { rule: 'Their words, where true', detail: 'Mirror the job description\u2019s keywords for skills you really have. Leave out what you have not done.' },
   ],
   limits: { linkedinHeadline: 220, linkedinAbout: 2600, naukriHeadline: 250, naukriSummary: 1000 },
   profileTips: [
@@ -2398,7 +2427,7 @@ window.CC_DATA_PARTS.letters = {
     mutual: { label: 'Shared connection or ex-colleague', placeholder: 'e.g. Ravi Kumar', hint: 'Someone you both know. If there is no one, edit the first line of the message.' },
     topic: { label: 'Something you discussed', placeholder: 'e.g. how the team trains new users', hint: 'One real point from the conversation' },
     interviewDate: { label: 'Interview day', placeholder: 'e.g. Tuesday', hint: 'For a status check a week or more later, a date reads better than a weekday' },
-    skill: { label: 'One key requirement from the job', placeholder: 'e.g. product demonstrations to clinicians', hint: 'Pick one you clearly meet, in the advert’s own words' },
+    skill: { label: 'One key requirement from the job', placeholder: 'e.g. product demonstrations to clinicians', hint: 'Pick one you clearly meet, in the advert\u2019s own words' },
     newRole: { label: 'Role you accepted elsewhere', placeholder: 'e.g. Product Specialist' },
   },
 
@@ -2432,7 +2461,7 @@ Thank you for your time and consideration.
 Kind regards,
 {{signature}}`,
       tips: [
-        `Add the Job ID after the role title if the advert has one, and use three to five of the advert’s own words where they are true for you.`,
+        `Add the Job ID after the role title if the advert has one, and use three to five of the advert\u2019s own words where they are true for you.`,
         `Applications on Naukri or LinkedIn rarely need a cover letter. Keep this one for direct emails, referrals and adverts that ask for it.`,
         `You do not need to mention the two short recent roles here. If you choose to, or if you are asked, one calm sentence is enough, for example "My two most recent roles were closed by the employers for business reasons, and I am now looking for a long-term role with an established team."`,
       ],
@@ -2485,7 +2514,7 @@ Kind regards,
 {{signature}}`,
       tips: [
         `Recruiters in India often ask for total experience, notice period, last CTC and expected CTC. If they have, add short lines above your sign-off, such as "Total experience: 13 years" and "Notice period: Immediate". Give your last drawn pay truthfully and a researched range for this role.`,
-        `Before you share documents, check that the recruiter writes from an official company or agency email and that the job appears on the company’s careers page. A genuine employer or recruiter will not ask you to pay anything.`,
+        `Before you share documents, check that the recruiter writes from an official company or agency email and that the job appears on the company\u2019s careers page. A genuine employer or recruiter will not ask you to pay anything.`,
         `If you are replying in the same email thread, keep their subject line.`,
       ],
     },
@@ -2526,7 +2555,7 @@ Would you be open to a short call this week or next? I am happy to share my CV h
 Thank you,
 {{me}}`,
       tips: [
-        `Pick one requirement you clearly meet, in the advert’s own words.`,
+        `Pick one requirement you clearly meet, in the advert\u2019s own words.`,
         `Send it within a day or two of them accepting, while your name is fresh.`,
         `If there is no reply after about five working days, one short follow-up is enough.`,
       ],
@@ -3108,7 +3137,7 @@ window.CC_DATA_PARTS.roles = [
     hybrid: 'low',
     hybridWhy: 'Field roles in operating rooms, dialysis units or wards, with home-based admin days.',
     upskill: [],
-    employers: ['Medtronic', 'BD', 'Stryker', 'Fresenius Medical Care', 'Olympus', 'Nihon Kohden', 'Dräger'],
+    employers: ['Medtronic', 'BD', 'Stryker', 'Fresenius Medical Care', 'Olympus', 'Nihon Kohden', 'Dr\u00e4ger'],
   },
   {
     id: 'remote-service-engineer',
@@ -3174,7 +3203,7 @@ window.CC_DATA_PARTS.roles = [
     hybridWhy: 'Desk-based work in capability centres; HCLTech listed its Hyderabad complaints role as hybrid, and about three office days a week is common.',
     upskill: [
       { name: 'CDRH Learn modules on medical device reporting, complaints and the quality management system rule (QMSR)', provider: 'US FDA (CDRH Learn)', cost: 'Free', url: 'https://www.fda.gov/training-and-continuing-education/cdrh-learn', duration: 'Self-paced, 5-10 hours' },
-      { name: 'ISO 13485:2016 foundation or internal auditor course', provider: 'BSI India or TÜV SÜD South Asia', cost: 'Paid, roughly INR 10,000-25,000 (check current fee)', url: 'https://www.bsigroup.com', duration: '2-3 days' },
+      { name: 'ISO 13485:2016 foundation or internal auditor course', provider: 'BSI India or T\u00dcV S\u00dcD South Asia', cost: 'Paid, roughly INR 10,000-25,000 (check current fee)', url: 'https://www.bsigroup.com', duration: '2-3 days' },
       { name: 'Six Sigma (IIT Kharagpur), for root-cause analysis', provider: 'NPTEL', cost: 'Free to learn; certificate exam about INR 1,000 (check)', url: 'https://nptel.ac.in/courses/110105123', duration: '8-12 weeks' },
     ],
     employers: ['Medtronic', 'HCLTech', 'Amgen', 'Sanofi', 'Cyient', 'Stryker', 'Philips'],
@@ -3199,7 +3228,7 @@ window.CC_DATA_PARTS.roles = [
     upskill: [
       { name: 'EU MDR post-market and vigilance guidance (MDCG documents)', provider: 'European Commission (Health)', cost: 'Free', url: 'https://health.ec.europa.eu/medical-devices-sector/new-regulations/guidance-mdcg-endorsed-documents-and-other-guidance_en', duration: 'Self-study, 1-2 weeks' },
       { name: 'Materiovigilance Programme of India (MvPI) pages', provider: 'Indian Pharmacopoeia Commission', cost: 'Free', url: 'https://www.ipc.gov.in', duration: 'A few hours' },
-      { name: 'ISO 14971 risk management course', provider: 'TÜV SÜD South Asia or BSI India', cost: 'Paid, roughly INR 10,000-20,000 (check current fee)', url: 'https://www.tuvsud.com', duration: '1-2 days' },
+      { name: 'ISO 14971 risk management course', provider: 'T\u00dcV S\u00dcD South Asia or BSI India', cost: 'Paid, roughly INR 10,000-20,000 (check current fee)', url: 'https://www.tuvsud.com', duration: '1-2 days' },
     ],
     employers: ['Medtronic', 'HCLTech', 'Cyient', 'Baxter', 'Stryker', 'Philips', 'Freyr Solutions'],
   },
@@ -3245,7 +3274,7 @@ window.CC_DATA_PARTS.roles = [
     hybridWhy: 'Documentation work, usually hybrid; BD lists some Bengaluru regulatory roles as hybrid, and Freyr in Hyderabad has advertised at least one work-from-home regulatory role.',
     upskill: [
       { name: 'Medical Devices Rules 2017 and CDSCO guidance (self-study)', provider: 'CDSCO (Government of India)', cost: 'Free', url: 'https://cdsco.gov.in', duration: '1-2 weeks' },
-      { name: 'EU MDR introduction or technical documentation training', provider: 'BSI India or TÜV SÜD South Asia', cost: 'Paid, roughly INR 15,000-30,000 (check current fee)', url: 'https://www.bsigroup.com', duration: '1-2 days' },
+      { name: 'EU MDR introduction or technical documentation training', provider: 'BSI India or T\u00dcV S\u00dcD South Asia', cost: 'Paid, roughly INR 15,000-30,000 (check current fee)', url: 'https://www.bsigroup.com', duration: '1-2 days' },
     ],
     employers: ['Freyr Solutions', 'Cyient', 'Medtronic', 'BD', 'Philips', 'Siemens Healthineers', 'HCLTech'],
   },
@@ -3290,7 +3319,7 @@ window.CC_DATA_PARTS.roles = [
     hybrid: 'medium',
     hybridWhy: 'QMS and CAPA documentation roles in engineering centres are hybrid; plant and supplier quality roles are mostly on-site.',
     upskill: [
-      { name: 'ISO 13485:2016 Lead Auditor (CQI/IRCA-certified course)', provider: 'BSI India or TÜV SÜD South Asia', cost: 'Paid, roughly INR 25,000-45,000 (check current fee)', url: 'https://www.bsigroup.com', duration: '5 days' },
+      { name: 'ISO 13485:2016 Lead Auditor (CQI/IRCA-certified course)', provider: 'BSI India or T\u00dcV S\u00dcD South Asia', cost: 'Paid, roughly INR 25,000-45,000 (check current fee)', url: 'https://www.bsigroup.com', duration: '5 days' },
       { name: 'Six Sigma (IIT Kharagpur)', provider: 'NPTEL', cost: 'Free to learn; certificate exam about INR 1,000 (check)', url: 'https://nptel.ac.in/courses/110105123', duration: '8-12 weeks' },
     ],
     employers: ['Medtronic', 'Philips', 'BD', 'Stryker', 'Baxter', 'Cyient', 'HCLTech'],
@@ -3733,8 +3762,7 @@ window.CC_DATA_PARTS.today = {
 
 window.CC_DATA = Object.assign({}, window.CC_DATA_PARTS);
 
-</script>
-<script>
+;
 /* Minimal, dependency-free .docx writer (single-column, ATS-friendly).
    Blocks: {type:'title'|'subtitle'|'contact'|'h'|'p'|'bullet'|'role'|'spacer', ...}
    Text may be a string or an array of runs [{t, b, i}]. */
@@ -3875,7 +3903,7 @@ const Docx = (() => {
   }
 
   const NUMBERING = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:abstractNum w:abstractNumId="0"><w:multiLevelType w:val="singleLevel"/><w:lvl w:ilvl="0"><w:start w:val="1"/><w:numFmt w:val="bullet"/><w:lvlText w:val="•"/><w:lvlJc w:val="left"/><w:pPr><w:ind w:left="360" w:hanging="240"/></w:pPr><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/></w:rPr></w:lvl></w:abstractNum><w:num w:numId="1"><w:abstractNumId w:val="0"/></w:num></w:numbering>`;
+<w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:abstractNum w:abstractNumId="0"><w:multiLevelType w:val="singleLevel"/><w:lvl w:ilvl="0"><w:start w:val="1"/><w:numFmt w:val="bullet"/><w:lvlText w:val="\u2022"/><w:lvlJc w:val="left"/><w:pPr><w:ind w:left="360" w:hanging="240"/></w:pPr><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/></w:rPr></w:lvl></w:abstractNum><w:num w:numId="1"><w:abstractNumId w:val="0"/></w:num></w:numbering>`;
 
   function build(blocks, opts = {}) {
     const font = opts.font || 'Calibri';
@@ -3902,8 +3930,7 @@ const Docx = (() => {
 })();
 if (typeof module !== 'undefined') module.exports = Docx;
 
-</script>
-<script>
+;
 /* Core utilities: DOM helper, dates, store (local-first with optional private cloud sync), capabilities, files. */
 const CC = (() => {
   'use strict';
@@ -4259,7 +4286,7 @@ const CC = (() => {
   }
   async function saveToDrive(filename, data, mime) {
     const blob = data instanceof Blob ? data : new Blob([data], { type: mime || 'application/octet-stream' });
-    toast('Saving to your Google Drive…');
+    toast('Saving to your Google Drive\u2026');
     try {
       const res = await Remote.call('saveFile', { name: filename, mime: blob.type || mime || 'application/octet-stream', base64: await blobToBase64(blob) });
       toast('Saved in Google Drive, folder "Career Compass".', res && res.url);
@@ -4322,8 +4349,7 @@ const CC = (() => {
   };
 })();
 
-</script>
-<script>
+;
 /* CV model: merges suggested content (CC_DATA.cv) with her edits (state.cv) into one model used by
    the on-screen preview, the Word export and the plain-text copy. */
 const CV = (() => {
@@ -4372,7 +4398,7 @@ const CV = (() => {
   function dates(start, end, endHint) {
     const s = (start || '').trim();
     const e = (end || '').trim();
-    return { text: `${s || '[start]'} – ${e || endHint || '[end]'}`, missing: !s || !e };
+    return { text: `${s || '[start]'} \u2013 ${e || endHint || '[end]'}`, missing: !s || !e };
   }
 
   function model(track = S().track) {
@@ -4411,7 +4437,7 @@ const CV = (() => {
       const ends = items.map((it) => it.end).filter(Boolean);
       experience.push({
         title: d.recent.compactTitle, org: '', city: '',
-        dates: `${starts[0] || '[start]'} – ${ends[ends.length - 1] || '[end]'}`,
+        dates: `${starts[0] || '[start]'} \u2013 ${ends[ends.length - 1] || '[end]'}`,
         bullets: [...lines, recent.reason || d.recent.reason], short: true,
       });
     }
@@ -4435,7 +4461,7 @@ const CV = (() => {
       track,
       name: c.name,
       headline,
-      contact: contactBits.join('  ·  '),
+      contact: contactBits.join('  \u00b7  '),
       summary,
       skills,
       experience,
@@ -4462,7 +4488,7 @@ const CV = (() => {
       for (const b of e.bullets) blocks.push({ type: 'bullet', text: b });
     }
     blocks.push({ type: 'h', text: 'Education' });
-    blocks.push({ type: 'p', text: [{ t: m.education.degree, b: true }, { t: `, ${m.education.school}, ${m.education.year}` }, { t: m.education.note ? ` — ${m.education.note}` : '' }] });
+    blocks.push({ type: 'p', text: [{ t: m.education.degree, b: true }, { t: `, ${m.education.school}, ${m.education.year}` }, { t: m.education.note ? ` \u2014 ${m.education.note}` : '' }] });
     if (m.certs.length) {
       blocks.push({ type: 'h', text: 'Training & Certifications' });
       for (const c of m.certs) blocks.push({ type: 'bullet', text: c });
@@ -4476,10 +4502,10 @@ const CV = (() => {
     const out = [m.name.toUpperCase(), m.headline, m.contact, '', 'PROFESSIONAL SUMMARY', m.summary, '', 'CORE SKILLS', m.skills.join(' | '), '', 'EXPERIENCE'];
     for (const e of m.experience) {
       out.push('', `${e.title}${e.org ? `, ${[e.org, e.city].filter(Boolean).join(', ')}` : ''}   ${e.dates}`);
-      for (const b of e.bullets) out.push(`• ${b}`);
+      for (const b of e.bullets) out.push(`\u2022 ${b}`);
     }
-    out.push('', 'EDUCATION', `${m.education.degree}, ${m.education.school}, ${m.education.year}${m.education.note ? ` — ${m.education.note}` : ''}`);
-    if (m.certs.length) { out.push('', 'TRAINING & CERTIFICATIONS'); for (const c of m.certs) out.push(`• ${c}`); }
+    out.push('', 'EDUCATION', `${m.education.degree}, ${m.education.school}, ${m.education.year}${m.education.note ? ` \u2014 ${m.education.note}` : ''}`);
+    if (m.certs.length) { out.push('', 'TRAINING & CERTIFICATIONS'); for (const c of m.certs) out.push(`\u2022 ${c}`); }
     out.push('', 'LANGUAGES', m.languages);
     return out.join('\n');
   }
@@ -4512,7 +4538,7 @@ const CV = (() => {
           h('span', { class: 'p-dates' }, marked(e.dates))),
         h('ul', null, e.bullets.map((b) => h('li', null, marked(b))))]),
       h('div', { class: 'p-h' }, 'Education'),
-      h('p', null, h('b', null, m.education.degree), `, ${m.education.school}, ${m.education.year}`, m.education.note ? ` — ${m.education.note}` : ''),
+      h('p', null, h('b', null, m.education.degree), `, ${m.education.school}, ${m.education.year}`, m.education.note ? ` \u2014 ${m.education.note}` : ''),
       m.certs.length ? [h('div', { class: 'p-h' }, 'Training & Certifications'), h('ul', null, m.certs.map((c) => h('li', null, c)))] : null,
       h('div', { class: 'p-h' }, 'Languages'),
       h('p', null, m.languages));
@@ -4526,8 +4552,7 @@ const CV = (() => {
   return { TRACKS, model, toBlocks, toText, preview, marked, suggestedBullets, bullets, jobState, field, trackText, kit, fileBase };
 })();
 
-</script>
-<script>
+;
 /* Views and router. */
 (() => {
   'use strict';
@@ -4631,7 +4656,7 @@ const CV = (() => {
       if (!text) { toast('Paste the text first.'); return; }
       ctl = new AbortController();
       go.disabled = true; stop.hidden = false;
-      out.replaceChildren('Thinking…');
+      out.replaceChildren('Thinking\u2026');
       try {
         const result = await run(sample, text, ctl.signal, (t) => { out.textContent = t; });
         if (cancelled) return;
@@ -4718,7 +4743,7 @@ const CV = (() => {
     const n = counts[energy] || 3;
     const tasks = [];
     for (const a of followUpsDue().slice(0, energy === 'low' ? 1 : 2)) {
-      tasks.push({ id: `fu-${a.id}`, title: `Follow up: ${a.company}`, sub: `${a.role || 'Application'} · applied ${CC.fmt(a.appliedOn)}. A short, friendly note is enough.`, href: '#tracker', minutes: 10 });
+      tasks.push({ id: `fu-${a.id}`, title: `Follow up: ${a.company}`, sub: `${a.role || 'Application'} \u00b7 applied ${CC.fmt(a.appliedOn)}. A short, friendly note is enough.`, href: '#tracker', minutes: 10 });
     }
     const fw = (D.today.firstWeek || []).filter((s) => !S().firstWeek[s.id]);
     for (const s of fw.slice(0, energy === 'good' ? 2 : 1)) tasks.push({ id: `fw-${s.id}`, title: rv(s, 'title'), sub: rv(s, 'sub'), href: s.href, minutes: s.minutes });
@@ -4804,7 +4829,7 @@ const CV = (() => {
       !isGlobal() && D.history && D.history.firstRound ? firstRoundCard() : null,
 
       day.energy ? h('section', { class: 'section' },
-        sectionHead('Today’s gentle plan', D.today.energy[day.energy].note),
+        sectionHead('Today\u2019s gentle plan', D.today.energy[day.energy].note),
         h('ul', { class: 'tasks' }, plan.map((task) => h('li', { class: done.has(task.id) ? 'done' : '' },
           h('input', {
             type: 'checkbox', id: `task-${task.id}`, checked: done.has(task.id), 'aria-label': `Mark done: ${task.title}`,
@@ -4822,13 +4847,13 @@ const CV = (() => {
             h('div', { class: 'row', style: { gap: '10px' } },
               task.minutes ? h('span', { class: 'small faint' }, `about ${task.minutes} min`) : null,
               task.href ? h('a', { href: task.href, class: 'small' }, 'Open') : null))))),
-        plan.length && plan.every((x) => done.has(x.id)) ? h('div', { class: 'note good' }, h('b', null, 'That’s today done.'), h('span', null, D.today.doneLine)) : null)
+        plan.length && plan.every((x) => done.has(x.id)) ? h('div', { class: 'note good' }, h('b', null, 'That\u2019s today done.'), h('span', null, D.today.doneLine)) : null)
         : null,
 
       due.length ? h('section', { class: 'section' },
         sectionHead('Ready for a follow-up', 'A week has passed on these. A two-line note keeps you on their radar.'),
         h('div', { class: 'grid' }, due.map((a) => h('div', { class: 'card' },
-          h('b', null, a.company), h('span', { class: 'small muted' }, `${a.role || ''} · applied ${CC.fmt(a.appliedOn)}`),
+          h('b', null, a.company), h('span', { class: 'small muted' }, `${a.role || ''} \u00b7 applied ${CC.fmt(a.appliedOn)}`),
           h('div', { class: 'row' },
             btn('Write follow-up', () => { CC.update((s) => { s.letters.tpl = 'followup'; s.letters.appId = a.id; s.letters.fields = { ...s.letters.fields, company: a.company, role: a.role, contact: a.contact || '' }; s.ui.apply = 'letters'; }); go('letters'); }, 'small primary'),
             btn('Not now', () => { a.followUpOn = CC.addDays(t, 3); CC.upsertApp(a); }, 'small ghost')))))) : null,
@@ -4891,7 +4916,7 @@ const CV = (() => {
       h('div', { class: 'kv' }, h('dt', { class: 'eyebrow' }, 'Search titles'), h('div', { class: 'chips' }, r.variants.map((v) => h('span', { class: 'chip static' }, v)))),
       r.upskill && r.upskill.length ? h('details', { class: 'acc' }, h('summary', null, 'Quick ways to upskill'),
         h('div', { class: 'acc-body' }, r.upskill.map((u) => h('div', { class: 'stack', style: { gap: '2px' } },
-          u.url ? ext(u.url, u.name) : h('b', null, u.name), h('span', { class: 'small muted' }, [u.provider, u.cost, u.duration].filter(Boolean).join(' · ')))))) : null,
+          u.url ? ext(u.url, u.name) : h('b', null, u.name), h('span', { class: 'small muted' }, [u.provider, u.cost, u.duration].filter(Boolean).join(' \u00b7 ')))))) : null,
       r.employers && r.employers.length ? h('p', { class: 'small muted' }, h('b', null, 'Who hires: '), r.employers.join(', ')) : null,
       h('div', { class: 'row' },
         btn('Find these jobs', () => { CC.update((s) => { s.ui.searchQ = r.variants[0]; s.ui.apply = 'search'; }); go('search'); }, 'small primary', 'send'),
@@ -4923,7 +4948,7 @@ const CV = (() => {
           isGlobal() ? null : h('label', { class: 'check', for: 'company-hyd' }, h('input', { type: 'checkbox', id: 'company-hyd', checked: !!f.hyd, onchange: (e) => setF({ hyd: e.target.checked }) }), 'Hyderabad office'),
           h('span', { class: 'count-note num' }, `${list.length} of ${source.length}`))),
       h('div', { class: 'grid two' }, list.map(companyCard)),
-      !isGlobal() && D.explore.marketNotes && D.explore.marketNotes.length ? h('details', { class: 'acc' }, h('summary', null, 'What’s happening in the market (2025–26)'),
+      !isGlobal() && D.explore.marketNotes && D.explore.marketNotes.length ? h('details', { class: 'acc' }, h('summary', null, 'What\u2019s happening in the market (2025\u201326)'),
         h('div', { class: 'acc-body' }, h('ul', { class: 'dots' }, D.explore.marketNotes.map((n) => h('li', null, n))))) : null);
   }
   function companyCard(c) {
@@ -5029,7 +5054,7 @@ const CV = (() => {
     const linksBox = h('div', { class: 'links' });
     const renderLinks = () => {
       const q = qInput.value.trim() || sq;
-      linksBox.replaceChildren(...buildSearchLinks(q, loc, mode, recent).map((l) => h('a', { class: 'linkcard', href: l.url, target: '_blank', rel: 'noopener noreferrer' }, h('b', null, `${l.name} ↗`), h('span', null, l.note || `${q} · ${loc}`))));
+      linksBox.replaceChildren(...buildSearchLinks(q, loc, mode, recent).map((l) => h('a', { class: 'linkcard', href: l.url, target: '_blank', rel: 'noopener noreferrer' }, h('b', null, `${l.name} \u2197`), h('span', null, l.note || `${q} \u00b7 ${loc}`))));
     };
     let tmr;
     qInput.addEventListener('input', () => { renderLinks(); clearTimeout(tmr); tmr = setTimeout(() => CC.update((s) => { s.ui.searchQ = qInput.value; }, { silent: true }), 400); });
@@ -5052,13 +5077,13 @@ const CV = (() => {
         h('ol', { class: 'tasks', style: { listStyle: 'none' } }, D.search.routine.map((r, i) => h('li', null, h('b', { class: 'num', style: { color: 'var(--marigold-ink)', minWidth: '1.4em' } }, `${i + 1}`), h('div', { class: 'stack', style: { gap: '2px' } }, h('span', { class: 't-title' }, r.title), h('span', { class: 't-sub' }, r.sub)))))),
       h('section', { class: 'section' }, sectionHead('Platform playbook', 'What each site is best for, and how to use it well.'),
         h('div', { class: 'stack', style: { gap: '0' } }, D.search.platforms.map((p) => h('details', { class: 'acc' },
-          h('summary', null, h('span', null, p.name, h('span', { class: 'small faint', style: { fontWeight: 400 } }, ` · ${p.bestFor}`))),
+          h('summary', null, h('span', null, p.name, h('span', { class: 'small faint', style: { fontWeight: 400 } }, ` \u00b7 ${p.bestFor}`))),
           h('div', { class: 'acc-body' }, h('ul', { class: 'dots' }, p.tips.map((t) => h('li', null, t))), p.url ? ext(p.url, `Open ${p.name}`, 'small') : null))))),
       h('section', { class: 'section' }, sectionHead('What works in 2026', 'Current, practical tips for getting read by a human.'),
         h('div', { class: 'grid' }, D.search.tips.map((t) => h('div', { class: 'card soft' }, h('b', null, t.tip), h('p', { class: 'small muted' }, t.why))))),
       h('section', { class: 'section' }, sectionHead('Scam shield', 'Real employers never ask you for money. Check before you share documents.'),
         h('div', { class: 'grid two' },
-          h('div', { class: 'card' }, h('h4', null, 'Red flags'), h('ul', { class: 'dots' }, D.search.scams.flags.map((f) => h('li', null, h('b', null, f.flag), ' — ', f.detail)))),
+          h('div', { class: 'card' }, h('h4', null, 'Red flags'), h('ul', { class: 'dots' }, D.search.scams.flags.map((f) => h('li', null, h('b', null, f.flag), ' \u2014 ', f.detail)))),
           h('div', { class: 'card' }, h('h4', null, 'Check a company or recruiter'), h('ol', { style: { margin: 0, paddingLeft: '1.2em', display: 'grid', gap: '6px' } }, D.search.scams.verify.map((v) => h('li', null, v))),
             h('div', { class: 'note warm' }, h('b', null, 'If something feels wrong'), h('span', null, D.search.scams.report)))),
         aiBox({
@@ -5098,7 +5123,7 @@ const CV = (() => {
       for (const p of GS.platforms || []) {
         if (!p.build || (Array.isArray(p.regions) && p.regions.length && !p.regions.includes(loc.id))) continue;
         const url = GLOBAL_BUILDERS[p.build] ? GLOBAL_BUILDERS[p.build](q, loc, mode, recent) : patternBuild(p.build, (GS.builders || {})[p.build], q, loc);
-        if (url) links.push(h('a', { class: 'linkcard', href: url, target: '_blank', rel: 'noopener noreferrer' }, h('b', null, `${p.name} ↗`), h('span', null, p.linkNote || `${q} · ${loc.label}`)));
+        if (url) links.push(h('a', { class: 'linkcard', href: url, target: '_blank', rel: 'noopener noreferrer' }, h('b', null, `${p.name} \u2197`), h('span', null, p.linkNote || `${q} \u00b7 ${loc.label}`)));
       }
       linksBox.replaceChildren(...links);
     };
@@ -5124,11 +5149,11 @@ const CV = (() => {
         h('div', { class: 'grid' }, GS.tips.map((t) => h('div', { class: 'card soft' }, h('b', null, t.tip), h('p', { class: 'small muted' }, t.why))))) : null,
       h('section', { class: 'section' }, sectionHead('Platform playbook', 'Where each site helps, and how to use it.'),
         h('div', { class: 'stack', style: { gap: '0' } }, (GS.platforms || []).map((p) => h('details', { class: 'acc' },
-          h('summary', null, h('span', null, p.name, h('span', { class: 'small faint', style: { fontWeight: 400 } }, ` · ${p.bestFor}`))),
+          h('summary', null, h('span', null, p.name, h('span', { class: 'small faint', style: { fontWeight: 400 } }, ` \u00b7 ${p.bestFor}`))),
           h('div', { class: 'acc-body' }, h('ul', { class: 'dots' }, (p.tips || []).map((t) => h('li', null, t))), p.url ? ext(p.url, `Open ${p.name}`, 'small') : null))))),
       h('section', { class: 'section' }, sectionHead('Working abroad safely', 'Real employers and registered agents never ask you to pay for a job.'),
         h('div', { class: 'grid two' },
-          h('div', { class: 'card' }, h('h4', null, 'Red flags'), h('ul', { class: 'dots' }, flags.map((f) => h('li', null, h('b', null, f.flag), ' — ', f.detail)))),
+          h('div', { class: 'card' }, h('h4', null, 'Red flags'), h('ul', { class: 'dots' }, flags.map((f) => h('li', null, h('b', null, f.flag), ' \u2014 ', f.detail)))),
           (GS.safety || []).length ? h('div', { class: 'card' }, h('h4', null, 'Steps that keep you safe'), h('ol', { style: { margin: 0, paddingLeft: '1.2em', display: 'grid', gap: '6px' } }, GS.safety.map((v) => h('li', null, v)))) : null)));
   }
 
@@ -5152,7 +5177,7 @@ const CV = (() => {
       const list = CV.bullets(job, track);
       const overridden = !!(st.jobs[job.id] && st.jobs[job.id].bullets && st.jobs[job.id].bullets[track]);
       const setBullets = (arr) => quiet((s) => { const js = s.cv.jobs[job.id] = s.cv.jobs[job.id] || {}; js.bullets = js.bullets || {}; js.bullets[track] = arr; });
-      return h('details', { class: 'acc' }, h('summary', null, h('span', null, CV.field(job, 'title'), h('span', { class: 'small faint', style: { fontWeight: 400 } }, ` · ${CV.field(job, 'org')}`))),
+      return h('details', { class: 'acc' }, h('summary', null, h('span', null, CV.field(job, 'title'), h('span', { class: 'small faint', style: { fontWeight: 400 } }, ` \u00b7 ${CV.field(job, 'org')}`))),
         h('div', { class: 'acc-body' },
           h('div', { class: 'form-grid' },
             ['title', 'org', 'city', 'start', 'end'].map((k) => field(`job-${job.id}-${k}`, { title: 'Title', org: 'Company', city: 'City', start: 'Start (e.g. Jul 2022)', end: 'End (e.g. Mar 2025)' }[k],
@@ -5207,7 +5232,7 @@ const CV = (() => {
 
     return h('div', { class: 'stack', style: { gap: '22px' } },
       isGlobal() && G().cv && (G().cv.rules || []).length ? h('details', { class: 'acc' }, h('summary', null, 'CVs for roles outside India'),
-        h('div', { class: 'acc-body' }, h('ul', { class: 'dots' }, G().cv.rules.map((r) => h('li', null, h('b', null, r.rule), ' — ', r.detail))))) : null,
+        h('div', { class: 'acc-body' }, h('ul', { class: 'dots' }, G().cv.rules.map((r) => h('li', null, h('b', null, r.rule), ' \u2014 ', r.detail))))) : null,
       h('div', { class: 'card soft' },
         h('b', null, 'Choose the version for this application'),
         h('div', { class: 'chips', role: 'radiogroup' }, CV.TRACKS.map((k) => h('button', { type: 'button', class: 'chip', role: 'radio', 'aria-checked': String(track === k), 'aria-pressed': String(track === k), onclick: () => CC.update((s) => { s.cv.track = k; }) }, T[k].label))),
@@ -5223,7 +5248,7 @@ const CV = (() => {
           numbers,
           h('div', { class: 'stack', style: { gap: '0' } }, h('b', { style: { marginBottom: '8px' } }, 'Experience'), editorJobs),
           field('cv-certs', 'Training & certifications (one per line)', textArea('cv-certs', st.certs != null ? st.certs : D.cv.certs, (v) => quiet((s) => { s.cv.certs = v; }), { rows: 3 }), 'Add courses as you finish them. Leave blank to hide the section.'),
-          h('details', { class: 'acc' }, h('summary', null, 'Why the CV looks like this'), h('div', { class: 'acc-body' }, h('ul', { class: 'dots' }, D.cv.rules.map((r) => h('li', null, h('b', null, r.rule), ' — ', r.detail)))))),
+          h('details', { class: 'acc' }, h('summary', null, 'Why the CV looks like this'), h('div', { class: 'acc-body' }, h('ul', { class: 'dots' }, D.cv.rules.map((r) => h('li', null, h('b', null, r.rule), ' \u2014 ', r.detail)))))),
         h('div', { class: 'stack sticky-col', style: { gap: '12px' } },
           h('div', { class: 'row no-print' },
             btn('Download Word (.docx)', () => { const mm = CV.model(track); CC.saveFile(`${CV.fileBase(mm)}.docx`, new Blob([Docx.build(CV.toBlocks(mm), { title: `${mm.name} CV`, author: mm.name })], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' })); }, 'primary', 'download'),
@@ -5328,7 +5353,7 @@ const CV = (() => {
           field('letter-app', 'Which application is this for?', h('select', { id: 'letter-app', value: appsList.some((a) => a.id === st.appId) ? st.appId : '', onchange: (e) => {
             const a = appsList.find((x) => x.id === e.target.value);
             CC.update((s) => { s.letters.appId = e.target.value; if (a) s.letters.fields = { ...s.letters.fields, company: a.company, role: a.role, contact: a.contact || s.letters.fields.contact || '' }; });
-          } }, h('option', { value: '' }, 'A new entry'), appsList.map((a) => h('option', { value: a.id }, `${a.company}${a.role ? ` — ${a.role}` : ''}`))), 'Saving links this message to that application in your tracker.'),
+          } }, h('option', { value: '' }, 'A new entry'), appsList.map((a) => h('option', { value: a.id }, `${a.company}${a.role ? ` \u2014 ${a.role}` : ''}`))), 'Saving links this message to that application in your tracker.'),
           h('div', { class: 'form-grid' }, fields),
           h('p', { class: 'small muted' }, `Uses your ${D.cv.tracks[S().cv.track].label} story. Change it in CV studio.`),
           tpl.tips && tpl.tips.length ? h('ul', { class: 'dots small' }, tpl.tips.map((t) => h('li', null, t))) : null),
@@ -5351,7 +5376,7 @@ const CV = (() => {
           aiBox({
             id: 'ai-letter', title: 'Ask Claude: write it for this job', desc: 'Paste the job description. Claude drafts this message from your CV, honestly, in a warm professional tone. Edit before sending.',
             placeholder: 'Paste the job description (or recruiter message) here', buttonLabel: 'Draft it',
-            run: (sample, jd, signal) => sample.text(`Write a ${tpl.label.toLowerCase()} for an Indian professional applying to a multinational company. Tone: warm, confident, plain English, no clichés, no exaggeration. NEVER invent experience, numbers or certifications not in her CV; where a detail is unknown, write it as [placeholder]. ${tpl.limit ? `Hard limit: ${tpl.limit} characters.` : 'Keep it under 300 words.'} If the role is a career change, connect her real experience to it honestly. Do not mention the two short recent roles unless the text explicitly asks why she is looking.\n\nFields she gave: ${JSON.stringify(S().letters.fields || {})}\n\nHER CV:\n${CV.toText(CV.model()).slice(0, 8000)}\n\nJOB DESCRIPTION / MESSAGE:\n${jd.slice(0, 8000)}\n\nReturn only the message text${tpl.subject ? ', with a first line "Subject: ..."' : ''}.`, { signal }),
+            run: (sample, jd, signal) => sample.text(`Write a ${tpl.label.toLowerCase()} for an Indian professional applying to a multinational company. Tone: warm, confident, plain English, no clich\u00e9s, no exaggeration. NEVER invent experience, numbers or certifications not in her CV; where a detail is unknown, write it as [placeholder]. ${tpl.limit ? `Hard limit: ${tpl.limit} characters.` : 'Keep it under 300 words.'} If the role is a career change, connect her real experience to it honestly. Do not mention the two short recent roles unless the text explicitly asks why she is looking.\n\nFields she gave: ${JSON.stringify(S().letters.fields || {})}\n\nHER CV:\n${CV.toText(CV.model()).slice(0, 8000)}\n\nJOB DESCRIPTION / MESSAGE:\n${jd.slice(0, 8000)}\n\nReturn only the message text${tpl.subject ? ', with a first line "Subject: ..."' : ''}.`, { signal }),
             render: (text) => h('div', { class: 'stack' }, h('div', { class: 'letter-out' }, text), h('div', { class: 'row' }, copyBtn(text, 'Copy draft'))),
           }))));
   }
@@ -5371,7 +5396,7 @@ const CV = (() => {
     const pipe = (key, label, n) => h('button', { type: 'button', class: 'pipe', 'aria-pressed': String(filter === key), onclick: () => setUi('tf', filter === key ? 'open' : key) }, h('b', null, String(n)), h('span', null, label));
 
     return h('div', { class: 'view' },
-      h('div', { class: 'view-head' }, h('span', { class: 'eyebrow' }, 'Tracker'), h('h1', null, 'Everything you’ve sent'),
+      h('div', { class: 'view-head' }, h('span', { class: 'eyebrow' }, 'Tracker'), h('h1', null, 'Everything you\u2019ve sent'),
         h('p', { class: 'lede' }, 'One place for every application, follow-up and message. The tool reminds you a week after you apply.')),
       h('div', { class: 'pipeline' },
         STATUSES.map(([k, l]) => pipe(k, l, counts[k])),
@@ -5383,9 +5408,9 @@ const CV = (() => {
       list.length ? h('div', { class: 'grid two' }, list.map((a) => (editing === a.id ? appEditor(a) : appCard(a, due(a)))))
         : h('div', { class: 'card soft' }, h('b', null, all.length ? 'Nothing in this view.' : 'Your tracker is empty.'), h('p', { class: 'small muted' }, 'Add companies from Explore, or save a letter from Letters, and they appear here.')),
       h('section', { class: 'section' },
-        sectionHead('Messages sent', `${msgs.length} saved. Every cover letter, email and note you saved, newest first.`, msgs.length ? copyBtn(() => msgs.map((m) => `=== ${m.date} · ${m.app.company} · ${m.label} ===\n${m.subject ? `Subject: ${m.subject}\n` : ''}${m.text}`).join('\n\n'), 'Copy all', 'small') : null),
+        sectionHead('Messages sent', `${msgs.length} saved. Every cover letter, email and note you saved, newest first.`, msgs.length ? copyBtn(() => msgs.map((m) => `=== ${m.date} \u00b7 ${m.app.company} \u00b7 ${m.label} ===\n${m.subject ? `Subject: ${m.subject}\n` : ''}${m.text}`).join('\n\n'), 'Copy all', 'small') : null),
         msgs.length ? h('div', { class: 'stack', style: { gap: '0' } }, msgs.slice(0, 60).map((m) => h('details', { class: 'acc' },
-          h('summary', null, h('span', null, `${m.app.company} · ${m.label}`), h('span', { class: 'small faint num', style: { fontWeight: 400 } }, CC.fmt(m.date))),
+          h('summary', null, h('span', null, `${m.app.company} \u00b7 ${m.label}`), h('span', { class: 'small faint num', style: { fontWeight: 400 } }, CC.fmt(m.date))),
           h('div', { class: 'acc-body' }, m.subject ? h('p', null, h('b', null, 'Subject: '), m.subject) : null, h('div', { class: 'letter-out' }, m.text), h('div', { class: 'row' }, copyBtn(m.text)))))) : h('p', { class: 'small faint' }, 'Saved messages appear here.')),
       dataPanel());
   }
@@ -5421,7 +5446,7 @@ const CV = (() => {
       h('h4', null, a.company ? `Edit: ${a.company}` : 'New application'),
       h('div', { class: 'form-grid' },
         inp('company', 'Company'), inp('role', 'Role'),
-        field(`ae-${a.id}-platform`, 'Where', h('select', { id: `ae-${a.id}-platform`, value: draft.platform || '', onchange: (e) => { draft.platform = e.target.value; } }, ['', 'Naukri', 'LinkedIn', 'Indeed', 'foundit', 'Instahyre', 'Company site', 'Referral', 'Recruiter', 'Email', 'Other'].map((p) => h('option', { value: p }, p || 'Choose…')))),
+        field(`ae-${a.id}-platform`, 'Where', h('select', { id: `ae-${a.id}-platform`, value: draft.platform || '', onchange: (e) => { draft.platform = e.target.value; } }, ['', 'Naukri', 'LinkedIn', 'Indeed', 'foundit', 'Instahyre', 'Company site', 'Referral', 'Recruiter', 'Email', 'Other'].map((p) => h('option', { value: p }, p || 'Choose\u2026')))),
         inp('link', 'Link to posting', { type: 'url', placeholder: 'https://' }),
         inp('appliedOn', 'Applied on', { type: 'date' }), inp('followUpOn', 'Follow up on', { type: 'date' }),
         inp('contact', 'Contact person'), inp('contactInfo', 'Contact email / LinkedIn')),
@@ -5455,7 +5480,7 @@ const CV = (() => {
         if (!data || typeof data !== 'object' || !data.cv) throw new Error('bad');
         confirmBox.replaceChildren(h('div', { class: 'note warm' }, h('span', null, `Replace what is here with the backup from ${file.name}? (${(data.apps || []).filter((x) => !x.deleted).length} applications)`),
           h('div', { class: 'row' }, btn('Yes, restore it', () => { CC.replaceAll(data); toast('Backup restored'); }, 'small primary'), btn('Cancel', () => confirmBox.replaceChildren(), 'small ghost'))));
-      } catch { toast('That file isn’t a Career Compass backup.'); }
+      } catch { toast('That file isn\u2019t a Career Compass backup.'); }
       fileIn.value = '';
     });
     const csv = () => {
@@ -5466,7 +5491,7 @@ const CV = (() => {
     return h('section', { class: 'section', id: 'your-data' },
       sectionHead('Your data', where),
       h('div', { class: 'row' },
-        btn('Download tracker (.csv)', () => CC.saveFile(`job-tracker-${CC.iso()}.csv`, new Blob([`﻿${csv()}`], { type: 'text/csv' })), 'small', 'download'),
+        btn('Download tracker (.csv)', () => CC.saveFile(`job-tracker-${CC.iso()}.csv`, new Blob([`\ufeff${csv()}`], { type: 'text/csv' })), 'small', 'download'),
         btn('Download full backup (.json)', () => CC.saveFile(`career-compass-backup-${CC.iso()}.json`, new Blob([JSON.stringify(CC.state, null, 1)], { type: 'application/json' })), 'small', 'download'),
         CC.Remote.enabled ? btn('Save backup to Drive', () => CC.saveToDrive(`career-compass-backup-${CC.iso()}.json`, new Blob([JSON.stringify(CC.state, null, 1)], { type: 'application/json' })), 'small', 'download') : null,
         btn('Restore from backup', () => fileIn.click(), 'small ghost'), fileIn,
@@ -5503,7 +5528,7 @@ const CV = (() => {
     }, 'small');
     const q = qs[pick];
     return h('div', { class: 'stack', style: { gap: '26px' } },
-      h('section', { class: 'section' }, sectionHead('Tell me about yourself', `Your ${D.cv.tracks[track].label} version. About 60–90 seconds when spoken.`),
+      h('section', { class: 'section' }, sectionHead('Tell me about yourself', `Your ${D.cv.tracks[track].label} version. About 60\u201390 seconds when spoken.`),
         h('div', { class: 'card' }, h('p', { style: { whiteSpace: 'pre-wrap' } }, D.interview.intro_answers[track]), h('div', { class: 'row' }, copyBtn(D.interview.intro_answers[track])),
           h('div', { class: 'chips' }, CV.TRACKS.map((k) => h('button', { type: 'button', class: 'chip', 'aria-pressed': String(track === k), onclick: () => CC.update((s) => { s.cv.track = k; }) }, D.cv.tracks[k].label))))),
       h('section', { class: 'section' }, sectionHead('Practice one question', 'Say it out loud. Two minutes is plenty.'),
@@ -5523,7 +5548,7 @@ const CV = (() => {
           const items = qs.filter((x) => x.group === g);
           return items.length ? h('div', { class: 'stack', style: { gap: '0' } }, h('span', { class: 'eyebrow', style: { margin: '6px 0' } }, g), items.map((x) => h('details', { class: 'acc' }, h('summary', null, x.q), h('div', { class: 'acc-body' }, h('p', { class: 'small muted' }, x.why), h('p', { style: { whiteSpace: 'pre-wrap' } }, x.answer), h('div', { class: 'row' }, copyBtn(x.answer)))))) : null;
         })),
-      h('section', { class: 'section' }, sectionHead('Your stories', 'Real moments from your career, shaped as Situation → Action → Result. Add the numbers you remember.'),
+      h('section', { class: 'section' }, sectionHead('Your stories', 'Real moments from your career, shaped as Situation \u2192 Action \u2192 Result. Add the numbers you remember.'),
         h('div', { class: 'grid two' }, D.interview.stories.map((s) => h('div', { class: 'card' }, h('h4', null, s.title), h('p', { class: 'small faint' }, `Use for: ${s.use}`),
           h('dl', { class: 'stack', style: { gap: '6px', margin: 0 } }, [['Situation', s.situation], ['What you did', s.action], ['Result', s.result]].map(([k, v]) => h('div', { class: 'kv' }, h('dt', null, k), h('dd', null, CV.marked(v))))))))),
       h('section', { class: 'section' }, sectionHead('Salary conversations', 'Know your number before they ask.'),
@@ -5564,7 +5589,7 @@ const CV = (() => {
       const step = () => {
         if (!ring.isConnected) { clearInterval(breathTimer); return; }
         const [name, scale, op] = phases[i % 4];
-        label.firstChild.textContent = `${name} · ${count}`;
+        label.firstChild.textContent = `${name} \u00b7 ${count}`;
         if (count === 4 && !reduce) { ring.style.transform = `scale(${scale})`; ring.style.opacity = String(op + 0.1); }
         count -= 1;
         if (count === 0) { count = 4; i += 1; }
@@ -5579,11 +5604,11 @@ const CV = (() => {
       h('div', { class: 'grid two' },
         h('section', { class: 'card' }, h('h3', null, 'Two minutes of calm'), h('div', { class: 'breath-wrap' }, h('div', { class: 'breath', 'aria-live': 'polite' }, ring, label), bBtn),
           h('p', { class: 'small muted' }, C.breathNote)),
-        h('section', { class: 'card' }, h('h3', null, 'Today’s page'), h('p', { style: { fontFamily: 'var(--font-display)', fontSize: '1.15rem' } }, prompt),
+        h('section', { class: 'card' }, h('h3', null, 'Today\u2019s page'), h('p', { style: { fontFamily: 'var(--font-display)', fontSize: '1.15rem' } }, prompt),
           h('textarea', { id: 'journal-today', rows: 6, value: journal, placeholder: 'Write as much or as little as you like. Only you can see this.', oninput: (e) => CC.update((s) => { s.journal[t] = e.target.value; }, { silent: true }) }),
           h('p', { class: 'small faint' }, 'Saved privately as you type.'))),
-      h('section', { class: 'section' }, sectionHead('When your mind says…', 'Gentle, realistic answers to the thoughts that visit during a job search.'),
-        h('div', { class: 'stack', style: { gap: '0' } }, C.reframes.map((r) => h('details', { class: 'acc' }, h('summary', null, `“${r.thought}”`), h('div', { class: 'acc-body' }, h('p', null, r.reframe)))))),
+      h('section', { class: 'section' }, sectionHead('When your mind says\u2026', 'Gentle, realistic answers to the thoughts that visit during a job search.'),
+        h('div', { class: 'stack', style: { gap: '0' } }, C.reframes.map((r) => h('details', { class: 'acc' }, h('summary', null, `\u201c${r.thought}\u201d`), h('div', { class: 'acc-body' }, h('p', null, r.reframe)))))),
       h('section', { class: 'section' }, sectionHead('Small practices that help', 'Each takes five minutes or less.'),
         h('div', { class: 'grid' }, C.practices.map((p) => h('div', { class: 'card soft' }, h('div', { class: 'row between' }, h('b', null, p.name), h('span', { class: 'pill plain num' }, `${p.minutes} min`)), h('p', { class: 'small' }, p.how), h('p', { class: 'small faint' }, p.evidence))))),
       h('section', { class: 'section' }, sectionHead('A sustainable week', 'Searching is work. Work needs rest.'),
@@ -5593,7 +5618,7 @@ const CV = (() => {
       h('section', { class: 'section' }, sectionHead('If it gets heavy', C.helpIntro),
         h('div', { class: 'grid' }, C.helplines.map((x) => h('div', { class: 'card' }, h('b', null, x.name),
           h('div', { class: 'row' }, h('span', { class: 'num', style: { fontSize: '1.25rem', fontWeight: 700, userSelect: 'all' } }, x.number), copyBtn(x.number, 'Copy number')),
-          h('p', { class: 'small muted' }, [x.hours, x.languages].filter(Boolean).join(' · ')), x.url ? ext(x.url, 'Website', 'small') : null)))));
+          h('p', { class: 'small muted' }, [x.hours, x.languages].filter(Boolean).join(' \u00b7 ')), x.url ? ext(x.url, 'Website', 'small') : null)))));
   }
 
   // ---------- ROUTER ----------
@@ -5633,20 +5658,20 @@ const CV = (() => {
     renderStatus();
     renderRegion();
   }
-  const STATUS_TEXT = { sheet: 'Saved to your Sheet', syncing: 'Saving…', locked: 'Private link needed', none: 'Not saving — back up' };
+  const STATUS_TEXT = { sheet: 'Saved to your Sheet', syncing: 'Saving\u2026', locked: 'Private link needed', none: 'Not saving \u2014 back up' };
   function renderStatus() {
     const pill = document.getElementById('save-pill');
     if (!pill) return;
     const st = CC.saveStatus;
     pill.dataset.state = st.ok ? 'ok' : 'warn';
-    pill.querySelector('.txt').textContent = st.where === 'device' ? (st.ok ? 'Saved on this device' : 'Offline · saved on device') : STATUS_TEXT[st.where] || 'Saved on this device';
+    pill.querySelector('.txt').textContent = st.where === 'device' ? (st.ok ? 'Saved on this device' : 'Offline \u00b7 saved on device') : STATUS_TEXT[st.where] || 'Saved on this device';
     pill.title = st.where === 'sheet' ? 'Everything is saved to your Google Sheet' : st.where === 'device' ? 'Saved in this browser. It will sync to your Sheet when the connection returns.' : pill.querySelector('.txt').textContent;
   }
   function renderRegion() {
     const r = region();
     document.querySelectorAll('[data-region]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.region === r)));
     const sub = document.getElementById('brand-sub');
-    if (sub) sub.textContent = `for ${D.person.full} · ${r === 'global' ? 'Global' : 'India'}`;
+    if (sub) sub.textContent = `for ${D.person.full} \u00b7 ${r === 'global' ? 'Global' : 'India'}`;
   }
 
   function buildNav() {
@@ -5684,10 +5709,21 @@ const CV = (() => {
     route(tokenFromHash(), true);
     CC.Remote.init();
   }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+  // The page's elements are all above this script, so start right away (no waiting on load events,
+  // which behave differently inside the Apps Script frame). Any failure is shown on screen.
+  try {
+    start();
+    window.__ccStarted = true;
+  } catch (err) {
+    if (window.__ccFail) window.__ccFail(err);
+    else throw err;
+  }
 })();
 
+window.__ccLoaded = true;
+})();
 </script>
+<!-- Career Compass end of file. If this line is in the Apps Script editor, the paste was complete. -->
 
 </body>
 </html>

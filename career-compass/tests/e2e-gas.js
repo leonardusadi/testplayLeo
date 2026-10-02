@@ -144,7 +144,7 @@ const nav = (page, token) => page.evaluate((t) => { const a = document.querySele
   check(gas.sheet('Applications').table().length === apps.length, 'no duplicate seed rows from the second device');
   await p2.screenshot({ path: path.join(out, 'd2-tracker.png'), fullPage: true });
   // edit on device 2, then reload device 1
-  await p2.click('text=Edit >> nth=0');
+  await p2.click('button:text-is("Edit") >> nth=0');
   await p2.fill('textarea[id$="-notes"]', 'Recruiter called on Monday');
   await p2.click('article.card.raised button:text-is("Save")');
   await waitSynced(p2, 'device2 after edit');

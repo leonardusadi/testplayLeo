@@ -28,26 +28,22 @@
   </div>
 </header>
 <div class="wrap">
+  <div id="cc-fail" class="note care" role="alert" hidden style="margin-top:24px">
+    <b>Career Compass could not start.</b>
+    <span>This usually means the Interface file was cut off or changed while it was copied into Apps Script.
+      Open Interface in the Apps Script editor, select everything, paste the whole file again, and save.
+      Then use Deploy &gt; Manage deployments &gt; pencil icon &gt; Version: New version &gt; Deploy.</span>
+    <span class="small">Details for whoever set this up: <span id="cc-fail-detail"></span></span>
+  </div>
   <main id="main" tabindex="-1"></main>
   <footer class="footer no-print">
     <span>Made with care for Smitapragyan. Facts were checked in October 2026. Job sites and visa rules change, so confirm details on official pages before acting.</span>
-    <span><a href="#data">Your data and backups</a></span>
+    <span><a href="#data">Your data and backups</a> &middot; Page version <span id="cc-version">/*@@VERSION@@*/</span></span>
   </footer>
 </div>
 <nav class="tabbar" id="tabbar" aria-label="Sections"></nav>
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 <script>
-/*@@DATA@@*/
+/*@@BUNDLE@@*/
 </script>
-<script>
-/*@@DOCX@@*/
-</script>
-<script>
-/*@@CORE@@*/
-</script>
-<script>
-/*@@CV@@*/
-</script>
-<script>
-/*@@APP@@*/
-</script>
+<!-- Career Compass end of file. If this line is in the Apps Script editor, the paste was complete. -->
