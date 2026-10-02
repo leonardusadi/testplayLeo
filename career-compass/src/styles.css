@@ -451,6 +451,19 @@ table.data tr:last-child td { border-bottom: 0; }
 
 .footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--line); color: var(--ink-3); font-size: 0.85rem; display: grid; gap: 6px; }
 
+@media (max-width: 600px) {
+  .paper-scroll .paper { min-width: 0; padding: 18px 16px 22px; font-size: 12.5px; }
+  .paper .p-name { font-size: 21px; }
+  table.data.stack-sm, table.data.stack-sm tbody, table.data.stack-sm tr, table.data.stack-sm td { display: block; min-width: 0; width: 100%; }
+  table.data.stack-sm { min-width: 0; }
+  table.data.stack-sm thead { display: none; }
+  table.data.stack-sm tr { border-bottom: 1px solid var(--line); padding: 8px 0; }
+  table.data.stack-sm td { border: 0; padding: 4px 12px; }
+  table.data.stack-sm td[data-label]::before { content: attr(data-label); display: block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); }
+}
+@media (max-width: 760px) {
+  .letter-out { max-height: none; overflow: visible; }
+}
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
 }

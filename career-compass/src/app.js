@@ -190,7 +190,7 @@
     for (const a of followUpsDue().slice(0, energy === 'low' ? 1 : 2)) {
       tasks.push({ id: `fu-${a.id}`, title: `Follow up: ${a.company}`, sub: `${a.role || 'Application'} · applied ${CC.fmt(a.appliedOn)}. A short, friendly note is enough.`, href: '#tracker', minutes: 10 });
     }
-    const fw = (D.today.firstWeek || []).filter((s) => !S().firstWeek[s.id]);
+    const fw = (D.today.firstWeek || []).filter((s) => !S().firstWeek[s.id] && (energy !== 'low' || (s.minutes || 0) <= 15));
     for (const s of fw.slice(0, energy === 'good' ? 2 : 1)) tasks.push({ id: `fw-${s.id}`, title: rv(s, 'title'), sub: rv(s, 'sub'), href: s.href, minutes: s.minutes });
     const pool = (D.today.pool || []).filter((p) => p.energy.includes(energy));
     const start = dayOfYear() % Math.max(pool.length, 1);
@@ -223,7 +223,9 @@
       h('div', { class: 'acc-body' },
         h('p', null, F.body),
         h('ul', { class: 'clean' }, F.points.map((p) => h('li', { class: 'stack', style: { gap: '2px' } }, h('b', null, p.title), h('span', { class: 'muted' }, p.body)))),
-        h('div', { class: 'row' }, h('a', { href: '#companies', class: 'btn small primary' }, 'See companies you have not tried'), h('a', { href: '#tracker', class: 'btn small' }, 'Your past applications'))));
+        h('div', { class: 'row' },
+          btn('See companies you have not tried', () => { CC.update((s) => { s.ui.cf = { ...(s.ui.cf || { q: '', hyd: false, cat: 'all' }), lane: 'fresh' }; s.ui.explore = 'companies'; }); go('companies'); }, 'small primary'),
+          btn('Your past applications', () => { CC.update((s) => { s.ui.tf = 'applied'; }); go('tracker'); }, 'small'))));
     det.addEventListener('toggle', () => { if (det.open === ui('firstRoundClosed', false)) CC.update((s) => { s.ui.firstRoundClosed = !det.open; }, { silent: true }); });
     return det;
   }
@@ -236,7 +238,10 @@
       const e = D.today.energy[key];
       return h('button', {
         type: 'button', id: `energy-${key}`, 'aria-pressed': String(day.energy === key),
-        onclick: () => CC.update((s) => { s.daily[t] = { ...(s.daily[t] || {}), energy: key, done: (s.daily[t] || {}).done || [] }; }),
+        onclick: () => {
+          CC.update((s) => { s.daily[t] = { ...(s.daily[t] || {}), energy: key, done: (s.daily[t] || {}).done || [] }; s.ui.firstRoundClosed = true; });
+          setTimeout(() => { const el = document.getElementById('plan-today'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60);
+        },
       }, icon(key, 26), h('b', null, e.label), h('span', null, e.sub));
     };
     const plan = day.energy ? planFor(day.energy) : [];
@@ -265,7 +270,7 @@
           h('p', { style: { fontWeight: 700 } }, 'How much energy do you have today?'),
           h('div', { class: 'energy' }, ['low', 'okay', 'good'].map(energyBtn)))),
 
-      planData ? h('details', { class: 'acc', open: !day.energy && !S().wins.length && !CC.apps().some((a) => !a.seed) },
+      planData ? h('details', { class: 'acc', open: !day.energy && !S().wins.length && !CC.apps().some((a) => !a.seed && !a.past) },
         h('summary', null, planData.title),
         h('div', { class: 'acc-body' },
           h('ol', { style: { margin: 0, paddingLeft: '1.2em', display: 'grid', gap: '8px' } }, planData.points.map((p) => h('li', null, h('b', null, p.title), ' ', h('span', { class: 'muted' }, p.body)))),
@@ -273,7 +278,7 @@
 
       !isGlobal() && D.history && D.history.firstRound ? firstRoundCard() : null,
 
-      day.energy ? h('section', { class: 'section' },
+      day.energy ? h('section', { class: 'section', id: 'plan-today' },
         sectionHead('Today’s gentle plan', D.today.energy[day.energy].note),
         h('ul', { class: 'tasks' }, plan.map((task) => h('li', { class: done.has(task.id) ? 'done' : '' },
           h('input', {
@@ -296,7 +301,7 @@
         : null,
 
       due.length ? h('section', { class: 'section' },
-        sectionHead('Ready for a follow-up', 'A week has passed on these. A two-line note keeps you on their radar.'),
+        sectionHead('Ready for a follow-up', 'A week has passed on these. A short, friendly note is enough.'),
         h('div', { class: 'grid' }, due.map((a) => h('div', { class: 'card' },
           h('b', null, a.company), h('span', { class: 'small muted' }, `${a.role || ''} · applied ${CC.fmt(a.appliedOn)}`),
           h('div', { class: 'row' },
@@ -348,6 +353,14 @@
       h('div', { class: 'grid two' }, roles.map(roleCard)),
       roles.length ? null : h('p', { class: 'muted' }, 'Nothing starred yet. Tap the star on any role to keep it here.'));
   }
+  /** Employers she has not tried yet come first; ones she already applied to are marked. */
+  function whoHires(list) {
+    const tried = new Set(((D.history && D.history.applied) || []).map((a) => a.name.toLowerCase().split(/\s+/)[0]));
+    const isTried = (name) => tried.has(String(name).toLowerCase().replace(/[^a-z ]/g, ' ').trim().split(/\s+/)[0]);
+    const fresh = list.filter((e) => !isTried(e));
+    const old = list.filter(isTried).map((e) => `${e} (applied)`);
+    return [...fresh, ...old].join(', ');
+  }
   function roleCard(r) {
     const starred = S().saved.roles.includes(r.id);
     return h('article', { class: 'card' },
@@ -355,14 +368,14 @@
         starBtn(starred, () => CC.update((s) => { s.saved.roles = toggleIn(s.saved.roles, r.id); }), starred ? 'Unstar role' : 'Star role')),
       h('p', null, r.why),
       h('dl', { class: 'stack', style: { gap: '8px', margin: 0 } },
-        r.gaps ? h('div', { class: 'kv' }, h('dt', null, 'To bridge'), h('dd', null, r.gaps)) : null,
+        r.gaps ? h('div', { class: 'kv' }, h('dt', null, 'To bridge'), h('dd', null, CV.marked(r.gaps))) : null,
         r.salary && !isGlobal() ? h('div', { class: 'kv' }, h('dt', null, 'Typical pay in India (indicative)'), h('dd', null, r.salary)) : null,
         r.hybridWhy ? h('div', { class: 'kv' }, h('dt', null, 'Work pattern'), h('dd', null, r.hybridWhy)) : null),
       h('div', { class: 'kv' }, h('dt', { class: 'eyebrow' }, 'Search titles'), h('div', { class: 'chips' }, r.variants.map((v) => h('span', { class: 'chip static' }, v)))),
       r.upskill && r.upskill.length ? h('details', { class: 'acc' }, h('summary', null, 'Quick ways to upskill'),
         h('div', { class: 'acc-body' }, r.upskill.map((u) => h('div', { class: 'stack', style: { gap: '2px' } },
           u.url ? ext(u.url, u.name) : h('b', null, u.name), h('span', { class: 'small muted' }, [u.provider, u.cost, u.duration].filter(Boolean).join(' · ')))))) : null,
-      r.employers && r.employers.length ? h('p', { class: 'small muted' }, h('b', null, 'Who hires: '), r.employers.join(', ')) : null,
+      r.employers && r.employers.length ? h('p', { class: 'small muted' }, h('b', null, 'Who hires: '), whoHires(r.employers)) : null,
       h('div', { class: 'row' },
         btn('Find these jobs', () => { CC.update((s) => { s.ui.searchQ = r.variants[0]; s.ui.apply = 'search'; }); go('search'); }, 'small primary', 'send'),
         btn('Matching CV', () => { CC.update((s) => { s.cv.track = r.lane; s.ui.apply = 'cv'; }); go('cv'); }, 'small')));
@@ -373,7 +386,7 @@
     const source = isGlobal() && Array.isArray(G().companies) ? G().companies : D.companies;
     const cats = [...new Set(source.map((c) => c.category))].sort();
     const q = (f.q || '').toLowerCase();
-    const tried = new Set(CC.apps().filter((a) => a.status !== 'idea').map((a) => a.companyId).filter(Boolean));
+    const tried = new Set(CC.apps().filter((a) => a.status !== 'idea' && (a.region || 'india') === region()).map((a) => a.companyId).filter(Boolean));
     const list = source.filter((c) =>
       (f.lane === 'all' || c.lane === f.lane || (f.lane === 'saved' && S().saved.companies.includes(c.id)) || (f.lane === 'fresh' && !tried.has(c.id))) &&
       (isGlobal() || !f.hyd || c.hyd) && (f.cat === 'all' || c.category === f.cat) &&
@@ -402,18 +415,19 @@
     const li = `https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(`${c.name} ${kw}`)}&location=${isGlobal() ? 'Worldwide' : 'India'}`;
     const reviews = `https://www.google.com/search?q=${encodeURIComponent(`${c.name} ${isGlobal() ? '' : 'India '}reviews Glassdoor${isGlobal() ? '' : ' AmbitionBox'}`)}`;
     const findCareers = `https://www.google.com/search?q=${encodeURIComponent(`${c.name} ${isGlobal() ? '' : 'India '}careers official site`)}`;
-    const mine = CC.apps().filter((a) => a.companyId === c.id || a.company === c.name);
+    const mine = CC.apps().filter((a) => (a.companyId === c.id || a.company === c.name) && (a.region || 'india') === region());
     const inTracker = mine.length > 0;
     const appliedBefore = mine.some((a) => a.past || a.status === 'applied' || a.status === 'closed');
     return h('article', { class: 'card' },
       h('div', { class: 'rc-top' }, h('div', { class: 'stack', style: { gap: '6px' } }, h('h3', null, c.name),
-        h('div', { class: 'rc-meta' }, lanePill(c.lane), h('span', { class: 'pill plain' }, c.category), c.hyd && !isGlobal() ? h('span', { class: 'pill good' }, 'Hyderabad') : null, appliedBefore ? h('span', { class: 'pill warn' }, 'Applied before') : null)),
+        h('div', { class: 'rc-meta' }, lanePill(c.lane), h('span', { class: 'pill plain' }, c.category), c.hyd && !isGlobal() ? h('span', { class: 'pill good' }, 'Hyderabad') : null, appliedBefore ? h('span', { class: 'pill plain' }, 'You applied here') : null)),
         starBtn(starred, () => CC.update((s) => { s.saved.companies = toggleIn(s.saved.companies, c.id); }), starred ? 'Unstar company' : 'Star company')),
       h('p', null, c.fit),
       h('dl', { class: 'stack', style: { gap: '8px', margin: 0 } },
-        h('div', { class: 'kv' }, h('dt', null, 'What they do here'), h('dd', null, c.functions)),
+        appliedBefore && D.history ? h('p', { class: 'small muted' }, D.history.pastNext) : null,
+        h('div', { class: 'kv' }, h('dt', null, isGlobal() ? 'What they do' : 'What they do here'), h('dd', null, c.functions)),
         h('div', { class: 'kv' }, h('dt', null, 'Work pattern'), h('dd', null, c.work)),
-        h('div', { class: 'kv' }, h('dt', null, 'Cities'), h('dd', null, c.cities.join(', ')))),
+        h('div', { class: 'kv' }, h('dt', null, 'Cities'), h('dd', null, c.cities.join(' \u00b7 ')))),
       h('div', { class: 'kv' }, h('dt', { class: 'eyebrow' }, 'Titles to search on their site'), h('div', { class: 'chips' },
         c.roles.map((r) => h('button', { type: 'button', class: 'chip', title: 'Copy this title', onclick: () => CC.copy(r) }, r)))),
       h('div', { class: 'row' },
@@ -443,10 +457,10 @@
           h('p', { class: 'small' }, e.how), e.pay ? h('p', { class: 'small muted' }, e.pay) : null,
           e.caution ? h('p', { class: 'small', style: { color: 'var(--warn)' } }, e.caution) : null, e.url ? ext(e.url, 'Website', 'small') : null)))),
       h('section', { class: 'section' }, sectionHead('If you move abroad later', R.overseasIntro),
-        h('div', { class: 'table-scroll' }, h('table', { class: 'data' },
+        h('div', { class: 'table-scroll' }, h('table', { class: 'data stack-sm' },
           h('thead', null, h('tr', null, ['Country', 'Route now (Oct 2026)', 'What changed', 'Effort', 'First step'].map((x) => h('th', null, x)))),
-          h('tbody', null, R.overseas.map((o) => h('tr', null, h('td', null, h('b', null, o.country)), h('td', null, o.route), h('td', null, o.changed),
-            h('td', null, h('span', { class: `pill ${o.effort === 'low' ? 'good' : o.effort === 'medium' ? 'warn' : 'rose'}` }, o.effort)), h('td', null, o.first)))))),
+          h('tbody', null, R.overseas.map((o) => h('tr', null, h('td', null, h('b', null, o.country)), h('td', { 'data-label': 'Route now' }, o.route), h('td', { 'data-label': 'What changed' }, o.changed),
+            h('td', { 'data-label': 'Effort' }, h('span', { class: `pill ${o.effort === 'low' ? 'good' : o.effort === 'medium' ? 'warn' : 'rose'}` }, o.effort)), h('td', { 'data-label': 'First step' }, o.first)))))),
         h('p', { class: 'small faint' }, R.overseasCaveat)));
   }
 
@@ -504,13 +518,13 @@
     let tmr;
     qInput.addEventListener('input', () => { renderLinks(); clearTimeout(tmr); tmr = setTimeout(() => CC.update((s) => { s.ui.searchQ = qInput.value; }, { silent: true }), 400); });
     renderLinks();
-    const suggestions = [...new Set(D.roles.filter((r) => S().saved.roles.includes(r.id)).concat(D.roles).flatMap((r) => r.variants.slice(0, 1)))].slice(0, 14);
+    const suggestions = [...new Set(D.roles.filter((r) => S().saved.roles.includes(r.id)).concat(D.roles).flatMap((r) => r.variants.slice(0, 1)))].slice(0, ui('moreTitles', false) ? 14 : 6);
     return h('div', { class: 'stack', style: { gap: '26px' } },
       h('section', { class: 'section' },
         sectionHead('Search builder', 'Pick a title, a city and how you want to work. Each button opens that site with the search filled in.'),
         h('div', { class: 'card' },
           field('search-q', 'Job title or keywords', qInput),
-          h('div', { class: 'chips' }, suggestions.map((s) => h('button', { type: 'button', class: 'chip', 'aria-pressed': String(sq === s), onclick: () => setUi('searchQ', s) }, s))),
+          h('div', { class: 'chips' }, h('button', { type: 'button', class: 'chip', onclick: () => setUi('moreTitles', !ui('moreTitles', false)) }, ui('moreTitles', false) ? 'Fewer titles' : 'More titles'), suggestions.map((s) => h('button', { type: 'button', class: 'chip', 'aria-pressed': String(sq === s), onclick: () => setUi('searchQ', s) }, s))),
           h('div', { class: 'form-grid' },
             field('search-loc', 'Where', h('select', { id: 'search-loc', value: loc, onchange: (e) => setUi('searchLoc', e.target.value) }, D.search.locations.map((l) => h('option', { value: l }, l === 'India' ? 'Anywhere in India' : l)))),
             field('search-mode', 'Work pattern', h('select', { id: 'search-mode', value: mode, onchange: (e) => setUi('searchMode', e.target.value) },
@@ -575,14 +589,14 @@
     let tmr;
     qInput.addEventListener('input', () => { renderLinks(); clearTimeout(tmr); tmr = setTimeout(() => CC.update((s) => { s.ui.searchQ = qInput.value; }, { silent: true }), 400); });
     renderLinks();
-    const suggestions = [...new Set(D.roles.flatMap((r) => r.variants.slice(0, 1)))].slice(0, 12);
+    const suggestions = [...new Set(D.roles.flatMap((r) => r.variants.slice(0, 1)))].slice(0, ui('moreTitles', false) ? 12 : 6);
     const flags = [...((D.search.scams && D.search.scams.flags) || []), ...(GS.scamsExtra || [])];
     return h('div', { class: 'stack', style: { gap: '26px' } },
       h('section', { class: 'section' },
         sectionHead('Search builder', 'Pick a title and a place. Remote roles first; moving abroad takes longer, so keep India in view too.'),
         h('div', { class: 'card' },
           field('gsearch-q', 'Job title or keywords', qInput),
-          h('div', { class: 'chips' }, suggestions.map((x) => h('button', { type: 'button', class: 'chip', 'aria-pressed': String(sq === x), onclick: () => setUi('searchQ', x) }, x))),
+          h('div', { class: 'chips' }, h('button', { type: 'button', class: 'chip', onclick: () => setUi('moreTitles', !ui('moreTitles', false)) }, ui('moreTitles', false) ? 'Fewer titles' : 'More titles'), suggestions.map((x) => h('button', { type: 'button', class: 'chip', 'aria-pressed': String(sq === x), onclick: () => setUi('searchQ', x) }, x))),
           h('div', { class: 'form-grid' },
             field('gsearch-loc', 'Where', h('select', { id: 'gsearch-loc', value: loc ? loc.id : '', onchange: (e) => setUi('gLoc', e.target.value) }, locs.map((l) => h('option', { value: l.id }, l.label)))),
             field('gsearch-mode', 'Work pattern', h('select', { id: 'gsearch-mode', value: mode, onchange: (e) => setUi('gMode', e.target.value) },
@@ -974,15 +988,15 @@
     const q = qs[pick];
     return h('div', { class: 'stack', style: { gap: '26px' } },
       h('section', { class: 'section' }, sectionHead('Tell me about yourself', `Your ${D.cv.tracks[track].label} version. About 60–90 seconds when spoken.`),
-        h('div', { class: 'card' }, h('p', { style: { whiteSpace: 'pre-wrap' } }, D.interview.intro_answers[track]), h('div', { class: 'row' }, copyBtn(D.interview.intro_answers[track])),
+        h('div', { class: 'card' }, h('p', { style: { whiteSpace: 'pre-wrap' } }, CV.marked(D.interview.intro_answers[track])), h('div', { class: 'row' }, copyBtn(D.interview.intro_answers[track])),
           h('div', { class: 'chips' }, CV.TRACKS.map((k) => h('button', { type: 'button', class: 'chip', 'aria-pressed': String(track === k), onclick: () => CC.update((s) => { s.cv.track = k; }) }, D.cv.tracks[k].label))))),
-      h('section', { class: 'section' }, sectionHead('Practice one question', 'Say it out loud. Two minutes is plenty.'),
+      h('section', { class: 'section' }, sectionHead('Practise one question', 'Say it out loud. Two minutes is plenty.'),
         h('div', { class: 'card raised' }, h('span', { class: 'eyebrow' }, q.group), h('h3', null, q.q), h('div', { class: 'row' }, timerEl, startBtn, btn('Another question', () => setUi('practiceQ', pick + 1 + (dayOfYear() % 3)), 'small ghost')),
-          h('details', { class: 'acc' }, h('summary', null, 'See a suggested answer'), h('div', { class: 'acc-body' }, h('p', { class: 'small muted' }, q.why), h('p', { style: { whiteSpace: 'pre-wrap' } }, q.answer))),
+          h('details', { class: 'acc' }, h('summary', null, 'See a suggested answer'), h('div', { class: 'acc-body' }, h('p', { class: 'small muted' }, q.why), h('p', { style: { whiteSpace: 'pre-wrap' } }, CV.marked(q.answer)))),
           aiBox({
             id: 'ai-practice', title: 'Ask Claude for feedback on your answer', desc: 'Type (or paste a voice-note transcript of) your answer. You get kind, specific feedback and a tighter version.',
             placeholder: 'Your answer', buttonLabel: 'Get feedback',
-            run: (sample, ans, signal) => sample.json(`You are a warm, experienced interview coach in India helping a biomedical engineer with 13 years in ultrasound clinical applications who is looking for a stable MNC role. Question: "${q.q}". Her answer is below. Be kind and specific. Never invent facts.\nReply with only JSON: {"went_well":[string] (2-3),"improve":[string] (2-3, concrete),"tighter_answer":string (under 160 words, first person, using only facts from her answer and this background: ${D.interview.coachBackground})}\n\nANSWER:\n${ans.slice(0, 6000)}`, { signal }),
+            run: (sample, ans, signal) => sample.json(`You are a warm, experienced interview coach in India helping a biomedical engineer with 13 years in diagnostic ultrasound across field service, clinical applications and product specialist roles, who is looking for a stable MNC role. Question: "${q.q}". Her answer is below. Be kind and specific. Never invent facts.\nReply with only JSON: {"went_well":[string] (2-3),"improve":[string] (2-3, concrete),"tighter_answer":string (under 160 words, first person, using only facts from her answer and this background: ${D.interview.coachBackground})}\n\nANSWER:\n${ans.slice(0, 6000)}`, { signal }),
             render: (r) => h('div', { class: 'stack' },
               h('div', null, h('b', null, 'What went well'), h('ul', { class: 'dots' }, (r.went_well || []).map((x) => h('li', null, String(x))))),
               h('div', null, h('b', null, 'To make it stronger'), h('ul', { class: 'dots' }, (r.improve || []).map((x) => h('li', null, String(x))))),
@@ -991,11 +1005,12 @@
       h('section', { class: 'section' }, sectionHead('Questions to expect', 'Including the ones that feel tender. Each has a calm, true answer.'),
         ['Tender', 'Common', 'Role-specific'].map((g) => {
           const items = qs.filter((x) => x.group === g);
-          return items.length ? h('div', { class: 'stack', style: { gap: '0' } }, h('span', { class: 'eyebrow', style: { margin: '6px 0' } }, g), items.map((x) => h('details', { class: 'acc' }, h('summary', null, x.q), h('div', { class: 'acc-body' }, h('p', { class: 'small muted' }, x.why), h('p', { style: { whiteSpace: 'pre-wrap' } }, x.answer), h('div', { class: 'row' }, copyBtn(x.answer)))))) : null;
+          return items.length ? h('div', { class: 'stack', style: { gap: '0' } }, h('span', { class: 'eyebrow', style: { margin: '6px 0' } }, g), items.map((x) => h('details', { class: 'acc' }, h('summary', null, x.q), h('div', { class: 'acc-body' }, h('p', { class: 'small muted' }, x.why), h('p', { style: { whiteSpace: 'pre-wrap' } }, CV.marked(x.answer)), h('div', { class: 'row' }, copyBtn(x.answer)))))) : null;
         })),
-      h('section', { class: 'section' }, sectionHead('Your stories', 'Real moments from your career, shaped as Situation → Action → Result. Add the numbers you remember.'),
+      h('section', { class: 'section' }, sectionHead('Your stories', 'Real moments from your career, shaped as Situation → Action → Result. Copy one into your notes and fill in the highlighted parts.'),
         h('div', { class: 'grid two' }, D.interview.stories.map((s) => h('div', { class: 'card' }, h('h4', null, s.title), h('p', { class: 'small faint' }, `Use for: ${s.use}`),
-          h('dl', { class: 'stack', style: { gap: '6px', margin: 0 } }, [['Situation', s.situation], ['What you did', s.action], ['Result', s.result]].map(([k, v]) => h('div', { class: 'kv' }, h('dt', null, k), h('dd', null, CV.marked(v))))))))),
+          h('dl', { class: 'stack', style: { gap: '6px', margin: 0 } }, [['Situation', s.situation], ['What you did', s.action], ['Result', s.result]].map(([k, v]) => h('div', { class: 'kv' }, h('dt', null, k), h('dd', null, CV.marked(v))))),
+          h('div', { class: 'row' }, copyBtn(`${s.title}\n\nSituation: ${s.situation}\n\nWhat I did: ${s.action}\n\nResult: ${s.result}`, 'Copy story')))))),
       h('section', { class: 'section' }, sectionHead('Salary conversations', 'Know your number before they ask.'),
         h('ul', { class: 'dots' }, (isGlobal() && G().interview && G().interview.salary ? G().interview.salary : D.interview.salary).map((x) => h('li', null, x)))));
   }
@@ -1003,7 +1018,7 @@
     return h('div', { class: 'stack', style: { gap: '26px' } },
       h('section', { class: 'section' }, sectionHead('Questions that reveal stability', 'Ask these in the later rounds. Good employers are glad you asked.'),
         h('div', { class: 'card' }, h('ol', { style: { margin: 0, paddingLeft: '1.2em', display: 'grid', gap: '8px' } }, D.interview.ask.map((x) => h('li', null, x))), copyBtn(D.interview.ask.join('\n'), 'Copy list'))),
-      h('section', { class: 'section' }, sectionHead('Signals to check before you say yes', 'Fifteen minutes of checking can save months.'),
+      h('section', { class: 'section' }, sectionHead('Signals to check before you say yes', 'A few quick checks that help you choose a steady employer.'),
         h('div', { class: 'grid' }, D.interview.stability.map((s) => h('div', { class: 'card soft' }, h('b', null, s.signal), h('p', { class: 'small muted' }, s.how))))),
       h('section', { class: 'section' }, sectionHead('Offer letter checklist', 'Read it slowly, with tea.'),
         h('ul', { class: 'tasks' }, D.interview.offer.map((x, i) => {
@@ -1062,7 +1077,7 @@
         h('div', { class: 'grid' }, C.affirmations.map((a) => h('div', { class: 'card soft' }, h('p', { style: { fontFamily: 'var(--font-display)', fontSize: '1.1rem' } }, a))))),
       h('section', { class: 'section' }, sectionHead('If it gets heavy', C.helpIntro),
         h('div', { class: 'grid' }, C.helplines.map((x) => h('div', { class: 'card' }, h('b', null, x.name),
-          h('div', { class: 'row' }, h('span', { class: 'num', style: { fontSize: '1.25rem', fontWeight: 700, userSelect: 'all' } }, x.number), copyBtn(x.number, 'Copy number')),
+          h('div', { class: 'row' }, h('a', { href: `tel:${x.number.replace(/[^+\d]/g, '')}`, target: '_top', class: 'num', style: { fontSize: '1.25rem', fontWeight: 700 } }, x.number), copyBtn(x.number, 'Copy number')),
           h('p', { class: 'small muted' }, [x.hours, x.languages].filter(Boolean).join(' · ')), x.url ? ext(x.url, 'Website', 'small') : null)))));
   }
 

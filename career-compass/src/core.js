@@ -233,6 +233,22 @@ const CC = (() => {
       state.apps = [...local.values()];
       persistLocal();
     }
+    /** Re-read the Sheet and keep whichever copy of each part is newer. */
+    async function pull() {
+      try {
+        const data = await call('load');
+        meta = data.meta || meta;
+        merge(data);
+        emit('state');
+      } catch { /* the next save or visit will try again */ }
+    }
+    let lastPull = 0;
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState !== 'visible' || !enabled || flushing) return;
+      if (Date.now() - lastPull < 20000) return;
+      lastPull = Date.now();
+      flush().then(pull);
+    });
     async function init() {
       if (!gs()) return;
       setStatus({ where: 'syncing', ok: true });
@@ -277,8 +293,14 @@ const CC = (() => {
       const coreStr = Object.fromEntries(Object.keys(core).map((k) => [k, JSON.stringify(core[k].value)]));
       setStatus({ where: 'syncing', ok: true });
       try {
-        await call('save', { core, apps: appsOut });
+        const res = await call('save', { core, apps: appsOut });
         for (const k of Object.keys(coreStr)) sent[k] = coreStr[k];
+        if (res && Array.isArray(res.skipped) && res.skipped.length) {
+          // Another device saved something newer: take the Sheet's copy.
+          for (const k of res.skipped) if (CORE_KEYS.includes(k) && state._ts) state._ts[k] = 0;
+          for (const id of res.skipped) { const a = state.apps.find((x) => x.id === id); if (a) a.updatedAt = 0; }
+          await pull();
+        }
         failures = 0;
         setStatus({ where: 'sheet', ok: true, note: '' });
       } catch (e) {
@@ -399,8 +421,9 @@ const CC = (() => {
     invalid_json: 'The answer came back in an unexpected shape. Please try once more.',
     network: 'The connection dropped. Check your internet and try again.',
     locked: 'This page needs its private link.',
+    slow: 'Claude took too long. Try a shorter text, or try again.',
   };
-  const aiError = (e) => AI_ERRORS[e && e.code] || 'Something interrupted the answer. You can try again.';
+  const aiError = (e) => AI_ERRORS[e && e.code] || (e && ['ai_auth', 'ai_error', 'empty', 'server_error'].includes(e.code) && e.message) || 'Something interrupted the answer. You can try again.';
   const aiHidden = (e) => ['ai_off', 'locked'].includes(e && e.code);
 
   const csvCell = (v) => {

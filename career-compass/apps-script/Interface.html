@@ -485,6 +485,19 @@ table.data tr:last-child td { border-bottom: 0; }
 
 .footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--line); color: var(--ink-3); font-size: 0.85rem; display: grid; gap: 6px; }
 
+@media (max-width: 600px) {
+  .paper-scroll .paper { min-width: 0; padding: 18px 16px 22px; font-size: 12.5px; }
+  .paper .p-name { font-size: 21px; }
+  table.data.stack-sm, table.data.stack-sm tbody, table.data.stack-sm tr, table.data.stack-sm td { display: block; min-width: 0; width: 100%; }
+  table.data.stack-sm { min-width: 0; }
+  table.data.stack-sm thead { display: none; }
+  table.data.stack-sm tr { border-bottom: 1px solid var(--line); padding: 8px 0; }
+  table.data.stack-sm td { border: 0; padding: 4px 12px; }
+  table.data.stack-sm td[data-label]::before { content: attr(data-label); display: block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); }
+}
+@media (max-width: 760px) {
+  .letter-out { max-height: none; overflow: visible; }
+}
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
 }
@@ -530,7 +543,7 @@ table.data tr:last-child td { border-bottom: 0; }
   <main id="main" tabindex="-1"></main>
   <footer class="footer no-print">
     <span>Made with care for Smitapragyan. Facts were checked in October 2026. Job sites and visa rules change, so confirm details on official pages before acting.</span>
-    <span><a href="#data">Your data and backups</a> &middot; Page version <span id="cc-version">67e561e</span></span>
+    <span><a href="#data">Your data and backups</a> &middot; Page version <span id="cc-version">f3806ad</span></span>
   </footer>
 </div>
 <nav class="tabbar" id="tabbar" aria-label="Sections"></nav>
@@ -546,7 +559,7 @@ window.CC_DATA_PARTS.care = {
   reframes: [
     {
       thought: 'I was let go twice in a row. Something must be wrong with me.',
-      reframe: 'Two retrenchments so close together hurt, and it is natural to look for the reason in yourself. Both were business decisions. When a company cuts back, the newest people are often the first to go, and you were the newest. Before that, employers kept you for years. You spent almost seven at Alliance, two and a half at Mindray and a long stretch at BPL. That longer record is the truer picture of you.',
+      reframe: 'Two retrenchments so close together hurt, and it is natural to look for the reason in yourself. Both were business decisions. When a company cuts back, the newest people are often the first to go. Before that, employers kept you for years. You spent almost seven at Alliance, two and a half at Mindray and a long stretch at BPL. That longer record is the truer picture of you.',
     },
     {
       thought: 'Recruiters will see the two short roles and turn me down.',
@@ -678,7 +691,7 @@ window.CC_DATA_PARTS.care = {
   ],
 
   rhythm: [
-    'Two to three focused hours a day, five days a week, is plenty. Long, unfocused days tend to drain mood, and tailored applications count as much as volume.',
+    'Two to three focused hours on a weekday is the most you need, and on many days the shorter plan on the Today page is enough. Long, unfocused days tend to drain mood, and tailored applications count as much as volume.',
     'Batch applications on two or three days, for example Monday, Tuesday and Thursday mornings, in your best-energy hours. Work in blocks of 45 to 60 minutes with a short break between them.',
     'Keep follow-ups and messages to people for one day, such as Wednesday. A steady week is about five tailored applications, three follow-ups and three people contacted. On a low-energy week, halving it is fine.',
     'Learn in small doses, 20 to 30 minutes two or three times a week, on one course that opens a lane you are considering.',
@@ -700,14 +713,14 @@ window.CC_DATA_PARTS.care = {
       name: 'Vandrevala Foundation helpline',
       number: '+91 99996 66555',
       hours: '24 hours, every day. Free. Call or WhatsApp.',
-      languages: '11 languages, including English, Hindi, Telugu and Bengali',
+      languages: 'English, Hindi and other Indian languages (check the website for the current list)',
       url: 'https://www.vandrevalafoundation.com/free-counseling',
     },
     {
       name: 'iCALL Psychosocial Helpline (TISS)',
       number: '+91 91529 87821',
-      hours: 'Monday to Saturday, 8 am to 9 pm. Free. Hours can change, so check the website. Not a 24-hour line.',
-      languages: 'English, Hindi, Telugu, Bengali and several other Indian languages',
+      hours: 'Monday to Saturday, daytime and early evening. Free. Check the website for current hours before you call. Not a 24-hour line.',
+      languages: 'English and Hindi. Ask about other languages when you call.',
       url: 'https://icallhelpline.org/',
     },
     {
@@ -761,9 +774,9 @@ window.CC_DATA_PARTS.companies = [
     careers: 'https://www.careers.philips.com/in/en',
     roles: ['Clinical Application Specialist Ultrasound', 'Remote Service Engineer Ultrasound', 'Clinical Education', 'Complaint Handling Investigator', 'Clinical Specialist R&D', 'Customer Success'],
     functions: 'Ultrasound clinical applications and field service, with Affiniti ultrasound built in Pune. Bengaluru quality and R&D teams hire complaint investigators and in-house clinical specialists with less travel.',
-    work: 'Clinical and service roles are home-based with field travel. A remote CAS Ultrasound listing appeared on an aggregator, but its country was not confirmed. Employees report about 3 office days a week in office roles.',
+    work: 'Clinical and service roles are home-based with field travel. A remote CAS Ultrasound role for India was listed in early 2026 and has probably closed. Remote here usually means home-based with field travel. Employees report about 3 office days a week in office roles.',
     lane: 'same',
-    fit: 'You spent nearly seven years installing, repairing and training on Philips ultrasound at a Philips channel partner. Few candidates bring that depth on Philips platforms, for clinical, service or complaint roles.',
+    fit: 'You spent nearly seven years installing, repairing and training on Philips ultrasound at a Philips channel partner. That depth fits clinical, service and complaint roles here. Your earlier application has had no reply, so this time reach a person too, such as a former Alliance colleague now at Philips or a Philips recruiter for India.',
   },
   {
     id: 'siemens-healthineers',
@@ -851,7 +864,7 @@ window.CC_DATA_PARTS.companies = [
     hyd: true,
     careers: 'https://jobs.sanofi.com/en/location/india-jobs/34155/1269750/2',
     roles: ['Specialist Quality Services Product Complaints', 'Medical Regulatory Writer', 'Pharmacovigilance Specialist', 'Regulatory Affairs Specialist', 'Medical Information'],
-    functions: 'The Hyderabad Global Hub centralises R&D, medical affairs, pharmacovigilance, regulatory and digital work, and is growing from about 2,600 people toward 4,500+ in HITEC City.',
+    functions: 'The Hyderabad Global Hub centralises R&D, medical affairs, pharmacovigilance, regulatory and digital work, and is growing from about 2,600 people towards 4,500+ in HITEC City.',
     work: 'Work mode was not confirmed, so check each posting.',
     lane: 'adjacent',
     fit: 'A product-complaints specialist role seen in 2026 is the most direct fit. Your work on product catalogues and spec sheets supports a later move into regulatory writing. Check what is open now.',
@@ -880,7 +893,7 @@ window.CC_DATA_PARTS.companies = [
     functions: 'Mindray Medical India covers ultrasound clinical applications, channel-partner training, and academic and marketing programmes. Roles seen include Assistant Application Manager and Academic Manager.',
     work: 'Field-based. Current Hyderabad openings were not confirmed, so check.',
     lane: 'same',
-    fit: 'You worked here as a Clinical Application Specialist in Hyderabad (2019-2021), so you know the products and how the team works. A return at Application Manager or Academic Manager level would build on that.',
+    fit: 'You worked here as a Clinical Application Specialist in Hyderabad (2019-2021), so you know the products and how the team works. A return at Application Manager or Academic Manager level would build on that. Your application here has had no reply so far, so ask a former Mindray colleague to refer you or pass your CV to the application team.',
   },
   {
     id: 'stryker',
@@ -1023,7 +1036,7 @@ window.CC_DATA_PARTS.companies = [
     functions: 'Its life-sciences team runs global complaint handling for clients, including creating complaint records, evaluating complaints against quality guidelines and following up with clients.',
     work: 'Work mode was not confirmed, so check each posting.',
     lane: 'adjacent',
-    fit: 'The work suits your domain, yet the Hyderabad role advertised in August 2026 was entry level. Apply only for team-lead or SME titles, or treat it as a short bridge into complaint work.',
+    fit: 'The work suits your domain, yet the Hyderabad role advertised in August 2026 was entry level. Apply for team-lead or SME titles, where your 13 years count, and check the level before you accept.',
   },
   {
     id: 'zoetis',
@@ -1251,7 +1264,7 @@ window.CC_DATA_PARTS.cv = {
       label: 'Clinical & product specialist',
       use: 'For Clinical Application Specialist, Product Specialist, Clinical Education and application or remote service roles at imaging and medical device companies.',
       headline: 'Clinical Application Specialist, Ultrasound | Biomedical Engineer | 13 years in medical imaging',
-      summary: 'Biomedical engineer with 13 years in diagnostic ultrasound across field service, clinical applications and product specialist roles. Installed and serviced Philips ultrasound for seven years, then trained doctors, sonographers and partner teams on Mindray and BPL systems and ran clinical trainings and webinars in Radiology, OB/GYN, Point-of-Care and MSK. Turns field feedback and competitor insight into clear product material for sales and marketing. Works with clinicians in English, Hindi, Telugu and Odia.',
+      summary: 'Biomedical engineer with 13 years in diagnostic ultrasound across field service, clinical applications and product specialist roles. Installed and serviced Philips ultrasound for nearly seven years, then trained doctors, sonographers and partner teams on Mindray and BPL systems and ran clinical trainings and webinars in Radiology, OB/GYN, Point-of-Care and MSK. Turns field feedback and competitor insight into clear product material for sales and marketing. Works with clinicians in English, Hindi, Telugu and Odia.',
       skills: [
         'Ultrasound clinical applications (Radiology, OB/GYN, Point-of-Care, MSK)',
         'Product demonstrations',
@@ -1269,18 +1282,18 @@ window.CC_DATA_PARTS.cv = {
       ],
       pitch: 'I am a biomedical engineer with 13 years in diagnostic ultrasound, from installing and servicing Philips systems to training doctors and sonographers as a clinical application specialist at Mindray and a senior product specialist at BPL Medical Technologies.',
       strengths: 'hands-on clinical training, clear product demonstrations and calm technical troubleshooting',
-      coverPara: 'In my recent roles I trained doctors, sonographers and channel-partner teams on Mindray and BPL ultrasound, ran clinical trainings and webinars in Radiology, OB/GYN, Point-of-Care and MSK, and supported sales teams with demonstrations, competitor comparisons and product material. Before that, seven years installing and servicing Philips ultrasound taught me how these systems behave in real hospitals, so I can answer the technical question and the clinical one in the same conversation.',
+      coverPara: 'In my recent roles I trained doctors, sonographers and channel-partner teams on Mindray and BPL ultrasound, ran clinical trainings and webinars in Radiology, OB/GYN, Point-of-Care and MSK, and supported sales teams with demonstrations, competitor comparisons and product material. Before that, nearly seven years installing and servicing Philips ultrasound taught me how these systems behave in real hospitals, so I can answer the technical question and the clinical one in the same conversation.',
       linkedinHeadline: 'Clinical Application Specialist, Ultrasound | Biomedical Engineer | Product demos, clinical training & technical support | Radiology, OB/GYN, POC, MSK | Hyderabad | Open to hybrid roles',
       linkedinAbout: 'I help clinicians get the best out of ultrasound systems, and I help the companies that make them understand what clinicians need.\n\nI am a biomedical engineer with 13 years in diagnostic ultrasound. I started as a service engineer on Philips systems at Alliance Medical Systems, installing, repairing and inspecting equipment and handling breakdown calls. I then moved into clinical applications at Mindray and Focus Medical Systems, training doctors, sonographers and channel-partner teams, and running trainings and webinars in Radiology, OB/GYN, Point-of-Care and MSK. As Senior Product Specialist at BPL Medical Technologies, I led product demonstrations and training, prepared competitor comparisons and maintained the catalogues and spec sheets our sales team relied on.\n\nWhat I bring is technical depth from years in the field, patience as a trainer, and the ability to explain the same system to an engineer, a doctor and a sales manager. I work in English, Hindi, Telugu and Odia.\n\nI am based in Hyderabad and available immediately for clinical application, product specialist, clinical education and medical device support roles, hybrid or field-based.',
       naukriHeadline: 'Clinical Application Specialist - Ultrasound | 13 yrs | Biomedical Engineer | Radiology, OB/GYN, POCUS, MSK | Product Demos & Clinical Training | Installation & Service | Hyderabad | Immediate Joiner',
-      naukriSummary: 'Biomedical engineer (B.Tech, 2011) with 13 years in diagnostic ultrasound. Seven years as service engineer and application specialist on Philips ultrasound: installation, repair, quality inspection and breakdown calls. Clinical Application Specialist at Mindray and Focus Medical Systems: trained doctors, sonographers and channel-partner teams; ran trainings and webinars in Radiology, OB/GYN, Point-of-Care and MSK. Senior Product Specialist at BPL Medical Technologies: product demos and training, competitor comparisons, product catalogues and spec sheets for sales and marketing. Languages: English, Hindi, Telugu, Odia. Looking for clinical application, product specialist or clinical education roles with an MNC in Hyderabad or South India, hybrid or field-based. Available to join immediately.',
+      naukriSummary: 'Biomedical engineer (B.Tech, 2011) with 13 years in diagnostic ultrasound. Nearly seven years as service engineer and application specialist on Philips ultrasound: installation, repair, quality inspection and breakdown calls. Clinical Application Specialist at Mindray and Focus Medical Systems: trained doctors, sonographers and channel-partner teams; ran trainings and webinars in Radiology, OB/GYN, Point-of-Care and MSK. Senior Product Specialist at BPL Medical Technologies: product demos and training, competitor comparisons, product catalogues and spec sheets for sales and marketing. Languages: English, Hindi, Telugu, Odia. Looking for clinical application, product specialist or clinical education roles with an MNC in Hyderabad or South India, hybrid or field-based. Available to join immediately.',
       keySkills: ['Clinical Application Specialist', 'Ultrasound', 'Diagnostic Imaging', 'Product Demonstration', 'Clinical Training', 'Point-of-Care Ultrasound (POCUS)', 'OB/GYN Ultrasound', 'MSK Ultrasound', 'Radiology', 'Installation and Commissioning', 'Biomedical Engineering', 'Key Account Management', 'Channel Partner Training', 'Medical Devices'],
     },
     adjacent: {
       label: 'MedTech quality & product support',
       use: 'For complaint handling, vigilance and post-market roles, product or technical support, technical writing and quality roles. These are often desk-based and hybrid, in MedTech capability centres.',
       headline: 'Biomedical Engineer | Medical Device Troubleshooting, Product Support & Field Feedback | 13 years in ultrasound',
-      summary: 'Biomedical engineer with 13 years on the field side of medical devices. Installed, inspected and repaired Philips ultrasound systems for seven years, diagnosing breakdowns under service deadlines, then trained clinical users and partner teams on Mindray and BPL systems. Understands how device problems appear in hospitals and how to describe them clearly for service, product and R&D colleagues. Experienced in product documentation, specification sheets and competitor comparisons. Now moving into complaint handling, post-market and product quality roles. Works in English, Hindi, Telugu and Odia.',
+      summary: 'Biomedical engineer with 13 years on the field side of medical devices. Installed, inspected and repaired Philips ultrasound systems for nearly seven years, diagnosing breakdowns under service deadlines, then trained clinical users and partner teams on Mindray and BPL systems. Understands how device problems appear in hospitals and how to describe them clearly for service, product and R&D colleagues. Experienced in product documentation, specification sheets and competitor comparisons. Now moving into complaint handling, post-market and product quality roles. Works in English, Hindi, Telugu and Odia.',
       skills: [
         'Medical device troubleshooting and fault diagnosis',
         'Installation, testing and quality inspection',
@@ -1293,13 +1306,13 @@ window.CC_DATA_PARTS.cv = {
         'Communication across service, sales and product teams',
         'MS Excel, Word, PowerPoint',
       ],
-      pitch: 'I am a biomedical engineer with 13 years on the field side of medical devices, including seven years installing and repairing Philips ultrasound systems and later clinical application and product specialist roles at Mindray and BPL Medical Technologies.',
+      pitch: 'I am a biomedical engineer with 13 years on the field side of medical devices, including nearly seven years installing and repairing Philips ultrasound systems and later clinical application and product specialist roles at Mindray and BPL Medical Technologies.',
       strengths: 'careful fault-finding, clear written communication and a real understanding of how devices are used in hospitals',
-      coverPara: 'Complaint and vigilance work depends on understanding what actually happened to a device and describing it accurately. I spent seven years diagnosing faults on Philips ultrasound systems at customer sites, working to service deadlines, and later trained doctors and sonographers who reported problems to me in their own words. I know the gap between a user\u2019s description and the technical cause, and I am used to closing it patiently and explaining it clearly to the next team.',
+      coverPara: 'Complaint and vigilance work depends on understanding what actually happened to a device and describing it accurately. I spent nearly seven years diagnosing faults on Philips ultrasound systems at customer sites, working to service deadlines, and later trained doctors and sonographers who reported problems to me in their own words. I know the gap between a user\u2019s description and the technical cause, and I am used to closing it patiently and explaining it clearly to the next team.',
       linkedinHeadline: 'Biomedical Engineer | Medical device troubleshooting, product support & field feedback | 13 yrs ultrasound (Philips, Mindray, BPL) | Moving into complaint handling & product quality | Hyderabad',
       linkedinAbout: 'I have spent 13 years on the field side of medical devices, and I would like to bring that experience into product quality and complaint handling.\n\nI began as a service engineer on Philips ultrasound systems at Alliance Medical Systems, installing, repairing and inspecting equipment and diagnosing breakdowns under service deadlines. Later, as a clinical application specialist at Mindray and Focus Medical Systems and a senior product specialist at BPL Medical Technologies, I trained doctors, sonographers and partner teams, and kept customers and colleagues informed until their issues were resolved.\n\nThat combination matters in complaint and vigilance work. I know how a device problem looks to the user, how it looks to an engineer, and how to describe it accurately for both.\n\nB.Tech in Biomedical Engineering. Fluent in English, Hindi and Odia, with advanced Telugu. Based in Hyderabad, open to hybrid roles, and available immediately.',
       naukriHeadline: 'Biomedical Engineer | 13 yrs Medical Devices (Ultrasound) | Troubleshooting, Field Service & Product Support | Complaint Handling, Technical Documentation | Hyderabad | Immediate Joiner',
-      naukriSummary: 'Biomedical engineer (B.Tech, 2011) with 13 years in medical devices. Seven years installing, repairing and quality-inspecting Philips ultrasound systems and resolving breakdown calls within service deadlines. Clinical Application Specialist at Mindray and Focus Medical Systems and Senior Product Specialist at BPL Medical Technologies: trained clinical users and partner teams, handled customer queries through to resolution, and maintained product catalogues and specification sheets. Looking for complaint handling, post-market, product support, technical documentation or quality roles with a MedTech MNC or capability centre in Hyderabad, hybrid preferred. English, Hindi, Telugu, Odia. Available to join immediately.',
+      naukriSummary: 'Biomedical engineer (B.Tech, 2011) with 13 years in medical devices. Nearly seven years installing, repairing and quality-inspecting Philips ultrasound systems and resolving breakdown calls within service deadlines. Clinical Application Specialist at Mindray and Focus Medical Systems and Senior Product Specialist at BPL Medical Technologies: trained clinical users and partner teams, handled customer queries through to resolution, and maintained product catalogues and specification sheets. Looking for complaint handling, post-market, product support, technical documentation or quality roles with a MedTech MNC or capability centre in Hyderabad, hybrid preferred. English, Hindi, Telugu, Odia. Available to join immediately.',
       keySkills: ['Biomedical Engineering', 'Medical Devices', 'Complaint Handling', 'Troubleshooting', 'Fault Diagnosis', 'Field Service', 'Product Support', 'Technical Documentation', 'Quality Inspection', 'Ultrasound', 'Customer Support', 'Escalation Management'],
     },
     new: {
@@ -1325,7 +1338,7 @@ window.CC_DATA_PARTS.cv = {
       strengths: 'clear, unhurried training, steady customer relationships and calm problem-solving',
       coverPara: 'Much of my work has been customer success under another name. I trained doctors, sonographers and partner teams until they were confident with new systems, ran training webinars that supported sales, and stayed with customers through breakdowns and queries until they were resolved. I learn new products quickly and explain them simply, and I would bring that same care to your customers.',
       linkedinHeadline: 'Customer Success & Clinical Training | Biomedical Engineer | 13 yrs helping hospitals adopt medical technology | Onboarding, demos, webinars & key accounts | Hyderabad | Open to hybrid or remote',
-      linkedinAbout: 'For 13 years my work has been helping hospitals and clinicians adopt medical technology and feel confident using it.\n\nAs a clinical application specialist at Mindray and Focus Medical Systems, and a senior product specialist at BPL Medical Technologies, I onboarded customers, trained doctors, sonographers and partner teams, and ran workshops and webinars that supported sales. Earlier, seven years as a service engineer on Philips ultrasound taught me to stay calm and helpful when something breaks.\n\nI explain complex products simply, build steady relationships with key accounts and learn new technology quickly. I am now looking to bring this to customer success, implementation and training roles, in healthcare technology or beyond.\n\nB.Tech in Biomedical Engineering. English, Hindi, Odia and Telugu. Based in Hyderabad, open to hybrid or remote work, and available immediately.',
+      linkedinAbout: 'For 13 years my work has been helping hospitals and clinicians adopt medical technology and feel confident using it.\n\nAs a clinical application specialist at Mindray and Focus Medical Systems, and a senior product specialist at BPL Medical Technologies, I onboarded customers, trained doctors, sonographers and partner teams, and ran workshops and webinars that supported sales. Earlier, nearly seven years as a service engineer on Philips ultrasound taught me to stay calm and helpful when something breaks.\n\nI explain complex products simply, build steady relationships with key accounts and learn new technology quickly. I am now looking to bring this to customer success, implementation and training roles, in healthcare technology or beyond.\n\nB.Tech in Biomedical Engineering. English, Hindi, Odia and Telugu. Based in Hyderabad, open to hybrid or remote work, and available immediately.',
       naukriHeadline: 'Customer Success / Clinical Trainer | 13 yrs Healthcare Technology | Customer Onboarding, Product Training, Webinars, Key Accounts | Biomedical Engineer | Hyderabad | Immediate Joiner',
       naukriSummary: 'Biomedical engineer with 13 years helping hospitals and clinicians adopt medical technology. Onboarded and trained customers, doctors, sonographers and channel-partner teams on ultrasound systems (Mindray, Focus Medical Systems, BPL Medical Technologies); ran workshops and webinars that supported sales; handled installations, breakdowns and customer queries through to resolution (Philips systems, Alliance Medical Systems). Strong at clear explanations, key account relationships and learning new products quickly. Looking for customer success, implementation, customer training or support roles, hybrid or remote, Hyderabad preferred. English, Hindi, Telugu, Odia. Available to join immediately.',
       keySkills: ['Customer Success', 'Customer Onboarding', 'Product Training', 'Corporate Training', 'Key Account Management', 'Product Demonstration', 'Webinars', 'Customer Support', 'Healthcare', 'Medical Devices', 'Stakeholder Management', 'Implementation'],
@@ -1428,7 +1441,7 @@ window.CC_DATA_PARTS.cv = {
         { t: 'Tested and maintained installed equipment to keep systems in reliable working order.' },
         {
           t: 'Guided customers and colleagues on both the technical and the clinical use of ultrasound.',
-          alt: { new: 'Supported customers and colleagues on the technical and clinical use of ultrasound, building lasting relationships with sites.' },
+          alt: { new: 'Supported customers and colleagues on the technical and clinical use of ultrasound.' },
         },
       ],
     },
@@ -1436,12 +1449,13 @@ window.CC_DATA_PARTS.cv = {
   recent: {
     items: [{ org: 'Trimed Solutions Pvt Ltd' }, { org: 'Docto Technologies Pvt Ltd' }],
     compactTitle: 'Short-term roles',
-    reason: 'Both roles were closed by the employers for business reasons within the first months.',
-    why: 'Your two recent roles lasted about a month each and ended for business reasons. Whether they appear on your CV is your choice.',
+    reasonOne: 'The role was closed by the employer for business reasons.',
+    reason: 'Both positions were closed by the employers for business reasons within two months of joining.',
+    why: 'Your two recent roles lasted one to two months each and ended for business reasons. Whether they appear on your CV is your choice.',
     modes: {
       compact: { label: 'Yes, as one short line', note: 'Recommended. Both roles sit together in one brief entry with a factual reason, so your 13 years stay the focus and nothing looks hidden.' },
       full: { label: 'Yes, as separate entries', note: 'Each role gets its own heading. Useful if one of them matches the job you are applying for.' },
-      omit: { label: 'No, leave them off', note: 'That is a fair choice for roles this short. Two things keep it safe. List both roles on any background-verification form that asks for every employer, and look at your EPFO passbook on the UAN member portal, because PF records can show them. If an interviewer asks about this year, a calm one-line answer is ready in Prepare.' },
+      omit: { label: 'No, leave them off', note: 'This can be a fair choice for roles this short, but check your EPFO passbook on the UAN member portal first. If either company paid PF for you, background checks can see that role, so one short line on the CV is safer. Whatever your CV shows, list both roles with exact dates on any background-verification form that asks for every employer. If an interviewer asks what you have done since BPL, a calm one-line answer is ready in Prepare.' },
     },
   },
   education: {
@@ -1453,26 +1467,26 @@ window.CC_DATA_PARTS.cv = {
   languages: 'English, Hindi, Odia (fluent)  \u00b7  Telugu (advanced)  \u00b7  Bengali (basic)',
   certs: '',
   numbers: [
-    { key: 'installs', q: 'Roughly how many Philips ultrasound systems did you install or service at Alliance?', hint: 'e.g. 150+' },
-    { key: 'mindrayUsers', q: 'About how many doctors and sonographers did you train at Mindray?', hint: 'e.g. 300+' },
-    { key: 'partnerStaff', q: 'How many channel-partner staff did you train or lead at Mindray?', hint: 'e.g. 12' },
-    { key: 'webinars', q: 'About how many trainings or webinars did you run at Mindray?', hint: 'e.g. 40+' },
-    { key: 'bplTrained', q: 'About how many clinicians and staff did you train at BPL?', hint: 'e.g. 200+' },
+    { key: 'installs', q: 'Roughly how many Philips ultrasound systems did you install or service at Alliance?', hint: 'Your best estimate; add + if unsure' },
+    { key: 'mindrayUsers', q: 'About how many doctors and sonographers did you train at Mindray?', hint: 'Your best estimate; add + if unsure' },
+    { key: 'partnerStaff', q: 'How many channel-partner staff did you train or lead at Mindray?', hint: 'Your best estimate; add + if unsure' },
+    { key: 'webinars', q: 'About how many trainings or webinars did you run at Mindray?', hint: 'Your best estimate; add + if unsure' },
+    { key: 'bplTrained', q: 'About how many clinicians and staff did you train at BPL?', hint: 'Your best estimate; add + if unsure' },
   ],
-  numbersNote: 'Honest estimates are fine. Add a "+" when you are not sure of the exact figure, for example 150+. Each number turns a duty into an achievement. Leave a box empty and that bullet simply stays without a number.',
+  numbersNote: 'Honest estimates are fine. Add a "+" when you are not sure of the exact figure, for example 150+. Each number shows the scale of your work. Leave a box empty and that bullet simply stays without a number.',
   rules: [
     { rule: 'One column, no photo, no tables', detail: 'Company portals such as Workday and SuccessFactors read a CV from left to right. Columns, photos and graphics often come out scrambled.' },
     { rule: 'Word file for portals', detail: 'A simple .docx is read reliably by job portals and Naukri. Send a PDF only when a recruiter asks for one.' },
     { rule: 'City only', detail: 'MNCs in India do not need your full address, date of birth, marital status or photo. City, phone, email and LinkedIn are enough.' },
     { rule: 'The top third does the work', detail: 'Recruiters skim the headline, summary and first job in a few seconds. That is why each version changes these first.' },
-    { rule: 'Results, not duties', detail: 'Bullets start with a verb and add a number where you can give an honest one.' },
+    { rule: 'Strong verbs, honest numbers', detail: 'Each bullet starts with a verb. Add a number where you can give an honest one, and leave it out where you cannot.' },
     { rule: 'Two pages for 13 years', detail: 'Older roles stay short. Detail goes to the work that matches the job.' },
     { rule: 'Their words, where true', detail: 'Mirror the job description\u2019s keywords for skills you really have. Leave out what you have not done.' },
   ],
   limits: { linkedinHeadline: 220, linkedinAbout: 2600, naukriHeadline: 250, naukriSummary: 1000 },
   profileTips: [
     { title: 'Open to Work', body: 'You are between roles, so the public green frame is fine once your profile is updated. List up to five titles across your lanes and add Hyderabad and Remote as locations.' },
-    { title: 'Refresh Naukri every week or two', body: 'Edit a line or re-upload your CV every 7 to 14 days. Recently updated profiles rank higher in recruiter searches.' },
+    { title: 'Refresh Naukri every week or two', body: 'Edit a line or re-upload your CV every 7 to 14 days. Guides report that recently updated profiles tend to show up higher in recruiter searches.' },
     { title: 'Notice period: immediate', body: 'Recruiters filter by notice period every day. Being able to join now is a real advantage, so make sure it shows.' },
     { title: 'Add skills you can talk about', body: 'Add a new skill such as ISO 13485 or complaint investigation once you have done a course or can give a real example. Interviewers ask about every skill listed.' },
     { title: 'Two recommendations', body: 'Short LinkedIn recommendations from a former manager and a doctor or partner you trained build trust quickly.' },
@@ -1482,7 +1496,7 @@ window.CC_DATA_PARTS.cv = {
 window.CC_DATA_PARTS = window.CC_DATA_PARTS || {};
 window.CC_DATA_PARTS.explore = {
   intro: 'Thirteen years of installing, servicing and teaching ultrasound give you more options than one job title suggests. Here they are in three lanes, with plain notes on fit, pay and work pattern, so you can star a few and leave the rest for another day.',
-  lanesNote: 'Same-field roles use everything you already know and are usually the quickest to land, though most are field-based with home-base days. Adjacent roles put your device knowledge to work at a desk, in complaint, vigilance, regulatory and writing teams that are often hybrid in Hyderabad capability centres. New directions welcome career-changers; some start a level lower, and many are hybrid or remote-friendly. Pay figures are rough estimates, so check AmbitionBox or Glassdoor for the company and city before you discuss salary.',
+  lanesNote: 'Same-field roles use everything you already know, though openings are few at any one time and most are field-based with home-base days. Adjacent roles put your device knowledge to work at a desk, in complaint, vigilance, regulatory and writing teams that are often hybrid in Hyderabad capability centres. New directions welcome career-changers; some start a level lower, and many are hybrid or remote-friendly. Pay figures are rough estimates, so check AmbitionBox or Glassdoor for the company and city before you discuss salary.',
   marketNotes: [
     'Hyderabad is one of India\'s busiest hubs for global capability centres; Deccan Herald reports that it took 35 of the 85 new centres set up in India in 2025.',
     'Life-sciences centres in the city keep growing, with Sanofi planning to take its Hyderabad hub from about 2,600 to more than 4,500 people, Eli Lilly adding a second India centre there and Medtronic expanding its Hyderabad engineering centre.',
@@ -1506,7 +1520,7 @@ window.CC_DATA_PARTS.global = {
 
   search: {
     intro: 'Start with remote roles you can do from Hyderabad, then look at the Gulf, where employers arrange and pay for the work visa. Other countries are long shots for now, and that is fine.',
-    linkCaveat: 'These links follow each site\'s address format as far as it could be checked in October 2026. A few could not be opened live, so if a page looks empty, search on the site itself.',
+    linkCaveat: 'These links follow each site\'s address format as it was in October 2026. Sites change these from time to time, so if a page looks empty, search on the site itself.',
 
     locations: [
       { id: 'remote-india', label: 'Remote, working from India', linkedin: 'India', indeed: 'in.indeed.com', indeedLoc: 'Remote', remote: true },
@@ -1588,7 +1602,7 @@ window.CC_DATA_PARTS.global = {
         bestFor: 'Gulf roles popular with Indian applicants; recruiters search CVs',
         build: 'naukrigulf',
         regions: ['uae', 'saudi-arabia', 'qatar'],
-        linkNote: 'Link format taken from open-source job tools; search on the site if it fails',
+        linkNote: 'If the page is empty, search for your title on Naukrigulf itself',
         tips: [
           'Run by Info Edge, the company behind Naukri. Keep your profile current and use the same headline as on Naukri.',
           'Recruiters search by title, so put Clinical Application Specialist - Ultrasound in your headline.',
@@ -1628,7 +1642,7 @@ window.CC_DATA_PARTS.global = {
         url: '',
         bestFor: 'Regional clinical roles at imaging manufacturers',
         tips: [
-          'Create a candidate profile on each target manufacturer\'s site, such as Siemens Healthineers, Philips, Mindray and Canon, and set alerts for the UAE and Saudi Arabia.',
+          'Create a candidate profile on each target manufacturer\'s site, such as Siemens Healthineers, Philips, Mindray and Canon, and set alerts for the UAE and Saudi Arabia. If you already have an account from your India applications, log in and add Gulf locations to your alerts instead of starting again.',
           'Manufacturers\' regional roles are often more open to hiring from India than distributors, who tend to want people already living in the Gulf.',
           'Ask former colleagues from Mindray and the Philips channel to refer you, and give them the job ID.',
           'The Companies page in Global mode lists these employers with direct links.',
@@ -1735,7 +1749,7 @@ window.CC_DATA_PARTS.global = {
 
     safety: [
       'Check any recruiting agent in the list of active agents on emigrate.gov.in, and ask to see their Registration Certificate from the Protector General of Emigrants. Their service charge is capped at Rs 30,000 plus 18% GST, with a receipt.',
-      'As a graduate you hold a non-ECR (ECNR) passport, so you do not need emigration clearance. The 2020 plan to make eMigrate registration compulsory for ECNR workers was put on hold, so it is voluntary for now. The government has proposed an Overseas Mobility Bill, 2025 to replace the current law, so check the rules again before you travel.',
+      'As a graduate you qualify for the non-ECR (ECNR) category, so you should not need emigration clearance. Check that your passport does not carry an ECR note. The 2020 plan to make eMigrate registration compulsory for ECNR workers was put on hold, so it is voluntary for now. The government has proposed an Overseas Mobility Bill, 2025 to replace the current law, so check the rules again before you travel.',
       'Start degree attestation early, and confirm the current steps with your employer. For the UAE it goes through your state HRD, then MEA, then the UAE Embassy and UAE foreign ministry, which are now done together in India as one digital certificate. Saudi Arabia usually needs an MEA apostille plus pre-verification of qualifications (QVP). Qatar needs HRD, MEA, the Qatar Embassy and Qatar\'s foreign ministry.',
       'Get the full contract in writing, in a language you read, before you resign from anything or travel. Check the job title on the visa, basic pay, allowances, probation, notice period, flights and insurance.',
       'Never pay for a job. In the UAE, Saudi Arabia and Qatar, recruitment and visa costs are the employer\'s by law.',
@@ -2021,9 +2035,9 @@ window.CC_DATA_PARTS.global = {
   ],
 
   cv: {
-    availability: 'Available immediately for remote work; open to relocation',
+    availability: 'Available immediately for remote work (IST, UTC+5:30)',
     rules: [
-      { rule: 'Gulf', detail: 'Keep it to 1 or 2 pages, newest role first, as an ATS-friendly PDF. Gulf employers expect a short personal details line, such as Indian national, Hyderabad, available to join immediately. Nationality, location, visa status and availability are enough.' },
+      { rule: 'Gulf', detail: 'Keep it to 1 or 2 pages, newest role first, as a simple PDF that job portals can read. Gulf employers expect a short personal details line, such as Indian national, Hyderabad, available to join immediately. Nationality, location, visa status and availability are enough.' },
       { rule: 'UK and Ireland', detail: 'Two pages. Leave out photo, date of birth and marital status. Add one honest right-to-work line, such as Requires visa sponsorship.' },
       { rule: 'Australia and New Zealand', detail: 'Two to three pages, using Australian English and keywords from the advert. Add a page of referees, with their permission.' },
       { rule: 'Canada', detail: 'One to two pages, with summary, then experience, then education. Leave out photo, age and marital status.' },
@@ -2084,16 +2098,16 @@ window.CC_DATA_PARTS.global = {
     title: 'Your global plan in one minute',
     points: [
       { title: 'Remote roles first', body: 'Search LinkedIn with India as the location and the Remote filter on, check eligibility on Himalayas or Jobgether, and look for employers who hire through an Employer of Record. These roles need no visa.' },
-      { title: 'The Gulf as the move abroad', body: 'In the UAE, Saudi Arabia and Qatar the employer arranges and pays for the work visa. Start with manufacturers\' regional teams in Dubai and Riyadh, such as Siemens Healthineers, Philips, Mindray and Canon.' },
+      { title: 'If you move, start with the Gulf', body: 'In the UAE, Saudi Arabia and Qatar the employer arranges and pays for the work visa. Start with manufacturers\' regional teams in Dubai and Riyadh, such as Siemens Healthineers, Philips, Mindray and Canon. If you applied to any of them before for roles in India, a Gulf opening there is a separate, new application.' },
       { title: 'Prepare documents early', body: 'Begin your degree attestation for the country you are aiming at, because it takes weeks. Check your passport\'s expiry date and keep clear scans of your certificates ready.' },
       { title: 'Stay safe', body: 'Use only recruiting agents you can find on eMigrate, and never pay a visa, processing or placement fee. Get the full contract in writing before you resign from anything or travel.' },
       { title: 'Keep India running alongside', body: 'A stable, hybrid MNC role in India is still your main goal. Keep your India alerts and weekly applications going, and treat Global as an extra door.' },
     ],
-    note: 'Visa, licensing and attestation rules change often, and several details here could not be opened live. Confirm each step on the official website before you spend money.',
+    note: 'Visa, licensing and attestation rules change often. Confirm each step on the official website before you spend money.',
   },
 
   letters: {
-    availabilityLine: 'I am based in Hyderabad, India (IST, UTC+5:30), available immediately for remote work and open to relocation.',
+    availabilityLine: 'I am based in Hyderabad, India (IST, UTC+5:30) and available immediately for remote work. [If true for this role: I am also open to relocating.]',
   },
 };
 
@@ -2112,18 +2126,18 @@ window.CC_DATA_PARTS.history = {
     { id: 'past-mindray', name: 'Mindray', companyId: 'mindray' },
     { id: 'past-edan', name: 'Edan', companyId: '' },
   ],
-  appliedNote: 'Applied before October 2026 through the company website, LinkedIn or Naukri. No reply so far. If you remember the role or the month, add them here.',
+  appliedNote: 'No reply so far. If you remember the role or the month, tap Edit to add them.',
   pastNext: 'Next step here: write to one person at this company, a recruiter or a former colleague, and ask about current openings.',
   ideas: [
     { companyId: 'bd', role: 'Product Specialist', note: 'Same field, a company you have not tried yet. A Product Specialist role in Hyderabad was seen in October 2026; check it is still open.' },
-    { companyId: 'medtronic', role: 'MDR / Vigilance Specialist', note: 'A different team from the clinical roles you applied for: desk-based complaint and vigilance work at the Hyderabad engineering centre (MEIC).' },
+    { companyId: 'medtronic', role: 'MDR / Vigilance Specialist', note: 'If your earlier Medtronic application was for a clinical role, this is a separate team. MDR and vigilance specialists at the Hyderabad engineering centre (MEIC) investigate device complaints at a desk.' },
     { companyId: 'hcltech', role: 'Complaint Investigation Specialist', note: 'Adjacent lane: medical device complaint work for global MedTech clients. Search their careers site for complaint or vigilance roles.' },
   ],
   firstRound: {
     title: 'What your first round tells us',
     body: 'You have already applied to the biggest imaging names in India, through their websites, LinkedIn and Naukri. That took real effort. Silence from job portals is very common, and it usually says more about how these systems work than about you.',
     points: [
-      { title: 'Portals read the file before a person does.', body: 'Your earlier CV used two columns and a photo, which many company portals scramble. The CV in this tool is a single column, made to be read correctly.' },
+      { title: 'Portals read the file before a person does.', body: 'Company portals often scramble CVs with two columns or a photo, and your earlier CV had both. That is a layout problem, easy to fix, and it says nothing about your experience. The CV in this tool is a single column, made to be read correctly.' },
       { title: 'These companies post only a handful of ultrasound specialist roles at a time.', body: 'Many are filled through referrals, distributors and recruiters. Pair each portal application with one short message to a person there.' },
       { title: 'Open more doors.', body: 'Try adjacent desk roles in Hyderabad capability centres (complaint handling, vigilance, product support), same-field roles at companies you have not tried yet, and the customer success and training lane.' },
       { title: 'A quiet portal is not a final answer.', body: 'When a new opening appears at a company you applied to before, apply again with the matching CV version, and with a referral if you can find one.' },
@@ -2149,7 +2163,7 @@ window.CC_DATA_PARTS.interview = {
       group: 'Tender',
       q: 'Why did your last two roles end so quickly?',
       why: 'They want to know whether the endings were about the business or about your work, and whether it could happen again.',
-      answer: 'After [about three] years at BPL Medical Technologies, I joined two smaller companies, Trimed Solutions and Docto Technologies. In both cases the company let me go for business reasons within the first couple of months. [One factual line, matching the company letter if you have one, e.g. The role was closed when the company restructured.]\n\nIt was disappointing, and it taught me something useful. I now look closely at how established a team is before I join, which is one reason I am applying to established companies like yours. The long roles before that are the core of what I bring, especially clinical training at Mindray and product specialist work at BPL.',
+      answer: 'After [about three] years at BPL Medical Technologies, I joined two companies, Trimed Solutions and Docto Technologies. In both cases the company let me go for business reasons within the first couple of months. [One factual line, matching the company letter if you have one, e.g. The role was closed when the company restructured.]\n\nIt was disappointing, and it taught me something useful. I now look closely at how established a team is before I join, which is one reason I am applying to established companies like yours. The long roles before that are the core of what I bring, especially clinical training at Mindray and product specialist work at BPL.',
     },
     {
       id: 't-leave-bpl',
@@ -2397,7 +2411,7 @@ window.CC_DATA_PARTS.interview = {
     },
     {
       signal: 'How long people in your target role stay',
-      how: 'On the company\'s LinkedIn page, open People and filter by Hyderabad and words such as application, product specialist or complaint. Several profiles with 1 to 6 month stints are the clearest warning. A friendly 10-minute chat with a current or former employee often tells you more than any rating.',
+      how: 'On the company\'s LinkedIn page, open People and filter by Hyderabad and words such as application, product specialist or complaint. If several people in this team moved on within months of joining, ask the recruiter why. A friendly 10-minute chat with a current or former employee often tells you more than any rating.',
     },
     {
       signal: 'How long the job has been open, and how often it returns',
@@ -2423,7 +2437,7 @@ window.CC_DATA_PARTS.letters = {
     role: { label: 'Role title', placeholder: 'e.g. Clinical Application Specialist', hint: 'Copy it exactly as the advert writes it' },
     contact: { label: 'Their name', placeholder: 'e.g. Priya Sharma', hint: 'Leave blank if you do not know it' },
     source: { label: 'Where you saw the role', placeholder: 'e.g. Naukri, LinkedIn, a referral' },
-    why: { label: 'Why this company, in one line', placeholder: 'e.g. your long presence in India and your work in point-of-care ultrasound', hint: 'Something true and specific: a product you know, their Hyderabad centre, a value they state' },
+    why: { label: 'Why this company, in one line', placeholder: 'e.g. your point-of-care ultrasound range', hint: 'Something true and specific: a product you know, their Hyderabad centre, a value they state' },
     mutual: { label: 'Shared connection or ex-colleague', placeholder: 'e.g. Ravi Kumar', hint: 'Someone you both know. If there is no one, edit the first line of the message.' },
     topic: { label: 'Something you discussed', placeholder: 'e.g. how the team trains new users', hint: 'One real point from the conversation' },
     interviewDate: { label: 'Interview day', placeholder: 'e.g. Tuesday', hint: 'For a status check a week or more later, a date reads better than a weekday' },
@@ -2571,7 +2585,7 @@ Thank you,
       body: '{{hi}}\n\nI applied online for the {{role}} role at {{company}}, and I wanted to put a name to the application.\n\n{{pitch}} I would be glad to be considered for this role, or for a similar one in your clinical, product or service teams.\n\n{{availabilityLine}}\n\nIf someone else looks after this hiring, I would be grateful if you could point me to them. Thank you for your time.\n\nWarm regards,\n{{signature}}',
       tips: [
         'Find the person on the company\u2019s LinkedIn page under People: a recruiter for India or a manager in the clinical applications or service team.',
-        'If you remember the Job ID, add it after the role name. If not, the role title is enough.',
+        'If you remember the Job ID, add it after the role name. If you do not remember the exact title, describe the kind of role instead, such as ultrasound clinical application.',
         'One message and a single gentle follow-up a week later is plenty. Recruiters are busy, and silence is common.',
       ],
     },
@@ -2801,7 +2815,7 @@ window.CC_DATA_PARTS.today.plan = {
     },
     {
       title: 'Put stability first',
-      body: 'Both short roles ended because of the companies\' business decisions. Losing two roles in a row hurts, and it reflects their situation more than your work. To screen for stability, check each employer before you apply, ask the stability questions in interviews, and read the whole offer before you accept.',
+      body: 'Both short roles ended because of the companies\' business decisions. Losing two roles in a row hurts, and those decisions say nothing about the quality of your work. To screen for stability, check each employer before you apply, ask the stability questions in interviews, and read the whole offer before you accept.',
     },
     {
       title: 'Remote work from home, abroad later',
@@ -3040,7 +3054,7 @@ window.CC_DATA_PARTS.roles = [
       'Senior Clinical Application Specialist',
     ],
     why: 'This is the work you know best. At Mindray you helped doctors and sonographers use their ultrasound systems and ran trainings and webinars in Radiology, OB/GYN, Point-of-Care and MSK. At BPL you trained staff and customers and ran demos. Before that, nearly seven years installing and servicing Philips ultrasound for a Philips channel partner gave you the technical side, so you can answer the clinical question and the technical one in the same conversation.',
-    gaps: 'Openings are few at any one time and most are field-based. Your CV will read more strongly with a few numbers added, such as [number] doctors and sonographers trained. For cardiac or vascular openings, check how much echo experience the role expects.',
+    gaps: 'Openings are few at any one time and most are field-based. You have already applied to most of the big names listed below, so pair the next opening there with a referral, and add Canon, Esaote, BD and KARL STORZ to your alerts. Your CV will read more strongly with a few numbers added, such as how many doctors and sonographers you trained. For cardiac or vascular openings, check how much echo experience the role expects.',
     salary: 'Roughly 8-16 LPA at MNCs for your level of experience; market-wide averages for this title are lower, about 5-8 LPA (rough estimate; confirm on AmbitionBox)',
     hybrid: 'medium',
     hybridWhy: 'Home-based with travel to hospitals and demos in your territory, so your days are flexible but desk time at home is limited.',
@@ -3086,7 +3100,7 @@ window.CC_DATA_PARTS.roles = [
       'Professional Education Specialist',
     ],
     why: 'Training runs through every job you have held. You trained end users and a channel-partner team at Mindray, trained staff and customers at BPL, and guided users technically and clinically at Alliance. At Mindray you also created trainings and webinars across four clinical areas. Education roles tend to be more central and more virtual than field application work.',
-    gaps: 'You will want visible proof of training design, such as a sample session plan or [average feedback score], and some comfort with a learning management system (LMS). There are fewer openings than for application roles.',
+    gaps: 'You will want visible proof of training design, such as a sample session plan or the feedback scores from your sessions, and some comfort with a learning management system (LMS). There are fewer openings than for application roles.',
     salary: 'Roughly 10-20 LPA (rough estimate; confirm on AmbitionBox)',
     hybrid: 'medium',
     hybridWhy: 'Webinars and content work can happen from home, while hands-on workshops, launches and conferences are in person.',
@@ -3220,7 +3234,7 @@ window.CC_DATA_PARTS.roles = [
       'Materiovigilance Associate',
       'PMS Engineer EU MDR',
     ],
-    why: 'Vigilance teams decide whether a device problem must be reported to regulators, and post-market teams turn field data into trend reports. You know how imaging devices fail in real hospitals, and your BPL market and competitor comparisons show you can turn data into a clear summary. Medtronic\'s Hyderabad engineering centre hires MDR/Vigilance Specialists at levels up to 4-8 years and prefers a biomedical engineering degree.',
+    why: 'Vigilance teams decide whether a device problem must be reported to regulators, and post-market teams turn field data into trend reports. You know how imaging devices fail in real hospitals, and your BPL market and competitor comparisons show you can turn data into a clear summary. Medtronic\'s Hyderabad engineering centre advertised MDR/Vigilance Specialist roles in late 2025 at levels up to 4-8 years, preferring a biomedical engineering degree, so check what is open now.',
     gaps: 'You will need EU MDR post-market rules (PSUR and PMS reports), ISO 14971 risk management and India\'s Materiovigilance Programme, plus confident Excel for trend analysis.',
     salary: 'Roughly 7-15 LPA at specialist level and 14-22 LPA at senior level (rough estimate; confirm on AmbitionBox)',
     hybrid: 'high',
@@ -3522,7 +3536,7 @@ window.CC_DATA_PARTS.search = {
   routine: [
     { title: 'Open your saved alerts (5 min)', sub: 'Check your Naukri and LinkedIn alerts with the last-7-days filter on. Skim titles only for now.' },
     { title: 'Shortlist three (5 min)', sub: 'Keep up to three roles that fit one of your tracks at an employer that looks stable. Let the rest go without guilt.' },
-    { title: 'Tailor and apply to one (12 min)', sub: 'Match the top third of your CV to the job description keywords, then apply on the company\'s own site where you can. A second one is optional.' },
+    { title: 'Tailor and apply to one (12 min)', sub: 'Match the top third of your CV to the job description keywords, then apply on the company\'s own site where you can. A careful application often takes longer, so finish it in your next session if you need to. A second one is optional.' },
     { title: 'One human touch (5 min)', sub: 'Send one follow-up, or one short message to a recruiter, former colleague or possible referrer.' },
     { title: 'Log it (2 min)', sub: 'Add each application to your tracker with the date, link and Job ID, so you never have to hold it in your head.' },
     { title: 'Stop and close the tabs (1 min)', sub: 'Thirty minutes is a full session. The rest of the day is yours.' },
@@ -3566,7 +3580,7 @@ window.CC_DATA_PARTS.search = {
       url: '',
       bestFor: 'Priority MNC roles; recruiters tend to trust direct applications more',
       tips: [
-        'Pick 15 to 25 target MNCs from the Companies page, create a candidate account on each, and set the portal\'s own job alerts by location and job family.',
+        'Start with the companies you starred (about ten is plenty). You may already have accounts at some of the big imaging firms from your earlier applications, so log in there first, then add new accounts one or two at a time, and set the portal\'s own job alerts by location and job family.',
         'Upload a single-column DOCX with standard headings and MM/YYYY dates, because Workday reads left to right and scrambles multi-column layouts.',
         'After the portal fills in your details from the CV, check every field before you submit.',
         'Note the requisition or Job ID of each application, share it with anyone referring you, and follow the status in the portal\'s candidate home page.',
@@ -3632,7 +3646,7 @@ window.CC_DATA_PARTS.search = {
       url: 'https://www.iimjobs.com/',
       bestFor: 'Mid-senior sales, key accounts and product marketing roles',
       tips: [
-        'Most useful if you lean toward Product Specialist, Product Marketing or Key Account Manager roles.',
+        'Most useful if you lean towards Product Specialist, Product Marketing or Key Account Manager roles.',
         'Recruiters post directly here, so follow those in healthcare and medtech and reply to their posts quickly.',
         'Filter by city and experience, and browse Sales & Marketing along with any healthcare or pharma listings.',
       ],
@@ -3666,8 +3680,8 @@ window.CC_DATA_PARTS.search = {
 
   tips: [
     { tip: 'Apply within 72 hours of posting', why: 'Early applicants get noticeably more replies; job-tool studies suggest two to five times as many, so treat the exact figure as rough.' },
-    { tip: 'Use the company site for priority roles', why: 'Direct applications get about two to three times the replies of LinkedIn Easy Apply in vendor data, and the portal takes your ATS-safe DOCX.' },
-    { tip: 'Keep one single-column DOCX master CV', why: 'Workday and SuccessFactors, used by many MNCs in India, scramble tables, columns and text boxes before a person ever sees them.' },
+    { tip: 'Use the company site for priority roles', why: 'Direct applications get about two to three times the replies of LinkedIn Easy Apply in vendor data. A portal alone can still go quiet, so pair each one with a short message to a person there.' },
+    { tip: 'Keep one simple, single-column Word CV', why: 'The application systems many MNCs in India use, such as Workday and SuccessFactors, scramble tables, columns and text boxes before a person sees them. The Word file from CV studio is built this way.' },
     { tip: 'Mirror the job description in your top third', why: 'Matching on Naukri, Indeed and company portals is mostly keyword-based, so the role\'s exact phrases in your summary and first bullets help you get through.' },
     { tip: 'Ask for referrals, with the Job ID', why: 'Vendor benchmarks for India put referral-to-hire at roughly 20-30% against 1-3% from job boards, and a Job ID makes referring you easy.' },
     { tip: 'Lead with immediate joiner', why: 'About one in three postings signal urgency and few candidates can join within 15 days, so your availability is a real advantage.' },
@@ -3675,7 +3689,7 @@ window.CC_DATA_PARTS.search = {
     { tip: 'Choose quality over volume', why: 'LinkedIn reports that applicants per opening in India have more than doubled since 2022, and a tailored application stands out among the many look-alike ones recruiters now see.' },
     { tip: 'Keep a simple tracker', why: 'Logging the date, link, Job ID and next step shows you when to follow up and what is working, without carrying it all in your head.' },
     { tip: 'Run three tracks with separate alerts', why: 'Separate saved searches for same-field, adjacent and new roles keep each feed relevant, and leave room for a non-linear move.' },
-    { tip: 'Check stability before applying and accepting', why: 'Recent reviews, MCA status and layoff news lower the chance of another short stint, and help you feel more in control.' },
+    { tip: 'Check stability before applying and accepting', why: 'Recent reviews, MCA status and layoff news help you spot a company that may be about to cut back, and help you feel more in control.' },
     { tip: 'Use AI for drafts, then rewrite in your voice', why: 'Recruiters report more look-alike AI CVs, and your real numbers and plain words are what make you recognisable.' },
   ],
 
@@ -3713,7 +3727,7 @@ window.CC_DATA_PARTS.today = {
   energy: {
     low: { label: 'Low', sub: 'Go gently', note: 'Two small things today, and one of them is for you. Low days are part of this and they still count.' },
     okay: { label: 'Steady', sub: 'A few steps', note: 'Three focused tasks, about an hour in all. Stop when they are done.' },
-    good: { label: 'Bright', sub: 'Make progress', note: 'Five tasks for a good-energy day. Leave a little in the tank for tomorrow.' },
+    good: { label: 'Bright', sub: 'A fuller day', note: 'Five tasks for a good-energy day. Stop when they are done and keep some energy for tomorrow.' },
   },
   weekGoals: { applied: 5, followups: 3, outreach: 3 },
   pool: [
@@ -3722,16 +3736,16 @@ window.CC_DATA_PARTS.today = {
     { id: 'apply-one', title: 'Apply to one shortlisted role on the company site', sub: 'Use the matching CV version, then send one short message to a person at that company.', minutes: 30, energy: ['okay', 'good'], href: '#cv' },
     { id: 'past-person', title: 'Find one person at a company you applied to before', sub: 'A recruiter or a former colleague. Ask kindly about current openings and what the team looks for.', minutes: 15, energy: ['okay', 'good'], href: '#tracker' },
     { id: 'reconnect', title: 'Message one former colleague', sub: 'A warm hello and a short update. Ask about referrals only if they work somewhere you are applying.', minutes: 10, energy: ['okay', 'good'], href: '#letters' },
-    { id: 'naukri-refresh', title: 'Refresh your Naukri profile', sub: 'Edit one line or re-upload your CV. Fresh profiles show up higher for recruiters.', minutes: 5, energy: ['low', 'okay', 'good'], href: '#cv' },
+    { id: 'naukri-refresh', title: 'Refresh your Naukri profile', sub: 'Edit one line or re-upload your CV. Recently updated profiles tend to show up higher for recruiters.', minutes: 5, energy: ['low', 'okay', 'good'], href: '#cv' },
     { id: 'apply-two', title: 'Send a second tailored application', sub: 'Same care as the first, then log both in the tracker.', minutes: 30, energy: ['good'], href: '#letters' },
-    { id: 'company-3', title: 'Star three companies to watch', sub: 'Pick from the company list and set a job alert on each careers site.', minutes: 15, energy: ['low', 'okay', 'good'], href: '#companies' },
+    { id: 'company-3', title: 'Star three companies to watch', sub: 'Use the New to you filter on the company list. If you have the energy, set a job alert on each careers site too.', minutes: 15, energy: ['low', 'okay', 'good'], href: '#companies' },
     { id: 'practice', title: 'Practise one interview answer out loud', sub: 'Two minutes, once. It gets easier each time.', minutes: 10, energy: ['okay', 'good'], href: '#interview' },
     { id: 'one-number', title: 'Add one number to your CV', sub: 'One figure you remember, such as systems installed or people trained.', minutes: 5, energy: ['low', 'okay'], href: '#cv' },
     { id: 'recruiter', title: 'Write to one MedTech recruiter', sub: 'Find a recruiter at a target company on LinkedIn and send a short note.', minutes: 15, energy: ['good'], href: '#letters' },
     { id: 'learn', title: 'Spend 20 minutes on a free course', sub: 'Pick one from a role path you starred.', minutes: 20, energy: ['okay', 'good'], href: '#paths' },
     { id: 'explore-path', title: 'Read about one new role path', sub: 'Just reading. No decisions needed today.', minutes: 10, energy: ['low', 'okay'], href: '#paths' },
     { id: 'stability-check', title: 'Check one company before you apply', sub: 'Reviews, recent news, and how long the role has been open.', minutes: 15, energy: ['okay', 'good'], href: '#offer' },
-    { id: 'tracker-tidy', title: 'Tidy your tracker', sub: 'Update statuses and close anything older than a month with no reply.', minutes: 10, energy: ['low', 'okay'], href: '#tracker' },
+    { id: 'tracker-tidy', title: 'Tidy your tracker', sub: 'Update statuses, and mark anything with no reply after a month as closed. Leave your earlier applications open until you have written to one person at each company.', minutes: 10, energy: ['low', 'okay'], href: '#tracker' },
     { id: 'win', title: 'Write down one win from this week', sub: 'Anything counts, including getting through a hard day.', minutes: 3, energy: ['low', 'okay'], href: '#today' },
     { id: 'comment', title: 'Leave one thoughtful comment on an industry post', sub: 'A useful comment on a MedTech or radiology post keeps you visible with little effort.', minutes: 10, energy: ['good'], href: '#search' },
     { id: 'informational', title: 'Ask someone for a 15-minute chat about their role', sub: 'People in complaint handling or customer success are usually glad to describe their work.', minutes: 15, energy: ['good'], href: '#letters' },
@@ -3741,13 +3755,13 @@ window.CC_DATA_PARTS.today = {
     { id: 'cv-download', title: 'Download your three CV versions', sub: 'One for clinical roles, one for MedTech quality and support, one for customer success and training.', href: '#cv', hrefLabel: 'Open CV studio', minutes: 10 },
     { id: 'linkedin', title: 'Update your LinkedIn headline and About', sub: 'Copy them from the profile kit, check your photo, and turn on Open to Work.', href: '#cv', hrefLabel: 'Open profile kit', minutes: 30 },
     { id: 'naukri', title: 'Update your Naukri profile', sub: 'Resume headline, profile summary, key skills, notice period set to immediate, and Hyderabad plus Remote as locations.', href: '#cv', hrefLabel: 'Open profile kit', minutes: 30 },
-    { id: 'alerts', title: 'Set job alerts on a few sites', sub: 'Naukri, LinkedIn, Indeed, and two or three company careers sites. Hyderabad and Remote.', href: '#search', hrefLabel: 'Open search builder', minutes: 30 },
+    { id: 'alerts', title: 'Set job alerts on a few sites', sub: 'Naukri, LinkedIn, Indeed, and two or three company careers sites. Hyderabad and Remote.', subGlobal: 'LinkedIn with India as the location and the Remote filter on, plus one Gulf board if you are looking there. Keep your Hyderabad alerts running too.', href: '#search', hrefLabel: 'Open search builder', minutes: 30 },
     { id: 'targets', title: 'Star ten companies', sub: 'Mix all three lanes. They become your weekly watch list.', href: '#companies', hrefLabel: 'Open companies', minutes: 20 },
     { id: 'people', title: 'Send a warm update to three former colleagues', sub: 'No request needed. Many referrals start with a simple hello.', href: '#letters', hrefLabel: 'Open letters', minutes: 20 },
     { id: 'course', title: 'Choose one short course', sub: 'Pick one that opens an adjacent lane, such as ISO 13485 or medical device complaint handling.', href: '#paths', hrefLabel: 'Open role paths', minutes: 15 },
   ],
   evidence: [
-    'For seven years you kept hospital ultrasound running, including on emergency breakdown calls.',
+    'For nearly seven years you kept hospital ultrasound running, including on emergency breakdown calls.',
     'Doctors and sonographers learned their systems from you at Mindray, Focus Medical Systems and BPL.',
     'You can explain the same machine to an engineer, a doctor and a sales manager.',
     'You work in English, Hindi, Telugu and Odia. Few candidates can say that.',
@@ -3755,7 +3769,7 @@ window.CC_DATA_PARTS.today = {
     'You designed trainings and webinars in Radiology, OB/GYN, Point-of-Care and MSK.',
     'As a Senior Product Specialist you were trusted with demos, competitor analysis and the material the sales team used.',
     'You earned a first-class B.Tech in Biomedical Engineering and have used it in every role since.',
-    'Two short roles ending were business decisions by those companies. Thirteen years of steady work is your real pattern.',
+    'Your two short roles ended because of business decisions by those companies. Thirteen years of steady work is your real pattern.',
     'You can join immediately, which many employers in India value highly right now.',
   ],
 };
@@ -4166,6 +4180,22 @@ const CC = (() => {
       state.apps = [...local.values()];
       persistLocal();
     }
+    /** Re-read the Sheet and keep whichever copy of each part is newer. */
+    async function pull() {
+      try {
+        const data = await call('load');
+        meta = data.meta || meta;
+        merge(data);
+        emit('state');
+      } catch { /* the next save or visit will try again */ }
+    }
+    let lastPull = 0;
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState !== 'visible' || !enabled || flushing) return;
+      if (Date.now() - lastPull < 20000) return;
+      lastPull = Date.now();
+      flush().then(pull);
+    });
     async function init() {
       if (!gs()) return;
       setStatus({ where: 'syncing', ok: true });
@@ -4210,8 +4240,14 @@ const CC = (() => {
       const coreStr = Object.fromEntries(Object.keys(core).map((k) => [k, JSON.stringify(core[k].value)]));
       setStatus({ where: 'syncing', ok: true });
       try {
-        await call('save', { core, apps: appsOut });
+        const res = await call('save', { core, apps: appsOut });
         for (const k of Object.keys(coreStr)) sent[k] = coreStr[k];
+        if (res && Array.isArray(res.skipped) && res.skipped.length) {
+          // Another device saved something newer: take the Sheet's copy.
+          for (const k of res.skipped) if (CORE_KEYS.includes(k) && state._ts) state._ts[k] = 0;
+          for (const id of res.skipped) { const a = state.apps.find((x) => x.id === id); if (a) a.updatedAt = 0; }
+          await pull();
+        }
         failures = 0;
         setStatus({ where: 'sheet', ok: true, note: '' });
       } catch (e) {
@@ -4332,8 +4368,9 @@ const CC = (() => {
     invalid_json: 'The answer came back in an unexpected shape. Please try once more.',
     network: 'The connection dropped. Check your internet and try again.',
     locked: 'This page needs its private link.',
+    slow: 'Claude took too long. Try a shorter text, or try again.',
   };
-  const aiError = (e) => AI_ERRORS[e && e.code] || 'Something interrupted the answer. You can try again.';
+  const aiError = (e) => AI_ERRORS[e && e.code] || (e && ['ai_auth', 'ai_error', 'empty', 'server_error'].includes(e.code) && e.message) || 'Something interrupted the answer. You can try again.';
   const aiHidden = (e) => ['ai_off', 'locked'].includes(e && e.code);
 
   const csvCell = (v) => {
@@ -4414,7 +4451,16 @@ const CV = (() => {
     const experience = [];
     const recent = st.recent || {};
     const mode = recent.mode || 'compact';
-    const items = (recent.items || d.recent.items).map((it, i) => ({ ...d.recent.items[i], ...it }));
+    const MON = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
+    const when = (txt) => {
+      const t = String(txt || '').trim();
+      const m = t.match(/^([A-Za-z]{3})[a-z]*\.?\s+(\d{4})$/) || t.match(/^(\d{1,2})[/-](\d{4})$/);
+      if (!m) return null;
+      const mon = /^\d+$/.test(m[1]) ? Number(m[1]) - 1 : MON[m[1].toLowerCase()];
+      return mon == null || mon < 0 || mon > 11 ? null : Number(m[2]) * 12 + mon;
+    };
+    const items = (recent.items || d.recent.items).map((it, i) => ({ ...d.recent.items[i], ...it }))
+      .sort((a, b) => (when(b.start) ?? -Infinity) - (when(a.start) ?? -Infinity)); // most recent first, as on any CV
 
     if (mode === 'full') {
       for (const it of items) {
@@ -4423,7 +4469,7 @@ const CV = (() => {
         if (dt.missing) missing.push(`Start and end month at ${it.org}`);
         experience.push({
           title: it.title || '[Your title]', org: it.org, city: it.city || '', dates: dt.text,
-          bullets: [it.summary || '', recent.reason || d.recent.reason].filter(Boolean), short: true,
+          bullets: [it.summary || '', it.reason || d.recent.reasonOne || 'The role was closed by the employer for business reasons.'].filter(Boolean), short: true,
         });
       }
     } else if (mode === 'compact') {
@@ -4433,8 +4479,9 @@ const CV = (() => {
         if (dt.missing) missing.push(`Start and end month at ${it.org}`);
         return `${it.title || '[Your title]'}, ${it.org} (${dt.text})`;
       });
-      const starts = items.map((it) => it.start).filter(Boolean);
-      const ends = items.map((it) => it.end).filter(Boolean);
+      const starts = items.map((it) => it.start).filter((x) => when(x) != null).sort((a, b) => when(a) - when(b));
+      const ends = items.map((it) => it.end).filter((x) => when(x) != null).sort((a, b) => when(a) - when(b));
+      if (items.some((it) => (it.start && when(it.start) == null) || (it.end && when(it.end) == null))) missing.push('Write the short-role months like "May 2025"');
       experience.push({
         title: d.recent.compactTitle, org: '', city: '',
         dates: `${starts[0] || '[start]'} \u2013 ${ends[ends.length - 1] || '[end]'}`,
@@ -4745,7 +4792,7 @@ const CV = (() => {
     for (const a of followUpsDue().slice(0, energy === 'low' ? 1 : 2)) {
       tasks.push({ id: `fu-${a.id}`, title: `Follow up: ${a.company}`, sub: `${a.role || 'Application'} \u00b7 applied ${CC.fmt(a.appliedOn)}. A short, friendly note is enough.`, href: '#tracker', minutes: 10 });
     }
-    const fw = (D.today.firstWeek || []).filter((s) => !S().firstWeek[s.id]);
+    const fw = (D.today.firstWeek || []).filter((s) => !S().firstWeek[s.id] && (energy !== 'low' || (s.minutes || 0) <= 15));
     for (const s of fw.slice(0, energy === 'good' ? 2 : 1)) tasks.push({ id: `fw-${s.id}`, title: rv(s, 'title'), sub: rv(s, 'sub'), href: s.href, minutes: s.minutes });
     const pool = (D.today.pool || []).filter((p) => p.energy.includes(energy));
     const start = dayOfYear() % Math.max(pool.length, 1);
@@ -4778,7 +4825,9 @@ const CV = (() => {
       h('div', { class: 'acc-body' },
         h('p', null, F.body),
         h('ul', { class: 'clean' }, F.points.map((p) => h('li', { class: 'stack', style: { gap: '2px' } }, h('b', null, p.title), h('span', { class: 'muted' }, p.body)))),
-        h('div', { class: 'row' }, h('a', { href: '#companies', class: 'btn small primary' }, 'See companies you have not tried'), h('a', { href: '#tracker', class: 'btn small' }, 'Your past applications'))));
+        h('div', { class: 'row' },
+          btn('See companies you have not tried', () => { CC.update((s) => { s.ui.cf = { ...(s.ui.cf || { q: '', hyd: false, cat: 'all' }), lane: 'fresh' }; s.ui.explore = 'companies'; }); go('companies'); }, 'small primary'),
+          btn('Your past applications', () => { CC.update((s) => { s.ui.tf = 'applied'; }); go('tracker'); }, 'small'))));
     det.addEventListener('toggle', () => { if (det.open === ui('firstRoundClosed', false)) CC.update((s) => { s.ui.firstRoundClosed = !det.open; }, { silent: true }); });
     return det;
   }
@@ -4791,7 +4840,10 @@ const CV = (() => {
       const e = D.today.energy[key];
       return h('button', {
         type: 'button', id: `energy-${key}`, 'aria-pressed': String(day.energy === key),
-        onclick: () => CC.update((s) => { s.daily[t] = { ...(s.daily[t] || {}), energy: key, done: (s.daily[t] || {}).done || [] }; }),
+        onclick: () => {
+          CC.update((s) => { s.daily[t] = { ...(s.daily[t] || {}), energy: key, done: (s.daily[t] || {}).done || [] }; s.ui.firstRoundClosed = true; });
+          setTimeout(() => { const el = document.getElementById('plan-today'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60);
+        },
       }, icon(key, 26), h('b', null, e.label), h('span', null, e.sub));
     };
     const plan = day.energy ? planFor(day.energy) : [];
@@ -4820,7 +4872,7 @@ const CV = (() => {
           h('p', { style: { fontWeight: 700 } }, 'How much energy do you have today?'),
           h('div', { class: 'energy' }, ['low', 'okay', 'good'].map(energyBtn)))),
 
-      planData ? h('details', { class: 'acc', open: !day.energy && !S().wins.length && !CC.apps().some((a) => !a.seed) },
+      planData ? h('details', { class: 'acc', open: !day.energy && !S().wins.length && !CC.apps().some((a) => !a.seed && !a.past) },
         h('summary', null, planData.title),
         h('div', { class: 'acc-body' },
           h('ol', { style: { margin: 0, paddingLeft: '1.2em', display: 'grid', gap: '8px' } }, planData.points.map((p) => h('li', null, h('b', null, p.title), ' ', h('span', { class: 'muted' }, p.body)))),
@@ -4828,7 +4880,7 @@ const CV = (() => {
 
       !isGlobal() && D.history && D.history.firstRound ? firstRoundCard() : null,
 
-      day.energy ? h('section', { class: 'section' },
+      day.energy ? h('section', { class: 'section', id: 'plan-today' },
         sectionHead('Today\u2019s gentle plan', D.today.energy[day.energy].note),
         h('ul', { class: 'tasks' }, plan.map((task) => h('li', { class: done.has(task.id) ? 'done' : '' },
           h('input', {
@@ -4851,7 +4903,7 @@ const CV = (() => {
         : null,
 
       due.length ? h('section', { class: 'section' },
-        sectionHead('Ready for a follow-up', 'A week has passed on these. A two-line note keeps you on their radar.'),
+        sectionHead('Ready for a follow-up', 'A week has passed on these. A short, friendly note is enough.'),
         h('div', { class: 'grid' }, due.map((a) => h('div', { class: 'card' },
           h('b', null, a.company), h('span', { class: 'small muted' }, `${a.role || ''} \u00b7 applied ${CC.fmt(a.appliedOn)}`),
           h('div', { class: 'row' },
@@ -4903,6 +4955,14 @@ const CV = (() => {
       h('div', { class: 'grid two' }, roles.map(roleCard)),
       roles.length ? null : h('p', { class: 'muted' }, 'Nothing starred yet. Tap the star on any role to keep it here.'));
   }
+  /** Employers she has not tried yet come first; ones she already applied to are marked. */
+  function whoHires(list) {
+    const tried = new Set(((D.history && D.history.applied) || []).map((a) => a.name.toLowerCase().split(/\s+/)[0]));
+    const isTried = (name) => tried.has(String(name).toLowerCase().replace(/[^a-z ]/g, ' ').trim().split(/\s+/)[0]);
+    const fresh = list.filter((e) => !isTried(e));
+    const old = list.filter(isTried).map((e) => `${e} (applied)`);
+    return [...fresh, ...old].join(', ');
+  }
   function roleCard(r) {
     const starred = S().saved.roles.includes(r.id);
     return h('article', { class: 'card' },
@@ -4910,14 +4970,14 @@ const CV = (() => {
         starBtn(starred, () => CC.update((s) => { s.saved.roles = toggleIn(s.saved.roles, r.id); }), starred ? 'Unstar role' : 'Star role')),
       h('p', null, r.why),
       h('dl', { class: 'stack', style: { gap: '8px', margin: 0 } },
-        r.gaps ? h('div', { class: 'kv' }, h('dt', null, 'To bridge'), h('dd', null, r.gaps)) : null,
+        r.gaps ? h('div', { class: 'kv' }, h('dt', null, 'To bridge'), h('dd', null, CV.marked(r.gaps))) : null,
         r.salary && !isGlobal() ? h('div', { class: 'kv' }, h('dt', null, 'Typical pay in India (indicative)'), h('dd', null, r.salary)) : null,
         r.hybridWhy ? h('div', { class: 'kv' }, h('dt', null, 'Work pattern'), h('dd', null, r.hybridWhy)) : null),
       h('div', { class: 'kv' }, h('dt', { class: 'eyebrow' }, 'Search titles'), h('div', { class: 'chips' }, r.variants.map((v) => h('span', { class: 'chip static' }, v)))),
       r.upskill && r.upskill.length ? h('details', { class: 'acc' }, h('summary', null, 'Quick ways to upskill'),
         h('div', { class: 'acc-body' }, r.upskill.map((u) => h('div', { class: 'stack', style: { gap: '2px' } },
           u.url ? ext(u.url, u.name) : h('b', null, u.name), h('span', { class: 'small muted' }, [u.provider, u.cost, u.duration].filter(Boolean).join(' \u00b7 ')))))) : null,
-      r.employers && r.employers.length ? h('p', { class: 'small muted' }, h('b', null, 'Who hires: '), r.employers.join(', ')) : null,
+      r.employers && r.employers.length ? h('p', { class: 'small muted' }, h('b', null, 'Who hires: '), whoHires(r.employers)) : null,
       h('div', { class: 'row' },
         btn('Find these jobs', () => { CC.update((s) => { s.ui.searchQ = r.variants[0]; s.ui.apply = 'search'; }); go('search'); }, 'small primary', 'send'),
         btn('Matching CV', () => { CC.update((s) => { s.cv.track = r.lane; s.ui.apply = 'cv'; }); go('cv'); }, 'small')));
@@ -4928,7 +4988,7 @@ const CV = (() => {
     const source = isGlobal() && Array.isArray(G().companies) ? G().companies : D.companies;
     const cats = [...new Set(source.map((c) => c.category))].sort();
     const q = (f.q || '').toLowerCase();
-    const tried = new Set(CC.apps().filter((a) => a.status !== 'idea').map((a) => a.companyId).filter(Boolean));
+    const tried = new Set(CC.apps().filter((a) => a.status !== 'idea' && (a.region || 'india') === region()).map((a) => a.companyId).filter(Boolean));
     const list = source.filter((c) =>
       (f.lane === 'all' || c.lane === f.lane || (f.lane === 'saved' && S().saved.companies.includes(c.id)) || (f.lane === 'fresh' && !tried.has(c.id))) &&
       (isGlobal() || !f.hyd || c.hyd) && (f.cat === 'all' || c.category === f.cat) &&
@@ -4957,18 +5017,19 @@ const CV = (() => {
     const li = `https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(`${c.name} ${kw}`)}&location=${isGlobal() ? 'Worldwide' : 'India'}`;
     const reviews = `https://www.google.com/search?q=${encodeURIComponent(`${c.name} ${isGlobal() ? '' : 'India '}reviews Glassdoor${isGlobal() ? '' : ' AmbitionBox'}`)}`;
     const findCareers = `https://www.google.com/search?q=${encodeURIComponent(`${c.name} ${isGlobal() ? '' : 'India '}careers official site`)}`;
-    const mine = CC.apps().filter((a) => a.companyId === c.id || a.company === c.name);
+    const mine = CC.apps().filter((a) => (a.companyId === c.id || a.company === c.name) && (a.region || 'india') === region());
     const inTracker = mine.length > 0;
     const appliedBefore = mine.some((a) => a.past || a.status === 'applied' || a.status === 'closed');
     return h('article', { class: 'card' },
       h('div', { class: 'rc-top' }, h('div', { class: 'stack', style: { gap: '6px' } }, h('h3', null, c.name),
-        h('div', { class: 'rc-meta' }, lanePill(c.lane), h('span', { class: 'pill plain' }, c.category), c.hyd && !isGlobal() ? h('span', { class: 'pill good' }, 'Hyderabad') : null, appliedBefore ? h('span', { class: 'pill warn' }, 'Applied before') : null)),
+        h('div', { class: 'rc-meta' }, lanePill(c.lane), h('span', { class: 'pill plain' }, c.category), c.hyd && !isGlobal() ? h('span', { class: 'pill good' }, 'Hyderabad') : null, appliedBefore ? h('span', { class: 'pill plain' }, 'You applied here') : null)),
         starBtn(starred, () => CC.update((s) => { s.saved.companies = toggleIn(s.saved.companies, c.id); }), starred ? 'Unstar company' : 'Star company')),
       h('p', null, c.fit),
       h('dl', { class: 'stack', style: { gap: '8px', margin: 0 } },
-        h('div', { class: 'kv' }, h('dt', null, 'What they do here'), h('dd', null, c.functions)),
+        appliedBefore && D.history ? h('p', { class: 'small muted' }, D.history.pastNext) : null,
+        h('div', { class: 'kv' }, h('dt', null, isGlobal() ? 'What they do' : 'What they do here'), h('dd', null, c.functions)),
         h('div', { class: 'kv' }, h('dt', null, 'Work pattern'), h('dd', null, c.work)),
-        h('div', { class: 'kv' }, h('dt', null, 'Cities'), h('dd', null, c.cities.join(', ')))),
+        h('div', { class: 'kv' }, h('dt', null, 'Cities'), h('dd', null, c.cities.join(' \u00b7 ')))),
       h('div', { class: 'kv' }, h('dt', { class: 'eyebrow' }, 'Titles to search on their site'), h('div', { class: 'chips' },
         c.roles.map((r) => h('button', { type: 'button', class: 'chip', title: 'Copy this title', onclick: () => CC.copy(r) }, r)))),
       h('div', { class: 'row' },
@@ -4998,10 +5059,10 @@ const CV = (() => {
           h('p', { class: 'small' }, e.how), e.pay ? h('p', { class: 'small muted' }, e.pay) : null,
           e.caution ? h('p', { class: 'small', style: { color: 'var(--warn)' } }, e.caution) : null, e.url ? ext(e.url, 'Website', 'small') : null)))),
       h('section', { class: 'section' }, sectionHead('If you move abroad later', R.overseasIntro),
-        h('div', { class: 'table-scroll' }, h('table', { class: 'data' },
+        h('div', { class: 'table-scroll' }, h('table', { class: 'data stack-sm' },
           h('thead', null, h('tr', null, ['Country', 'Route now (Oct 2026)', 'What changed', 'Effort', 'First step'].map((x) => h('th', null, x)))),
-          h('tbody', null, R.overseas.map((o) => h('tr', null, h('td', null, h('b', null, o.country)), h('td', null, o.route), h('td', null, o.changed),
-            h('td', null, h('span', { class: `pill ${o.effort === 'low' ? 'good' : o.effort === 'medium' ? 'warn' : 'rose'}` }, o.effort)), h('td', null, o.first)))))),
+          h('tbody', null, R.overseas.map((o) => h('tr', null, h('td', null, h('b', null, o.country)), h('td', { 'data-label': 'Route now' }, o.route), h('td', { 'data-label': 'What changed' }, o.changed),
+            h('td', { 'data-label': 'Effort' }, h('span', { class: `pill ${o.effort === 'low' ? 'good' : o.effort === 'medium' ? 'warn' : 'rose'}` }, o.effort)), h('td', { 'data-label': 'First step' }, o.first)))))),
         h('p', { class: 'small faint' }, R.overseasCaveat)));
   }
 
@@ -5059,13 +5120,13 @@ const CV = (() => {
     let tmr;
     qInput.addEventListener('input', () => { renderLinks(); clearTimeout(tmr); tmr = setTimeout(() => CC.update((s) => { s.ui.searchQ = qInput.value; }, { silent: true }), 400); });
     renderLinks();
-    const suggestions = [...new Set(D.roles.filter((r) => S().saved.roles.includes(r.id)).concat(D.roles).flatMap((r) => r.variants.slice(0, 1)))].slice(0, 14);
+    const suggestions = [...new Set(D.roles.filter((r) => S().saved.roles.includes(r.id)).concat(D.roles).flatMap((r) => r.variants.slice(0, 1)))].slice(0, ui('moreTitles', false) ? 14 : 6);
     return h('div', { class: 'stack', style: { gap: '26px' } },
       h('section', { class: 'section' },
         sectionHead('Search builder', 'Pick a title, a city and how you want to work. Each button opens that site with the search filled in.'),
         h('div', { class: 'card' },
           field('search-q', 'Job title or keywords', qInput),
-          h('div', { class: 'chips' }, suggestions.map((s) => h('button', { type: 'button', class: 'chip', 'aria-pressed': String(sq === s), onclick: () => setUi('searchQ', s) }, s))),
+          h('div', { class: 'chips' }, h('button', { type: 'button', class: 'chip', onclick: () => setUi('moreTitles', !ui('moreTitles', false)) }, ui('moreTitles', false) ? 'Fewer titles' : 'More titles'), suggestions.map((s) => h('button', { type: 'button', class: 'chip', 'aria-pressed': String(sq === s), onclick: () => setUi('searchQ', s) }, s))),
           h('div', { class: 'form-grid' },
             field('search-loc', 'Where', h('select', { id: 'search-loc', value: loc, onchange: (e) => setUi('searchLoc', e.target.value) }, D.search.locations.map((l) => h('option', { value: l }, l === 'India' ? 'Anywhere in India' : l)))),
             field('search-mode', 'Work pattern', h('select', { id: 'search-mode', value: mode, onchange: (e) => setUi('searchMode', e.target.value) },
@@ -5130,14 +5191,14 @@ const CV = (() => {
     let tmr;
     qInput.addEventListener('input', () => { renderLinks(); clearTimeout(tmr); tmr = setTimeout(() => CC.update((s) => { s.ui.searchQ = qInput.value; }, { silent: true }), 400); });
     renderLinks();
-    const suggestions = [...new Set(D.roles.flatMap((r) => r.variants.slice(0, 1)))].slice(0, 12);
+    const suggestions = [...new Set(D.roles.flatMap((r) => r.variants.slice(0, 1)))].slice(0, ui('moreTitles', false) ? 12 : 6);
     const flags = [...((D.search.scams && D.search.scams.flags) || []), ...(GS.scamsExtra || [])];
     return h('div', { class: 'stack', style: { gap: '26px' } },
       h('section', { class: 'section' },
         sectionHead('Search builder', 'Pick a title and a place. Remote roles first; moving abroad takes longer, so keep India in view too.'),
         h('div', { class: 'card' },
           field('gsearch-q', 'Job title or keywords', qInput),
-          h('div', { class: 'chips' }, suggestions.map((x) => h('button', { type: 'button', class: 'chip', 'aria-pressed': String(sq === x), onclick: () => setUi('searchQ', x) }, x))),
+          h('div', { class: 'chips' }, h('button', { type: 'button', class: 'chip', onclick: () => setUi('moreTitles', !ui('moreTitles', false)) }, ui('moreTitles', false) ? 'Fewer titles' : 'More titles'), suggestions.map((x) => h('button', { type: 'button', class: 'chip', 'aria-pressed': String(sq === x), onclick: () => setUi('searchQ', x) }, x))),
           h('div', { class: 'form-grid' },
             field('gsearch-loc', 'Where', h('select', { id: 'gsearch-loc', value: loc ? loc.id : '', onchange: (e) => setUi('gLoc', e.target.value) }, locs.map((l) => h('option', { value: l.id }, l.label)))),
             field('gsearch-mode', 'Work pattern', h('select', { id: 'gsearch-mode', value: mode, onchange: (e) => setUi('gMode', e.target.value) },
@@ -5529,15 +5590,15 @@ const CV = (() => {
     const q = qs[pick];
     return h('div', { class: 'stack', style: { gap: '26px' } },
       h('section', { class: 'section' }, sectionHead('Tell me about yourself', `Your ${D.cv.tracks[track].label} version. About 60\u201390 seconds when spoken.`),
-        h('div', { class: 'card' }, h('p', { style: { whiteSpace: 'pre-wrap' } }, D.interview.intro_answers[track]), h('div', { class: 'row' }, copyBtn(D.interview.intro_answers[track])),
+        h('div', { class: 'card' }, h('p', { style: { whiteSpace: 'pre-wrap' } }, CV.marked(D.interview.intro_answers[track])), h('div', { class: 'row' }, copyBtn(D.interview.intro_answers[track])),
           h('div', { class: 'chips' }, CV.TRACKS.map((k) => h('button', { type: 'button', class: 'chip', 'aria-pressed': String(track === k), onclick: () => CC.update((s) => { s.cv.track = k; }) }, D.cv.tracks[k].label))))),
-      h('section', { class: 'section' }, sectionHead('Practice one question', 'Say it out loud. Two minutes is plenty.'),
+      h('section', { class: 'section' }, sectionHead('Practise one question', 'Say it out loud. Two minutes is plenty.'),
         h('div', { class: 'card raised' }, h('span', { class: 'eyebrow' }, q.group), h('h3', null, q.q), h('div', { class: 'row' }, timerEl, startBtn, btn('Another question', () => setUi('practiceQ', pick + 1 + (dayOfYear() % 3)), 'small ghost')),
-          h('details', { class: 'acc' }, h('summary', null, 'See a suggested answer'), h('div', { class: 'acc-body' }, h('p', { class: 'small muted' }, q.why), h('p', { style: { whiteSpace: 'pre-wrap' } }, q.answer))),
+          h('details', { class: 'acc' }, h('summary', null, 'See a suggested answer'), h('div', { class: 'acc-body' }, h('p', { class: 'small muted' }, q.why), h('p', { style: { whiteSpace: 'pre-wrap' } }, CV.marked(q.answer)))),
           aiBox({
             id: 'ai-practice', title: 'Ask Claude for feedback on your answer', desc: 'Type (or paste a voice-note transcript of) your answer. You get kind, specific feedback and a tighter version.',
             placeholder: 'Your answer', buttonLabel: 'Get feedback',
-            run: (sample, ans, signal) => sample.json(`You are a warm, experienced interview coach in India helping a biomedical engineer with 13 years in ultrasound clinical applications who is looking for a stable MNC role. Question: "${q.q}". Her answer is below. Be kind and specific. Never invent facts.\nReply with only JSON: {"went_well":[string] (2-3),"improve":[string] (2-3, concrete),"tighter_answer":string (under 160 words, first person, using only facts from her answer and this background: ${D.interview.coachBackground})}\n\nANSWER:\n${ans.slice(0, 6000)}`, { signal }),
+            run: (sample, ans, signal) => sample.json(`You are a warm, experienced interview coach in India helping a biomedical engineer with 13 years in diagnostic ultrasound across field service, clinical applications and product specialist roles, who is looking for a stable MNC role. Question: "${q.q}". Her answer is below. Be kind and specific. Never invent facts.\nReply with only JSON: {"went_well":[string] (2-3),"improve":[string] (2-3, concrete),"tighter_answer":string (under 160 words, first person, using only facts from her answer and this background: ${D.interview.coachBackground})}\n\nANSWER:\n${ans.slice(0, 6000)}`, { signal }),
             render: (r) => h('div', { class: 'stack' },
               h('div', null, h('b', null, 'What went well'), h('ul', { class: 'dots' }, (r.went_well || []).map((x) => h('li', null, String(x))))),
               h('div', null, h('b', null, 'To make it stronger'), h('ul', { class: 'dots' }, (r.improve || []).map((x) => h('li', null, String(x))))),
@@ -5546,11 +5607,12 @@ const CV = (() => {
       h('section', { class: 'section' }, sectionHead('Questions to expect', 'Including the ones that feel tender. Each has a calm, true answer.'),
         ['Tender', 'Common', 'Role-specific'].map((g) => {
           const items = qs.filter((x) => x.group === g);
-          return items.length ? h('div', { class: 'stack', style: { gap: '0' } }, h('span', { class: 'eyebrow', style: { margin: '6px 0' } }, g), items.map((x) => h('details', { class: 'acc' }, h('summary', null, x.q), h('div', { class: 'acc-body' }, h('p', { class: 'small muted' }, x.why), h('p', { style: { whiteSpace: 'pre-wrap' } }, x.answer), h('div', { class: 'row' }, copyBtn(x.answer)))))) : null;
+          return items.length ? h('div', { class: 'stack', style: { gap: '0' } }, h('span', { class: 'eyebrow', style: { margin: '6px 0' } }, g), items.map((x) => h('details', { class: 'acc' }, h('summary', null, x.q), h('div', { class: 'acc-body' }, h('p', { class: 'small muted' }, x.why), h('p', { style: { whiteSpace: 'pre-wrap' } }, CV.marked(x.answer)), h('div', { class: 'row' }, copyBtn(x.answer)))))) : null;
         })),
-      h('section', { class: 'section' }, sectionHead('Your stories', 'Real moments from your career, shaped as Situation \u2192 Action \u2192 Result. Add the numbers you remember.'),
+      h('section', { class: 'section' }, sectionHead('Your stories', 'Real moments from your career, shaped as Situation \u2192 Action \u2192 Result. Copy one into your notes and fill in the highlighted parts.'),
         h('div', { class: 'grid two' }, D.interview.stories.map((s) => h('div', { class: 'card' }, h('h4', null, s.title), h('p', { class: 'small faint' }, `Use for: ${s.use}`),
-          h('dl', { class: 'stack', style: { gap: '6px', margin: 0 } }, [['Situation', s.situation], ['What you did', s.action], ['Result', s.result]].map(([k, v]) => h('div', { class: 'kv' }, h('dt', null, k), h('dd', null, CV.marked(v))))))))),
+          h('dl', { class: 'stack', style: { gap: '6px', margin: 0 } }, [['Situation', s.situation], ['What you did', s.action], ['Result', s.result]].map(([k, v]) => h('div', { class: 'kv' }, h('dt', null, k), h('dd', null, CV.marked(v))))),
+          h('div', { class: 'row' }, copyBtn(`${s.title}\n\nSituation: ${s.situation}\n\nWhat I did: ${s.action}\n\nResult: ${s.result}`, 'Copy story')))))),
       h('section', { class: 'section' }, sectionHead('Salary conversations', 'Know your number before they ask.'),
         h('ul', { class: 'dots' }, (isGlobal() && G().interview && G().interview.salary ? G().interview.salary : D.interview.salary).map((x) => h('li', null, x)))));
   }
@@ -5558,7 +5620,7 @@ const CV = (() => {
     return h('div', { class: 'stack', style: { gap: '26px' } },
       h('section', { class: 'section' }, sectionHead('Questions that reveal stability', 'Ask these in the later rounds. Good employers are glad you asked.'),
         h('div', { class: 'card' }, h('ol', { style: { margin: 0, paddingLeft: '1.2em', display: 'grid', gap: '8px' } }, D.interview.ask.map((x) => h('li', null, x))), copyBtn(D.interview.ask.join('\n'), 'Copy list'))),
-      h('section', { class: 'section' }, sectionHead('Signals to check before you say yes', 'Fifteen minutes of checking can save months.'),
+      h('section', { class: 'section' }, sectionHead('Signals to check before you say yes', 'A few quick checks that help you choose a steady employer.'),
         h('div', { class: 'grid' }, D.interview.stability.map((s) => h('div', { class: 'card soft' }, h('b', null, s.signal), h('p', { class: 'small muted' }, s.how))))),
       h('section', { class: 'section' }, sectionHead('Offer letter checklist', 'Read it slowly, with tea.'),
         h('ul', { class: 'tasks' }, D.interview.offer.map((x, i) => {
@@ -5617,7 +5679,7 @@ const CV = (() => {
         h('div', { class: 'grid' }, C.affirmations.map((a) => h('div', { class: 'card soft' }, h('p', { style: { fontFamily: 'var(--font-display)', fontSize: '1.1rem' } }, a))))),
       h('section', { class: 'section' }, sectionHead('If it gets heavy', C.helpIntro),
         h('div', { class: 'grid' }, C.helplines.map((x) => h('div', { class: 'card' }, h('b', null, x.name),
-          h('div', { class: 'row' }, h('span', { class: 'num', style: { fontSize: '1.25rem', fontWeight: 700, userSelect: 'all' } }, x.number), copyBtn(x.number, 'Copy number')),
+          h('div', { class: 'row' }, h('a', { href: `tel:${x.number.replace(/[^+\d]/g, '')}`, target: '_top', class: 'num', style: { fontSize: '1.25rem', fontWeight: 700 } }, x.number), copyBtn(x.number, 'Copy number')),
           h('p', { class: 'small muted' }, [x.hours, x.languages].filter(Boolean).join(' \u00b7 ')), x.url ? ext(x.url, 'Website', 'small') : null)))));
   }
 

@@ -7,7 +7,7 @@ window.CC_DATA_PARTS.search = {
   routine: [
     { title: 'Open your saved alerts (5 min)', sub: 'Check your Naukri and LinkedIn alerts with the last-7-days filter on. Skim titles only for now.' },
     { title: 'Shortlist three (5 min)', sub: 'Keep up to three roles that fit one of your tracks at an employer that looks stable. Let the rest go without guilt.' },
-    { title: 'Tailor and apply to one (12 min)', sub: 'Match the top third of your CV to the job description keywords, then apply on the company\'s own site where you can. A second one is optional.' },
+    { title: 'Tailor and apply to one (12 min)', sub: 'Match the top third of your CV to the job description keywords, then apply on the company\'s own site where you can. A careful application often takes longer, so finish it in your next session if you need to. A second one is optional.' },
     { title: 'One human touch (5 min)', sub: 'Send one follow-up, or one short message to a recruiter, former colleague or possible referrer.' },
     { title: 'Log it (2 min)', sub: 'Add each application to your tracker with the date, link and Job ID, so you never have to hold it in your head.' },
     { title: 'Stop and close the tabs (1 min)', sub: 'Thirty minutes is a full session. The rest of the day is yours.' },
@@ -51,7 +51,7 @@ window.CC_DATA_PARTS.search = {
       url: '',
       bestFor: 'Priority MNC roles; recruiters tend to trust direct applications more',
       tips: [
-        'Pick 15 to 25 target MNCs from the Companies page, create a candidate account on each, and set the portal\'s own job alerts by location and job family.',
+        'Start with the companies you starred (about ten is plenty). You may already have accounts at some of the big imaging firms from your earlier applications, so log in there first, then add new accounts one or two at a time, and set the portal\'s own job alerts by location and job family.',
         'Upload a single-column DOCX with standard headings and MM/YYYY dates, because Workday reads left to right and scrambles multi-column layouts.',
         'After the portal fills in your details from the CV, check every field before you submit.',
         'Note the requisition or Job ID of each application, share it with anyone referring you, and follow the status in the portal\'s candidate home page.',
@@ -117,7 +117,7 @@ window.CC_DATA_PARTS.search = {
       url: 'https://www.iimjobs.com/',
       bestFor: 'Mid-senior sales, key accounts and product marketing roles',
       tips: [
-        'Most useful if you lean toward Product Specialist, Product Marketing or Key Account Manager roles.',
+        'Most useful if you lean towards Product Specialist, Product Marketing or Key Account Manager roles.',
         'Recruiters post directly here, so follow those in healthcare and medtech and reply to their posts quickly.',
         'Filter by city and experience, and browse Sales & Marketing along with any healthcare or pharma listings.',
       ],
@@ -151,8 +151,8 @@ window.CC_DATA_PARTS.search = {
 
   tips: [
     { tip: 'Apply within 72 hours of posting', why: 'Early applicants get noticeably more replies; job-tool studies suggest two to five times as many, so treat the exact figure as rough.' },
-    { tip: 'Use the company site for priority roles', why: 'Direct applications get about two to three times the replies of LinkedIn Easy Apply in vendor data, and the portal takes your ATS-safe DOCX.' },
-    { tip: 'Keep one single-column DOCX master CV', why: 'Workday and SuccessFactors, used by many MNCs in India, scramble tables, columns and text boxes before a person ever sees them.' },
+    { tip: 'Use the company site for priority roles', why: 'Direct applications get about two to three times the replies of LinkedIn Easy Apply in vendor data. A portal alone can still go quiet, so pair each one with a short message to a person there.' },
+    { tip: 'Keep one simple, single-column Word CV', why: 'The application systems many MNCs in India use, such as Workday and SuccessFactors, scramble tables, columns and text boxes before a person sees them. The Word file from CV studio is built this way.' },
     { tip: 'Mirror the job description in your top third', why: 'Matching on Naukri, Indeed and company portals is mostly keyword-based, so the role\'s exact phrases in your summary and first bullets help you get through.' },
     { tip: 'Ask for referrals, with the Job ID', why: 'Vendor benchmarks for India put referral-to-hire at roughly 20-30% against 1-3% from job boards, and a Job ID makes referring you easy.' },
     { tip: 'Lead with immediate joiner', why: 'About one in three postings signal urgency and few candidates can join within 15 days, so your availability is a real advantage.' },
@@ -160,7 +160,7 @@ window.CC_DATA_PARTS.search = {
     { tip: 'Choose quality over volume', why: 'LinkedIn reports that applicants per opening in India have more than doubled since 2022, and a tailored application stands out among the many look-alike ones recruiters now see.' },
     { tip: 'Keep a simple tracker', why: 'Logging the date, link, Job ID and next step shows you when to follow up and what is working, without carrying it all in your head.' },
     { tip: 'Run three tracks with separate alerts', why: 'Separate saved searches for same-field, adjacent and new roles keep each feed relevant, and leave room for a non-linear move.' },
-    { tip: 'Check stability before applying and accepting', why: 'Recent reviews, MCA status and layoff news lower the chance of another short stint, and help you feel more in control.' },
+    { tip: 'Check stability before applying and accepting', why: 'Recent reviews, MCA status and layoff news help you spot a company that may be about to cut back, and help you feel more in control.' },
     { tip: 'Use AI for drafts, then rewrite in your voice', why: 'Recruiters report more look-alike AI CVs, and your real numbers and plain words are what make you recognisable.' },
   ],
 

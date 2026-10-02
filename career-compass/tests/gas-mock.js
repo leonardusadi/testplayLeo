@@ -10,9 +10,10 @@ function createGas({ props = {}, fetch, codePath = path.join(__dirname, '..', 's
   const logs = [];
   const files = [];
   const fetches = [];
+  const folders = [];
 
   class Sheet {
-    constructor(name) { this.name = name; this.data = []; this.frozen = 0; }
+    constructor(name) { this.name = name; this.data = []; this.frozen = 0; this.maxRows = 1000; }
     getName() { return this.name; }
     getLastRow() {
       let n = this.data.length;
@@ -26,12 +27,15 @@ function createGas({ props = {}, fetch, codePath = path.join(__dirname, '..', 's
         return Math.max(m, n);
       }, 0);
     }
-    getMaxRows() { return Math.max(1000, this.data.length); }
+    getMaxRows() { return this.maxRows; }
+    insertRowsAfter(after, n) { if (after !== this.maxRows) throw new Error('insertRowsAfter: test only supports appending'); this.maxRows += n; return this; }
     setFrozenRows(n) { this.frozen = n; return this; }
     getRange(r, c, nr = 1, nc = 1) { return new Range(this, r, c, nr, nc); }
     deleteRow(r) {
       if (r < 1 || r > this.data.length) throw new Error(`deleteRow out of range: ${r}`);
+      if (this.maxRows - 1 <= this.frozen) throw new Error('Sorry, it is not possible to delete all non-frozen rows.');
       this.data.splice(r - 1, 1);
+      this.maxRows -= 1;
     }
     /** Test helper: rows as objects keyed by the header row. */
     table() {
@@ -42,6 +46,7 @@ function createGas({ props = {}, fetch, codePath = path.join(__dirname, '..', 's
   class Range {
     constructor(sh, r, c, nr, nc) {
       if (r < 1 || c < 1 || nr < 1 || nc < 1) throw new Error(`bad range ${r},${c},${nr},${nc}`);
+      if (r + nr - 1 > sh.maxRows) throw new Error('The coordinates of the range are outside the dimensions of the sheet.');
       Object.assign(this, { sh, r, c, nr, nc });
     }
     setValues(vals) {
@@ -71,6 +76,7 @@ function createGas({ props = {}, fetch, codePath = path.join(__dirname, '..', 's
     deleteSheet: (s) => sheets.delete(s.name),
     getUrl: () => 'https://docs.google.com/spreadsheets/d/MOCK/edit',
     getId: () => 'MOCK',
+    getSpreadsheetTimeZone: () => 'Asia/Kolkata',
   };
   sheets.set('Sheet1', new Sheet('Sheet1'));
   const chain = { setTitle() { return chain; }, addMetaTag() { return chain; }, setXFrameOptionsMode() { return chain; } };
@@ -87,11 +93,17 @@ function createGas({ props = {}, fetch, codePath = path.join(__dirname, '..', 's
     },
     Session: { getScriptTimeZone: () => 'Asia/Kolkata' },
     DriveApp: {
-      getFoldersByName: () => ({ hasNext: () => false }),
-      createFolder: (name) => ({
-        getName: () => name,
-        createFile: (blob) => { files.push(blob); return { getUrl: () => `https://drive.google.com/file/d/MOCK${files.length}/view`, getName: () => blob.name }; },
-      }),
+      getFoldersByName: (name) => { const list = folders.filter((f) => f.getName() === name); let i = 0; return { hasNext: () => i < list.length, next: () => list[i++] }; },
+      getFolderById: (id) => { const f = folders.find((x) => x.getId() === id); if (!f) throw new Error('No item with the given ID could be found'); return f; },
+      createFolder: (name) => {
+        const f = {
+          id: `F${folders.length + 1}`, trashed: false, files: [],
+          getId: () => f.id, getName: () => name, isTrashed: () => f.trashed,
+          createFile: (blob) => { files.push(blob); f.files.push(blob); return { getUrl: () => `https://drive.google.com/file/d/MOCK${files.length}/view`, getName: () => blob.name }; },
+        };
+        folders.push(f);
+        return f;
+      },
     },
     UrlFetchApp: {
       fetch: (url, opts) => {
@@ -102,13 +114,13 @@ function createGas({ props = {}, fetch, codePath = path.join(__dirname, '..', 's
       },
     },
     HtmlService: { createHtmlOutputFromFile: () => chain, createHtmlOutput: () => chain },
-    ScriptApp: { getService: () => ({ getUrl: () => 'https://script.google.com/macros/s/MOCK/exec' }) },
+    ScriptApp: { AuthMode: { FULL: 'FULL' }, requireAllScopes: () => {}, getService: () => ({ getUrl: () => 'https://script.google.com/macros/s/MOCK/exec' }) },
     Logger: { log: (...a) => logs.push(a.join(' ')) },
     console,
   };
   vm.createContext(context);
   vm.runInContext(fs.readFileSync(codePath, 'utf8'), context, { filename: 'Code.gs' });
-  return { context, sheets, props, files, logs, fetches, api: (s) => context.api(s), sheet: (n) => sheets.get(n) };
+  return { context, sheets, props, files, folders, logs, fetches, api: (s) => context.api(s), sheet: (n) => sheets.get(n) };
 }
 
 module.exports = { createGas };

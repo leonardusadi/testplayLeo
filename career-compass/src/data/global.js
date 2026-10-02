@@ -10,7 +10,7 @@ window.CC_DATA_PARTS.global = {
 
   search: {
     intro: 'Start with remote roles you can do from Hyderabad, then look at the Gulf, where employers arrange and pay for the work visa. Other countries are long shots for now, and that is fine.',
-    linkCaveat: 'These links follow each site\'s address format as far as it could be checked in October 2026. A few could not be opened live, so if a page looks empty, search on the site itself.',
+    linkCaveat: 'These links follow each site\'s address format as it was in October 2026. Sites change these from time to time, so if a page looks empty, search on the site itself.',
 
     locations: [
       { id: 'remote-india', label: 'Remote, working from India', linkedin: 'India', indeed: 'in.indeed.com', indeedLoc: 'Remote', remote: true },
@@ -92,7 +92,7 @@ window.CC_DATA_PARTS.global = {
         bestFor: 'Gulf roles popular with Indian applicants; recruiters search CVs',
         build: 'naukrigulf',
         regions: ['uae', 'saudi-arabia', 'qatar'],
-        linkNote: 'Link format taken from open-source job tools; search on the site if it fails',
+        linkNote: 'If the page is empty, search for your title on Naukrigulf itself',
         tips: [
           'Run by Info Edge, the company behind Naukri. Keep your profile current and use the same headline as on Naukri.',
           'Recruiters search by title, so put Clinical Application Specialist - Ultrasound in your headline.',
@@ -132,7 +132,7 @@ window.CC_DATA_PARTS.global = {
         url: '',
         bestFor: 'Regional clinical roles at imaging manufacturers',
         tips: [
-          'Create a candidate profile on each target manufacturer\'s site, such as Siemens Healthineers, Philips, Mindray and Canon, and set alerts for the UAE and Saudi Arabia.',
+          'Create a candidate profile on each target manufacturer\'s site, such as Siemens Healthineers, Philips, Mindray and Canon, and set alerts for the UAE and Saudi Arabia. If you already have an account from your India applications, log in and add Gulf locations to your alerts instead of starting again.',
           'Manufacturers\' regional roles are often more open to hiring from India than distributors, who tend to want people already living in the Gulf.',
           'Ask former colleagues from Mindray and the Philips channel to refer you, and give them the job ID.',
           'The Companies page in Global mode lists these employers with direct links.',
@@ -239,7 +239,7 @@ window.CC_DATA_PARTS.global = {
 
     safety: [
       'Check any recruiting agent in the list of active agents on emigrate.gov.in, and ask to see their Registration Certificate from the Protector General of Emigrants. Their service charge is capped at Rs 30,000 plus 18% GST, with a receipt.',
-      'As a graduate you hold a non-ECR (ECNR) passport, so you do not need emigration clearance. The 2020 plan to make eMigrate registration compulsory for ECNR workers was put on hold, so it is voluntary for now. The government has proposed an Overseas Mobility Bill, 2025 to replace the current law, so check the rules again before you travel.',
+      'As a graduate you qualify for the non-ECR (ECNR) category, so you should not need emigration clearance. Check that your passport does not carry an ECR note. The 2020 plan to make eMigrate registration compulsory for ECNR workers was put on hold, so it is voluntary for now. The government has proposed an Overseas Mobility Bill, 2025 to replace the current law, so check the rules again before you travel.',
       'Start degree attestation early, and confirm the current steps with your employer. For the UAE it goes through your state HRD, then MEA, then the UAE Embassy and UAE foreign ministry, which are now done together in India as one digital certificate. Saudi Arabia usually needs an MEA apostille plus pre-verification of qualifications (QVP). Qatar needs HRD, MEA, the Qatar Embassy and Qatar\'s foreign ministry.',
       'Get the full contract in writing, in a language you read, before you resign from anything or travel. Check the job title on the visa, basic pay, allowances, probation, notice period, flights and insurance.',
       'Never pay for a job. In the UAE, Saudi Arabia and Qatar, recruitment and visa costs are the employer\'s by law.',
@@ -525,9 +525,9 @@ window.CC_DATA_PARTS.global = {
   ],
 
   cv: {
-    availability: 'Available immediately for remote work; open to relocation',
+    availability: 'Available immediately for remote work (IST, UTC+5:30)',
     rules: [
-      { rule: 'Gulf', detail: 'Keep it to 1 or 2 pages, newest role first, as an ATS-friendly PDF. Gulf employers expect a short personal details line, such as Indian national, Hyderabad, available to join immediately. Nationality, location, visa status and availability are enough.' },
+      { rule: 'Gulf', detail: 'Keep it to 1 or 2 pages, newest role first, as a simple PDF that job portals can read. Gulf employers expect a short personal details line, such as Indian national, Hyderabad, available to join immediately. Nationality, location, visa status and availability are enough.' },
       { rule: 'UK and Ireland', detail: 'Two pages. Leave out photo, date of birth and marital status. Add one honest right-to-work line, such as Requires visa sponsorship.' },
       { rule: 'Australia and New Zealand', detail: 'Two to three pages, using Australian English and keywords from the advert. Add a page of referees, with their permission.' },
       { rule: 'Canada', detail: 'One to two pages, with summary, then experience, then education. Leave out photo, age and marital status.' },
@@ -588,15 +588,15 @@ window.CC_DATA_PARTS.global = {
     title: 'Your global plan in one minute',
     points: [
       { title: 'Remote roles first', body: 'Search LinkedIn with India as the location and the Remote filter on, check eligibility on Himalayas or Jobgether, and look for employers who hire through an Employer of Record. These roles need no visa.' },
-      { title: 'The Gulf as the move abroad', body: 'In the UAE, Saudi Arabia and Qatar the employer arranges and pays for the work visa. Start with manufacturers\' regional teams in Dubai and Riyadh, such as Siemens Healthineers, Philips, Mindray and Canon.' },
+      { title: 'If you move, start with the Gulf', body: 'In the UAE, Saudi Arabia and Qatar the employer arranges and pays for the work visa. Start with manufacturers\' regional teams in Dubai and Riyadh, such as Siemens Healthineers, Philips, Mindray and Canon. If you applied to any of them before for roles in India, a Gulf opening there is a separate, new application.' },
       { title: 'Prepare documents early', body: 'Begin your degree attestation for the country you are aiming at, because it takes weeks. Check your passport\'s expiry date and keep clear scans of your certificates ready.' },
       { title: 'Stay safe', body: 'Use only recruiting agents you can find on eMigrate, and never pay a visa, processing or placement fee. Get the full contract in writing before you resign from anything or travel.' },
       { title: 'Keep India running alongside', body: 'A stable, hybrid MNC role in India is still your main goal. Keep your India alerts and weekly applications going, and treat Global as an extra door.' },
     ],
-    note: 'Visa, licensing and attestation rules change often, and several details here could not be opened live. Confirm each step on the official website before you spend money.',
+    note: 'Visa, licensing and attestation rules change often. Confirm each step on the official website before you spend money.',
   },
 
   letters: {
-    availabilityLine: 'I am based in Hyderabad, India (IST, UTC+5:30), available immediately for remote work and open to relocation.',
+    availabilityLine: 'I am based in Hyderabad, India (IST, UTC+5:30) and available immediately for remote work. [If true for this role: I am also open to relocating.]',
   },
 };

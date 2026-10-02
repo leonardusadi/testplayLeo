@@ -20,7 +20,7 @@ window.CC_DATA_PARTS.today.plan = {
     },
     {
       title: 'Put stability first',
-      body: 'Both short roles ended because of the companies\' business decisions. Losing two roles in a row hurts, and it reflects their situation more than your work. To screen for stability, check each employer before you apply, ask the stability questions in interviews, and read the whole offer before you accept.',
+      body: 'Both short roles ended because of the companies\' business decisions. Losing two roles in a row hurts, and those decisions say nothing about the quality of your work. To screen for stability, check each employer before you apply, ask the stability questions in interviews, and read the whole offer before you accept.',
     },
     {
       title: 'Remote work from home, abroad later',
