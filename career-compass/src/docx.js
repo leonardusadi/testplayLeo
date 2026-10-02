@@ -86,9 +86,11 @@ const Docx = (() => {
     return list.map((r) => {
       const b = r.b ?? base.b, i = r.i ?? base.i;
       const props = `${b ? '<w:b/>' : ''}${i ? '<w:i/>' : ''}${base.color ? `<w:color w:val="${base.color}"/>` : ''}${base.sz ? `<w:sz w:val="${base.sz}"/><w:szCs w:val="${base.sz}"/>` : ''}`;
-      const parts = String(r.t ?? '').split('\t');
-      return parts.map((part, idx) =>
-        `${idx ? `<w:r>${props ? `<w:rPr>${props}</w:rPr>` : ''}<w:tab/></w:r>` : ''}<w:r>${props ? `<w:rPr>${props}</w:rPr>` : ''}<w:t xml:space="preserve">${esc(part)}</w:t></w:r>`
+      const rp = props ? `<w:rPr>${props}</w:rPr>` : '';
+      return String(r.t ?? '').split('\n').map((line, li) =>
+        (li ? `<w:r>${rp}<w:br/></w:r>` : '') + line.split('\t').map((part, idx) =>
+          `${idx ? `<w:r>${rp}<w:tab/></w:r>` : ''}<w:r>${rp}<w:t xml:space="preserve">${esc(part)}</w:t></w:r>`
+        ).join('')
       ).join('');
     }).join('');
   };

@@ -762,7 +762,7 @@
       subjBox.replaceChildren(current.subject ? h('div', { class: 'row between' }, h('div', null, h('span', { class: 'small faint' }, 'Subject: '), h('b', null, CV.marked(current.subject))), copyBtn(() => current.subject, 'Copy subject')) : '');
       const n = [...current.body].length;
       metaBox.replaceChildren(tpl.limit ? counter(current.body, tpl.limit) : h('div', { class: 'counter num' }, `${current.body.split(/\s+/).filter(Boolean).length} words`));
-      if (tpl.limit && n > tpl.limit) metaBox.append(h('p', { class: 'small', style: { color: 'var(--rose)' } }, 'Too long for this channel. Shorten the "why" line.'));
+      if (tpl.limit && n > tpl.limit) metaBox.append(h('p', { class: 'small', style: { color: 'var(--rose)' } }, 'A little too long for this channel. Shorten the role title or a phrase, and it will fit.'));
     };
     const fields = tpl.uses.map((k) => {
       const meta = D.letters.fields[k] || { label: k };
@@ -807,12 +807,12 @@
           h('div', { class: 'row' },
             copyBtn(() => current.body, 'Copy text', 'primary'),
             tpl.docx ? btn('Download Word', () => {
-              const blocks = current.body.split(/\n{2,}/).map((p) => ({ type: 'p', text: p.replace(/\n/g, ' '), after: 160 }));
+              const blocks = current.body.split(/\n{2,}/).map((p) => ({ type: 'p', text: p, after: 160 }));
               const f = S().letters.fields || {};
               CC.saveFile(`Cover_Letter_${slug(f.company || 'company')}.docx`, new Blob([Docx.build(blocks, { title: 'Cover letter', author: D.person.full })], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' }));
             }, '', 'download') : null,
             tpl.docx && CC.Remote.enabled ? btn('Save to Drive', () => {
-              const blocks = current.body.split(/\n{2,}/).map((p) => ({ type: 'p', text: p.replace(/\n/g, ' '), after: 160 }));
+              const blocks = current.body.split(/\n{2,}/).map((p) => ({ type: 'p', text: p, after: 160 }));
               const f = S().letters.fields || {};
               CC.saveToDrive(`Cover_Letter_${slug(f.company || 'company')}.docx`, new Blob([Docx.build(blocks, { title: 'Cover letter', author: D.person.full })], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' }));
             }, '', 'download') : null,
