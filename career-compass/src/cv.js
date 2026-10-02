@@ -62,7 +62,16 @@ const CV = (() => {
     const experience = [];
     const recent = st.recent || {};
     const mode = recent.mode || 'compact';
-    const items = (recent.items || d.recent.items).map((it, i) => ({ ...d.recent.items[i], ...it }));
+    const MON = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
+    const when = (txt) => {
+      const t = String(txt || '').trim();
+      const m = t.match(/^([A-Za-z]{3})[a-z]*\.?\s+(\d{4})$/) || t.match(/^(\d{1,2})[/-](\d{4})$/);
+      if (!m) return null;
+      const mon = /^\d+$/.test(m[1]) ? Number(m[1]) - 1 : MON[m[1].toLowerCase()];
+      return mon == null || mon < 0 || mon > 11 ? null : Number(m[2]) * 12 + mon;
+    };
+    const items = (recent.items || d.recent.items).map((it, i) => ({ ...d.recent.items[i], ...it }))
+      .sort((a, b) => (when(b.start) ?? -Infinity) - (when(a.start) ?? -Infinity)); // most recent first, as on any CV
 
     if (mode === 'full') {
       for (const it of items) {
@@ -71,7 +80,7 @@ const CV = (() => {
         if (dt.missing) missing.push(`Start and end month at ${it.org}`);
         experience.push({
           title: it.title || '[Your title]', org: it.org, city: it.city || '', dates: dt.text,
-          bullets: [it.summary || '', recent.reason || d.recent.reason].filter(Boolean), short: true,
+          bullets: [it.summary || '', it.reason || d.recent.reasonOne || 'The role was closed by the employer for business reasons.'].filter(Boolean), short: true,
         });
       }
     } else if (mode === 'compact') {
@@ -81,8 +90,9 @@ const CV = (() => {
         if (dt.missing) missing.push(`Start and end month at ${it.org}`);
         return `${it.title || '[Your title]'}, ${it.org} (${dt.text})`;
       });
-      const starts = items.map((it) => it.start).filter(Boolean);
-      const ends = items.map((it) => it.end).filter(Boolean);
+      const starts = items.map((it) => it.start).filter((x) => when(x) != null).sort((a, b) => when(a) - when(b));
+      const ends = items.map((it) => it.end).filter((x) => when(x) != null).sort((a, b) => when(a) - when(b));
+      if (items.some((it) => (it.start && when(it.start) == null) || (it.end && when(it.end) == null))) missing.push('Write the short-role months like "May 2025"');
       experience.push({
         title: d.recent.compactTitle, org: '', city: '',
         dates: `${starts[0] || '[start]'} – ${ends[ends.length - 1] || '[end]'}`,

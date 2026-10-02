@@ -60,7 +60,7 @@ const nav = (page, token) => page.evaluate((t) => { const a = document.querySele
   check(seeded.filter((a) => a.status === 'applied').map((a) => a.company).includes('Edan'), 'past applications include Edan');
   await nav(p1, 'companies');
   await p1.waitForTimeout(100);
-  check((await p1.textContent('#main')).includes('Applied before'), 'company cards mark companies she already applied to');
+  check((await p1.textContent('#main')).includes('You applied here'), 'company cards mark companies she already applied to');
   await p1.click('button.chip:has-text("New to you")');
   await p1.waitForTimeout(100);
   const freshNames = await p1.$$eval('article.card h3', (hs) => hs.map((x) => x.textContent));

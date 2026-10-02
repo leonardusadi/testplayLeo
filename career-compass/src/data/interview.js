@@ -16,7 +16,7 @@ window.CC_DATA_PARTS.interview = {
       group: 'Tender',
       q: 'Why did your last two roles end so quickly?',
       why: 'They want to know whether the endings were about the business or about your work, and whether it could happen again.',
-      answer: 'After [about three] years at BPL Medical Technologies, I joined two smaller companies, Trimed Solutions and Docto Technologies. In both cases the company let me go for business reasons within the first couple of months. [One factual line, matching the company letter if you have one, e.g. The role was closed when the company restructured.]\n\nIt was disappointing, and it taught me something useful. I now look closely at how established a team is before I join, which is one reason I am applying to established companies like yours. The long roles before that are the core of what I bring, especially clinical training at Mindray and product specialist work at BPL.',
+      answer: 'After [about three] years at BPL Medical Technologies, I joined two companies, Trimed Solutions and Docto Technologies. In both cases the company let me go for business reasons within the first couple of months. [One factual line, matching the company letter if you have one, e.g. The role was closed when the company restructured.]\n\nIt was disappointing, and it taught me something useful. I now look closely at how established a team is before I join, which is one reason I am applying to established companies like yours. The long roles before that are the core of what I bring, especially clinical training at Mindray and product specialist work at BPL.',
     },
     {
       id: 't-leave-bpl',
@@ -264,7 +264,7 @@ window.CC_DATA_PARTS.interview = {
     },
     {
       signal: 'How long people in your target role stay',
-      how: 'On the company\'s LinkedIn page, open People and filter by Hyderabad and words such as application, product specialist or complaint. Several profiles with 1 to 6 month stints are the clearest warning. A friendly 10-minute chat with a current or former employee often tells you more than any rating.',
+      how: 'On the company\'s LinkedIn page, open People and filter by Hyderabad and words such as application, product specialist or complaint. If several people in this team moved on within months of joining, ask the recruiter why. A friendly 10-minute chat with a current or former employee often tells you more than any rating.',
     },
     {
       signal: 'How long the job has been open, and how often it returns',

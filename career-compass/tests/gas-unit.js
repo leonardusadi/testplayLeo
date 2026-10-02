@@ -104,7 +104,10 @@ test('private link: requests without the key are refused', () => {
   assert.strictEqual(call(gas, 'load', null, 'wrong').error.code, 'locked');
   assert.strictEqual(call(gas, 'load', null, 'k123').ok, true);
   gas.context.createPrivateLink();
-  assert.ok(gas.logs.some((l) => /\?key=[0-9a-f]{32}/.test(l)));
+  assert.ok(gas.logs.some((l) => l.includes("?key=k123")));
+  const fresh = createGas();
+  fresh.context.createPrivateLink();
+  assert.ok(/^[0-9a-f]{32}$/.test(fresh.props.ACCESS_KEY));
 });
 
 test('saveFile stores a file in the Career Compass folder', () => {
@@ -146,6 +149,54 @@ test('bad input is rejected cleanly', () => {
   const s = call(gas, 'save', { core: { 'bad key!': { value: 1, updatedAt: 1 } }, apps: [{ id: '../evil', company: 'x' }] });
   assert.strictEqual(s.data.core, 0);
   assert.strictEqual(s.data.apps, 0);
+});
+
+test('tabs grow past their row limit, and deleting rows never removes the last spare row', () => {
+  const gas = createGas();
+  call(gas, 'load');
+  const sh = gas.sheet('Applications');
+  sh.maxRows = 3; // header + 2 rows, as on a small sheet
+  const many = Array.from({ length: 5 }, (_, i) => ({ id: `a${i}`, company: `C${i}`, updatedAt: 1 }));
+  assert.strictEqual(call(gas, 'save', { apps: many }).ok, true);
+  assert.strictEqual(sh.table().length, 5);
+  const msgs = gas.sheet('Messages');
+  call(gas, 'save', { apps: [{ id: 'm', company: 'M', updatedAt: 1, messages: [{ id: 'x1', text: 'a' }] }] });
+  msgs.maxRows = msgs.data.length; // completely full tab
+  assert.strictEqual(call(gas, 'save', { apps: [{ id: 'm', company: 'M', updatedAt: 2, deleted: true }] }).ok, true);
+  assert.strictEqual(msgs.table().length, 0);
+});
+
+test('Store rows follow column names even if someone reorders the columns', () => {
+  const gas = createGas();
+  call(gas, 'save', { core: { wins: { value: ['a'], updatedAt: 1 } } });
+  const st = gas.sheet('Store');
+  st.data = st.data.map((r) => [r[2], r[0], r[1], r[3], r[4]]); // value, key, part, ...
+  call(gas, 'save', { core: { wins: { value: ['b'], updatedAt: 2 } } });
+  assert.deepStrictEqual(call(gas, 'load').data.core.wins.value, ['b']);
+});
+
+test('Save to Drive reuses its folder and never uses a trashed one', () => {
+  const gas = createGas();
+  const file = { name: 'a.docx', mime: 'x', base64: Buffer.from('PK').toString('base64') };
+  call(gas, 'saveFile', file);
+  call(gas, 'saveFile', file);
+  assert.strictEqual(gas.folders.length, 1);
+  gas.folders[0].trashed = true;
+  call(gas, 'saveFile', file);
+  assert.strictEqual(gas.folders.length, 2);
+  assert.strictEqual(gas.folders[1].files.length, 1);
+});
+
+test('createPrivateLink keeps an existing key', () => {
+  const gas = createGas({ props: { ACCESS_KEY: 'keep-me' } });
+  gas.context.createPrivateLink();
+  assert.strictEqual(gas.props.ACCESS_KEY, 'keep-me');
+  assert.ok(gas.logs.some((l) => l.includes('keep-me')));
+});
+
+test('Ask Claude timeouts become a clear message', () => {
+  const gas = createGas({ props: { ANTHROPIC_API_KEY: 'k' }, fetch: () => { throw new Error('Timeout: https://api.anthropic.com/v1/messages'); } });
+  assert.strictEqual(call(gas, 'ai', { prompt: 'x' }).error.code, 'slow');
 });
 
 console.log(`\n${n} passed`);

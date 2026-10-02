@@ -97,21 +97,27 @@ function api(requestJson) {
 
 /** Creates the tabs (safe to run again) and prints the Sheet's address. */
 function setup() {
+  // Granular consent lets people untick a permission; ask again for anything missing before going on.
+  if (ScriptApp.requireAllScopes) ScriptApp.requireAllScopes(ScriptApp.AuthMode.FULL);
   Object.keys(TABS).forEach((k) => tab_(TABS[k]));
   const book = book_();
   const first = book.getSheets()[0];
   if (first && first.getName() === 'Sheet1' && first.getLastRow() === 0 && book.getSheets().length > 1) book.deleteSheet(first);
   Logger.log('Career Compass is ready. Data lives in: ' + book.getUrl());
+  Logger.log('Dates use the Sheet time zone: ' + book.getSpreadsheetTimeZone() + ' (File > Settings in the Sheet).');
   Logger.log('Next: Deploy > New deployment > Web app (Execute as: Me).');
 }
 
 /** Optional: lock the page to a secret link, for deployments shared as "Anyone". */
 function createPrivateLink() {
-  const key = Utilities.getUuid().replace(/-/g, '');
-  props_().setProperty('ACCESS_KEY', key);
+  const existing = props_().getProperty('ACCESS_KEY');
+  const key = existing || Utilities.getUuid().replace(/-/g, '');
+  if (!existing) props_().setProperty('ACCESS_KEY', key);
   const url = ScriptApp.getService().getUrl();
-  Logger.log('Private link (send only this): ' + (url ? url + '?key=' + key : '<web app URL>?key=' + key));
-  Logger.log('To remove the lock, delete the ACCESS_KEY script property.');
+  Logger.log((existing ? 'A private key already exists (unchanged): ' : 'Private key created: ') + key);
+  Logger.log('Send her: <your Web app URL, ending in /exec>?key=' + key);
+  if (url && /\/exec$/.test(url)) Logger.log('For this deployment that is: ' + url + '?key=' + key);
+  Logger.log('To remove the lock, delete the ACCESS_KEY script property (Project Settings > Script properties).');
 }
 
 // ---------------------------------------------------------------- load and save
@@ -177,13 +183,15 @@ function writeStore_(core, skipped) {
     const parts = [];
     for (let i = 0; i < json.length || i === 0; i += CHUNK) parts.push(json.slice(i, i + CHUNK));
     parts.forEach((p, i) => {
-      const values = [key, String(i), p, String(ts), stamp];
-      if (i < existing.length) writeRow_(t, existing[i].row, values, existing[i].raw);
+      const prev = i < existing.length ? existing[i] : null;
+      const values = rowFrom_(t, { key: key, part: String(i), value: p, updatedAt: String(ts), savedOn: stamp }, prev && prev.raw);
+      if (prev) writeRow_(t, prev.row, values);
       else appends.push(values);
     });
     existing.slice(parts.length).forEach((r) => deletes.push(r.row));
     written += 1;
   });
+  ensureRows_(t.sh, t.sh.getLastRow() + 1); // never delete the last spare row
   deletes.sort((a, b) => b - a).forEach((row) => t.sh.deleteRow(row));
   appendRows_(t, appends);
   return written;
@@ -263,6 +271,7 @@ function writeApps_(apps, skipped) {
     });
   });
   appendRows_(t, appends);
+  ensureRows_(mt.sh, mt.sh.getLastRow() + 1); // never delete the last spare row
   [...new Set(msgDeletes)].sort((a, b) => b - a).forEach((row) => mt.sh.deleteRow(row));
   appendRows_(mt, msgAppends);
   return written;
@@ -276,10 +285,22 @@ function saveFile_(p) {
   if (!b64) throw err_('bad_request', 'The file was empty.');
   if (b64.length > 14 * 1024 * 1024) throw err_('too_large', 'That file is too large to save.');
   const blob = Utilities.newBlob(Utilities.base64Decode(b64), String(p.mime || 'application/octet-stream'), name);
-  const folders = DriveApp.getFoldersByName('Career Compass');
-  const folder = folders.hasNext() ? folders.next() : DriveApp.createFolder('Career Compass');
-  const file = folder.createFile(blob);
+  const file = folder_().createFile(blob);
   return { url: file.getUrl(), name: file.getName() };
+}
+
+/** The "Career Compass" Drive folder, remembered by id; a trashed folder is never reused. */
+function folder_() {
+  const id = props_().getProperty('DRIVE_FOLDER_ID');
+  if (id) {
+    try { const f = DriveApp.getFolderById(id); if (!f.isTrashed()) return f; } catch (err) { /* deleted: make a new one */ }
+  }
+  const it = DriveApp.getFoldersByName('Career Compass');
+  let folder = null;
+  while (it.hasNext()) { const f = it.next(); if (!f.isTrashed()) { folder = f; break; } }
+  if (!folder) folder = DriveApp.createFolder('Career Compass');
+  props_().setProperty('DRIVE_FOLDER_ID', folder.getId());
+  return folder;
 }
 
 // ---------------------------------------------------------------- Ask Claude (optional)
@@ -291,7 +312,10 @@ function askClaude_(p) {
   if (!prompt.trim()) throw err_('bad_request', 'Nothing to send.');
   if (prompt.length > 150000) throw err_('too_long', 'That text is too long.');
   const effort = ['low', 'medium', 'high'].indexOf(p.effort) >= 0 ? p.effort : 'medium';
-  const res = UrlFetchApp.fetch('https://api.anthropic.com/v1/messages', {
+  // UrlFetchApp gives up after about a minute and cannot stream, so answers are kept short.
+  let res;
+  try {
+    res = UrlFetchApp.fetch('https://api.anthropic.com/v1/messages', {
     method: 'post',
     contentType: 'application/json',
     muteHttpExceptions: true,
@@ -302,12 +326,16 @@ function askClaude_(p) {
     },
     payload: JSON.stringify({
       model: 'claude-opus-5-5',
-      max_tokens: 16000,
+      max_tokens: 6000,
       output_config: { effort: effort },
       fallbacks: 'default',
       messages: [{ role: 'user', content: prompt }],
     }),
-  });
+    });
+  } catch (err) {
+    if (/timed? ?out|timeout|deadline/i.test(String(err))) throw err_('slow', 'Claude took too long. Try a shorter text, or try again.');
+    throw err_('network', 'Could not reach Claude just now.');
+  }
   const status = res.getResponseCode();
   let data = {};
   try { data = JSON.parse(res.getContentText()); } catch (err) { data = {}; }
@@ -368,8 +396,14 @@ function rows_(t) {
   });
 }
 
+let tz_ = null;
+function tz_get_() {
+  if (!tz_) { try { tz_ = book_().getSpreadsheetTimeZone(); } catch (err) { tz_ = Session.getScriptTimeZone(); } }
+  return tz_;
+}
+
 function cell_(v) {
-  if (v instanceof Date) return Utilities.formatDate(v, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+  if (v instanceof Date) return Utilities.formatDate(v, tz_get_(), 'yyyy-MM-dd');
   return v == null ? '' : v;
 }
 
@@ -385,9 +419,16 @@ function writeRow_(t, row, values) {
   t.sh.getRange(row, 1, 1, values.length).setNumberFormat('@').setValues([values]);
 }
 
+/** A tab has a fixed number of rows; add more before writing past the end. */
+function ensureRows_(sh, lastRow) {
+  const max = sh.getMaxRows();
+  if (lastRow > max) sh.insertRowsAfter(max, lastRow - max);
+}
+
 function appendRows_(t, rows) {
   if (!rows.length) return;
   const start = t.sh.getLastRow() + 1;
+  ensureRows_(t.sh, start + rows.length - 1);
   t.sh.getRange(start, 1, rows.length, t.header.length).setNumberFormat('@').setValues(rows.map((r) => {
     const out = r.slice(0, t.header.length);
     while (out.length < t.header.length) out.push('');
@@ -406,7 +447,7 @@ function keyOk_(key) {
   return !want || key === want;
 }
 
-function now_() { return Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd HH:mm'); }
+function now_() { return Utilities.formatDate(new Date(), tz_get_(), 'yyyy-MM-dd HH:mm'); }
 function err_(code, message) { const e = new Error(message); e.code = code; return e; }
 function ok_(data) { return JSON.stringify({ ok: true, data: data }); }
 function fail_(code, message) { return JSON.stringify({ ok: false, error: { code: code, message: message } }); }

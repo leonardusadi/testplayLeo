@@ -39,9 +39,9 @@ window.CC_DATA_PARTS.companies = [
     careers: 'https://www.careers.philips.com/in/en',
     roles: ['Clinical Application Specialist Ultrasound', 'Remote Service Engineer Ultrasound', 'Clinical Education', 'Complaint Handling Investigator', 'Clinical Specialist R&D', 'Customer Success'],
     functions: 'Ultrasound clinical applications and field service, with Affiniti ultrasound built in Pune. Bengaluru quality and R&D teams hire complaint investigators and in-house clinical specialists with less travel.',
-    work: 'Clinical and service roles are home-based with field travel. A remote CAS Ultrasound listing appeared on an aggregator, but its country was not confirmed. Employees report about 3 office days a week in office roles.',
+    work: 'Clinical and service roles are home-based with field travel. A remote CAS Ultrasound role for India was listed in early 2026 and has probably closed. Remote here usually means home-based with field travel. Employees report about 3 office days a week in office roles.',
     lane: 'same',
-    fit: 'You spent nearly seven years installing, repairing and training on Philips ultrasound at a Philips channel partner. Few candidates bring that depth on Philips platforms, for clinical, service or complaint roles.',
+    fit: 'You spent nearly seven years installing, repairing and training on Philips ultrasound at a Philips channel partner. That depth fits clinical, service and complaint roles here. Your earlier application has had no reply, so this time reach a person too, such as a former Alliance colleague now at Philips or a Philips recruiter for India.',
   },
   {
     id: 'siemens-healthineers',
@@ -129,7 +129,7 @@ window.CC_DATA_PARTS.companies = [
     hyd: true,
     careers: 'https://jobs.sanofi.com/en/location/india-jobs/34155/1269750/2',
     roles: ['Specialist Quality Services Product Complaints', 'Medical Regulatory Writer', 'Pharmacovigilance Specialist', 'Regulatory Affairs Specialist', 'Medical Information'],
-    functions: 'The Hyderabad Global Hub centralises R&D, medical affairs, pharmacovigilance, regulatory and digital work, and is growing from about 2,600 people toward 4,500+ in HITEC City.',
+    functions: 'The Hyderabad Global Hub centralises R&D, medical affairs, pharmacovigilance, regulatory and digital work, and is growing from about 2,600 people towards 4,500+ in HITEC City.',
     work: 'Work mode was not confirmed, so check each posting.',
     lane: 'adjacent',
     fit: 'A product-complaints specialist role seen in 2026 is the most direct fit. Your work on product catalogues and spec sheets supports a later move into regulatory writing. Check what is open now.',
@@ -158,7 +158,7 @@ window.CC_DATA_PARTS.companies = [
     functions: 'Mindray Medical India covers ultrasound clinical applications, channel-partner training, and academic and marketing programmes. Roles seen include Assistant Application Manager and Academic Manager.',
     work: 'Field-based. Current Hyderabad openings were not confirmed, so check.',
     lane: 'same',
-    fit: 'You worked here as a Clinical Application Specialist in Hyderabad (2019-2021), so you know the products and how the team works. A return at Application Manager or Academic Manager level would build on that.',
+    fit: 'You worked here as a Clinical Application Specialist in Hyderabad (2019-2021), so you know the products and how the team works. A return at Application Manager or Academic Manager level would build on that. Your application here has had no reply so far, so ask a former Mindray colleague to refer you or pass your CV to the application team.',
   },
   {
     id: 'stryker',
@@ -301,7 +301,7 @@ window.CC_DATA_PARTS.companies = [
     functions: 'Its life-sciences team runs global complaint handling for clients, including creating complaint records, evaluating complaints against quality guidelines and following up with clients.',
     work: 'Work mode was not confirmed, so check each posting.',
     lane: 'adjacent',
-    fit: 'The work suits your domain, yet the Hyderabad role advertised in August 2026 was entry level. Apply only for team-lead or SME titles, or treat it as a short bridge into complaint work.',
+    fit: 'The work suits your domain, yet the Hyderabad role advertised in August 2026 was entry level. Apply for team-lead or SME titles, where your 13 years count, and check the level before you accept.',
   },
   {
     id: 'zoetis',

@@ -7,7 +7,7 @@ window.CC_DATA_PARTS.care = {
   reframes: [
     {
       thought: 'I was let go twice in a row. Something must be wrong with me.',
-      reframe: 'Two retrenchments so close together hurt, and it is natural to look for the reason in yourself. Both were business decisions. When a company cuts back, the newest people are often the first to go, and you were the newest. Before that, employers kept you for years. You spent almost seven at Alliance, two and a half at Mindray and a long stretch at BPL. That longer record is the truer picture of you.',
+      reframe: 'Two retrenchments so close together hurt, and it is natural to look for the reason in yourself. Both were business decisions. When a company cuts back, the newest people are often the first to go. Before that, employers kept you for years. You spent almost seven at Alliance, two and a half at Mindray and a long stretch at BPL. That longer record is the truer picture of you.',
     },
     {
       thought: 'Recruiters will see the two short roles and turn me down.',
@@ -139,7 +139,7 @@ window.CC_DATA_PARTS.care = {
   ],
 
   rhythm: [
-    'Two to three focused hours a day, five days a week, is plenty. Long, unfocused days tend to drain mood, and tailored applications count as much as volume.',
+    'Two to three focused hours on a weekday is the most you need, and on many days the shorter plan on the Today page is enough. Long, unfocused days tend to drain mood, and tailored applications count as much as volume.',
     'Batch applications on two or three days, for example Monday, Tuesday and Thursday mornings, in your best-energy hours. Work in blocks of 45 to 60 minutes with a short break between them.',
     'Keep follow-ups and messages to people for one day, such as Wednesday. A steady week is about five tailored applications, three follow-ups and three people contacted. On a low-energy week, halving it is fine.',
     'Learn in small doses, 20 to 30 minutes two or three times a week, on one course that opens a lane you are considering.',
@@ -161,14 +161,14 @@ window.CC_DATA_PARTS.care = {
       name: 'Vandrevala Foundation helpline',
       number: '+91 99996 66555',
       hours: '24 hours, every day. Free. Call or WhatsApp.',
-      languages: '11 languages, including English, Hindi, Telugu and Bengali',
+      languages: 'English, Hindi and other Indian languages (check the website for the current list)',
       url: 'https://www.vandrevalafoundation.com/free-counseling',
     },
     {
       name: 'iCALL Psychosocial Helpline (TISS)',
       number: '+91 91529 87821',
-      hours: 'Monday to Saturday, 8 am to 9 pm. Free. Hours can change, so check the website. Not a 24-hour line.',
-      languages: 'English, Hindi, Telugu, Bengali and several other Indian languages',
+      hours: 'Monday to Saturday, daytime and early evening. Free. Check the website for current hours before you call. Not a 24-hour line.',
+      languages: 'English and Hindi. Ask about other languages when you call.',
       url: 'https://icallhelpline.org/',
     },
     {
