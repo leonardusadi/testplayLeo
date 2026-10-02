@@ -437,6 +437,36 @@ table.data tr:last-child td { border-bottom: 0; }
 .breath .label { position: relative; font-family: var(--font-display); font-size: 1.25rem; font-weight: 600; text-align: center; }
 .breath .label small { display: block; font-family: var(--font-body); font-size: 0.85rem; color: var(--ink-2); font-weight: 600; }
 
+/* Theosophical reflections */
+.epigraph {
+  margin: 0; padding: 12px 16px 12px 18px; display: grid; gap: 4px; max-width: 74ch;
+  border-left: 3px solid var(--marigold); border-radius: 0 12px 12px 0;
+  background: color-mix(in srgb, var(--marigold-soft) 55%, transparent);
+}
+.epigraph blockquote { margin: 0; font-family: var(--font-display); font-style: italic; font-size: 1.1rem; line-height: 1.45; }
+.epigraph figcaption { font-size: 0.82rem; font-weight: 600; color: var(--ink-3); }
+.epigraph p { margin: 2px 0 0; font-size: 0.93rem; color: var(--ink-2); }
+.epigraph.small-ep { margin-top: 10px; padding: 8px 12px 8px 14px; }
+.epigraph.small-ep blockquote { font-size: 1rem; }
+.seed {
+  background: linear-gradient(160deg, color-mix(in srgb, var(--marigold-soft) 70%, var(--surface)) 0%, var(--surface) 70%);
+  border-color: color-mix(in srgb, var(--marigold) 35%, var(--line));
+}
+.seed .row > span:last-child { color: var(--marigold-ink); }
+.seed blockquote { margin: 0; font-family: var(--font-display); font-size: 1.22rem; line-height: 1.45; }
+.seed .src { margin: 0; font-size: 0.82rem; font-weight: 600; color: var(--ink-3); }
+.seed-clock { font-family: var(--font-display); font-size: 1.5rem; min-width: 3.2ch; }
+.prayer-lines { display: grid; gap: 2px; font-family: var(--font-display); font-size: 1.1rem; line-height: 1.5; }
+ol.objects { margin: 0; padding-left: 1.3em; display: grid; gap: 10px; }
+ol.objects li > span { display: block; }
+ol.objects .obj { font-family: var(--font-display); font-size: 1.05rem; }
+.stairs-text { font-family: var(--font-display); font-size: 1.08rem; line-height: 1.6; max-width: 68ch; white-space: pre-line; }
+.theo-line { display: flex; gap: 8px; align-items: flex-start; }
+.theo-line > span:first-child { color: var(--marigold-ink); margin-top: 2px; flex: none; }
+.theo-toggle b { display: inline-flex; align-items: center; gap: 4px; }
+.t-title > span:first-child { vertical-align: -2px; margin-right: 6px; color: var(--marigold-ink); }
+.motto { font-family: var(--font-display); font-style: italic; color: var(--ink-2); }
+
 /* Toast */
 .toast {
   position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(76px + env(safe-area-inset-bottom, 0px)); z-index: 50;

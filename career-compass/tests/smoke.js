@@ -28,6 +28,8 @@ const ROUTES = ['today', 'paths', 'companies', 'abroad', 'search', 'cv', 'letter
       if (overflow > 1) problems.push(`[${w}] #${r}: horizontal overflow ${overflow}px`);
       const empty = await page.evaluate(() => document.querySelector('#main').innerText.trim().length);
       if (empty < 40) problems.push(`[${w}] #${r}: view looks empty`);
+      const epi = await page.evaluate(() => !!(window.CC_DATA && window.CC_DATA.theosophy) && !document.querySelector('[data-epigraph], .seed'));
+      if (epi) problems.push(`[${w}] #${r}: theosophical epigraph missing`);
       await page.screenshot({ path: path.join(out, `${w}-${r}.png`), fullPage: true });
     }
     if (w === 390) {
@@ -65,6 +67,32 @@ const ROUTES = ['today', 'paths', 'companies', 'abroad', 'search', 'cv', 'letter
         const target = path.join(out, `export${ext}`);
         await dl.saveAs(target);
         if (!target.endsWith(ext) || fs.statSync(target).size < 50) problems.push(`download ${label} too small`);
+      }
+      // theosophical layer: on by default, never in the CV, can be switched off and on
+      if (await page.evaluate(() => !!(window.CC_DATA && window.CC_DATA.theosophy))) {
+        const T = await page.evaluate(() => window.CC_DATA.theosophy);
+        await page.evaluate(() => { history.pushState(null, '', '#cv'); dispatchEvent(new PopStateEvent('popstate')); });
+        await page.waitForTimeout(150);
+        const paper = await page.textContent('.paper');
+        const quotes = [...Object.values(T.epigraphs).map((e) => e.quote), ...T.seeds.map((x) => x.quote)];
+        if (quotes.some((q) => paper.includes(q.slice(0, 40)))) problems.push('theosophy text appears in the CV');
+        await page.evaluate(() => { history.pushState(null, '', '#care'); dispatchEvent(new PopStateEvent('popstate')); });
+        await page.waitForTimeout(150);
+        if (!(await page.$('#theosophy'))) problems.push('care: theosophy section missing');
+        if ((await page.$$eval('.prayer-lines span', (e) => e.length)) < 3) problems.push('care: Universal Prayer missing');
+        await page.click('.theo-toggle button');
+        await page.waitForTimeout(150);
+        if (await page.$('#theosophy, [data-epigraph], .seed')) problems.push('care: theosophy still shown after turning it off');
+        await page.evaluate(() => { history.pushState(null, '', '#today'); dispatchEvent(new PopStateEvent('popstate')); });
+        await page.waitForTimeout(150);
+        if (await page.$('.seed, [data-epigraph]')) problems.push('today: theosophy still shown after turning it off');
+        await page.evaluate(() => { history.pushState(null, '', '#care'); dispatchEvent(new PopStateEvent('popstate')); });
+        await page.waitForTimeout(150);
+        await page.click('.theo-toggle button');
+        await page.waitForTimeout(150);
+        if (!(await page.$('#theosophy'))) problems.push('care: theosophy not restored after turning it on');
+        await page.evaluate(() => { history.pushState(null, '', '#tracker'); dispatchEvent(new PopStateEvent('popstate')); });
+        await page.waitForTimeout(150);
       }
       // reload keeps data
       await page.reload();

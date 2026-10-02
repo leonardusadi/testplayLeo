@@ -121,6 +121,14 @@ const nav = (page, token) => page.evaluate((t) => { const a = document.querySele
   await p1.click('[data-region="global"]');
   await waitSynced(p1, 'device1 after region switch');
   check((Object.fromEntries(gas.sheet('Store').table().map((r) => [r.key, r.value])).settings || '').includes('global'), 'region saved to Store');
+  const hasTheo = await p1.evaluate(() => !!(window.CC_DATA && window.CC_DATA.theosophy));
+  if (hasTheo) {
+    await nav(p1, 'care');
+    await p1.waitForTimeout(150);
+    await p1.click('.theo-toggle button');
+    await waitSynced(p1, 'device1 after turning theosophy off');
+    check(/"theo":false/.test(Object.fromEntries(gas.sheet('Store').table().map((r) => [r.key, r.value])).settings || ''), 'theosophy switch saved to Store');
+  }
 
   // Drive save of the CV
   await nav(p1, 'cv');
@@ -140,6 +148,7 @@ const nav = (page, token) => page.evaluate((t) => { const a = document.querySele
   await p2.waitForTimeout(150);
   const t2 = await p2.textContent('#main');
   check(t2.includes('Medtronic'), 'device2 sees the Medtronic application');
+  if (hasTheo) check(!(await p2.$('[data-epigraph]')), 'device2 picks up theosophy switched off from the Sheet');
   check(t2.includes('Messages sent') && /1 saved/.test(t2), 'device2 sees the saved message');
   check(gas.sheet('Applications').table().length === apps.length, 'no duplicate seed rows from the second device');
   await p2.screenshot({ path: path.join(out, 'd2-tracker.png'), fullPage: true });

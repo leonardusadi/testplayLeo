@@ -55,6 +55,7 @@ const CC = (() => {
     good: '<circle cx="12" cy="13" r="4.5"/><path d="M12 4v2"/><path d="M5 13H3"/><path d="M21 13h-2"/><path d="M6.6 7.6l1.4 1.4"/><path d="M17.4 7.6L16 9"/>',
     trash: '<path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/>',
     check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+    lotus: '<path d="M12 4.5c2.3 2.6 2.3 8 0 11.5-2.3-3.5-2.3-8.9 0-11.5z"/><path d="M12 16c-2.7.1-6.2-1.8-7.6-5.6 3.3-.3 5.9 1.1 7.6 3.7"/><path d="M12 16c2.7.1 6.2-1.8 7.6-5.6-3.3-.3-5.9 1.1-7.6 3.7"/><path d="M5 19.5h14"/>',
   };
 
   const toastEl = () => document.getElementById('toast');
@@ -66,7 +67,7 @@ const CC = (() => {
     if (link) el.append(' ', h('a', { href: link, target: '_blank', rel: 'noopener noreferrer' }, 'Open'));
     el.hidden = false;
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => { el.hidden = true; }, link ? 8000 : 2600);
+    toastTimer = setTimeout(() => { el.hidden = true; }, link ? 8000 : Math.min(7000, Math.max(2600, String(msg).length * 55)));
   }
 
   // ---------- Dates ----------

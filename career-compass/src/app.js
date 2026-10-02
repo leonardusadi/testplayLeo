@@ -53,6 +53,24 @@
   const ui = (key, fallback) => (S().ui && S().ui[key] != null ? S().ui[key] : fallback);
   const setUi = (key, value) => CC.update((s) => { s.ui = s.ui || {}; s.ui[key] = value; });
 
+  // ---------- theosophical reflections (on unless she turns them off in Care) ----------
+  const TH = () => D.theosophy;
+  const theoOn = () => !!TH() && !(S().settings && S().settings.theo === false);
+  const moment = (key) => (theoOn() && key && TH().moments[key]) || '';
+  const withMoment = (base, key) => (moment(key) ? `${base} ${moment(key)}` : base);
+  const seedOfDay = () => TH().seeds[dayOfYear() % TH().seeds.length];
+  /** A short passage under a page heading: quote, attribution and one line on what it means for this page. */
+  function epigraph(key) {
+    const e = theoOn() && TH().epigraphs[key];
+    if (!e) return null;
+    return h('figure', { class: 'epigraph no-print', 'data-epigraph': key },
+      h('blockquote', null, e.quote), h('figcaption', null, e.source), e.note ? h('p', null, e.note) : null);
+  }
+  function setTheo(on) {
+    CC.update((s) => { s.settings.theo = on; });
+    toast(on ? 'Theosophical reflections are on.' : 'Theosophical reflections are off. You can turn them on again in Care.');
+  }
+
   function subtabs(key, options, fallback) {
     const cur = ui(key, fallback);
     return h('div', { class: 'subtabs', role: 'tablist' },
@@ -196,6 +214,13 @@
     const start = dayOfYear() % Math.max(pool.length, 1);
     const rotated = [...pool.slice(start), ...pool.slice(0, start)];
     for (const p of rotated) { if (tasks.length >= n) break; if (!tasks.some((t) => t.id === `p-${p.id}`)) tasks.push({ ...p, title: rv(p, 'title'), sub: rv(p, 'sub'), id: `p-${p.id}` }); }
+    // One theosophical practice a day at most; on low days it is the one thing that is for her.
+    const theoPool = theoOn() ? (TH().pool || []).filter((p) => p.energy.includes(energy)) : [];
+    if (theoPool.length) {
+      const pick = (energy === 'low' && theoPool.find((p) => p.care)) || theoPool[dayOfYear() % theoPool.length];
+      if (tasks.length >= n) tasks.pop();
+      tasks.push({ ...pick, id: `th-${pick.id}`, theo: true });
+    }
     if (energy === 'low' && !tasks.some((t) => t.care)) {
       const care = (D.today.pool || []).find((p) => p.care);
       if (care) { if (tasks.length >= n) tasks.pop(); tasks.push({ ...care, id: `p-${care.id}` }); }
@@ -229,6 +254,17 @@
     det.addEventListener('toggle', () => { if (det.open === ui('firstRoundClosed', false)) CC.update((s) => { s.ui.firstRoundClosed = !det.open; }, { silent: true }); });
     return det;
   }
+  /** Today's seed thought: the same passage on Today and in Care, changing each day. */
+  function seedCard(timer) {
+    const sd = seedOfDay();
+    return h('section', { class: 'card seed', 'aria-label': 'Seed thought for today' },
+      h('div', { class: 'row between' }, h('span', { class: 'eyebrow' }, 'Seed thought for today'), icon('lotus', 22)),
+      h('blockquote', null, sd.quote),
+      h('p', { class: 'src' }, sd.source),
+      h('p', { class: 'small muted' }, sd.reflection),
+      timer || h('a', { href: '#care', class: 'small' }, 'Sit with it in Care'));
+  }
+
   function viewToday() {
     const t = CC.iso();
     const day = S().daily[t] || {};
@@ -270,6 +306,8 @@
           h('p', { style: { fontWeight: 700 } }, 'How much energy do you have today?'),
           h('div', { class: 'energy' }, ['low', 'okay', 'good'].map(energyBtn)))),
 
+      theoOn() ? seedCard() : null,
+
       planData ? h('details', { class: 'acc', open: !day.energy && !S().wins.length && !CC.apps().some((a) => !a.seed && !a.past) },
         h('summary', null, planData.title),
         h('div', { class: 'acc-body' },
@@ -280,6 +318,7 @@
 
       day.energy ? h('section', { class: 'section', id: 'plan-today' },
         sectionHead('Today’s gentle plan', D.today.energy[day.energy].note),
+        epigraph('today'),
         h('ul', { class: 'tasks' }, plan.map((task) => h('li', { class: done.has(task.id) ? 'done' : '' },
           h('input', {
             type: 'checkbox', id: `task-${task.id}`, checked: done.has(task.id), 'aria-label': `Mark done: ${task.title}`,
@@ -292,12 +331,12 @@
             }),
           }),
           h('div', { class: 'stack', style: { gap: '2px', flex: '1' } },
-            h('span', { class: 't-title' }, task.title),
+            h('span', { class: 't-title' }, task.theo ? icon('lotus', 15) : null, task.title),
             task.sub ? h('span', { class: 't-sub' }, task.sub) : null,
             h('div', { class: 'row', style: { gap: '10px' } },
               task.minutes ? h('span', { class: 'small faint' }, `about ${task.minutes} min`) : null,
               task.href ? h('a', { href: task.href, class: 'small' }, 'Open') : null))))),
-        plan.length && plan.every((x) => done.has(x.id)) ? h('div', { class: 'note good' }, h('b', null, 'That’s today done.'), h('span', null, D.today.doneLine)) : null)
+        plan.length && plan.every((x) => done.has(x.id)) ? h('div', { class: 'note good' }, h('b', null, 'That’s today done.'), h('span', null, D.today.doneLine), moment('dayDone') ? h('span', { class: 'small' }, moment('dayDone')) : null) : null)
         : null,
 
       due.length ? h('section', { class: 'section' },
@@ -339,6 +378,7 @@
         h('p', { class: 'lede' }, D.explore.intro)),
       isGlobal() && G().intro ? h('div', { class: 'note info' }, h('b', null, 'Global mode'), h('span', null, G().intro)) : null,
       subtabs('explore', [['paths', 'Role paths'], ['companies', 'Companies'], ['abroad', 'Remote & abroad']], 'paths'),
+      epigraph(tab),
       tab === 'paths' ? viewPaths() : tab === 'companies' ? viewCompanies() : viewAbroad());
   }
 
@@ -471,6 +511,7 @@
       h('div', { class: 'view-head' }, h('span', { class: 'eyebrow' }, 'Apply'), h('h1', null, tab === 'cv' ? 'Your CV' : tab === 'letters' ? 'Letters & messages' : 'Find openings'),
         h('p', { class: 'lede' }, tab === 'cv' ? D.cv.intro : tab === 'letters' ? D.letters.intro : isGlobal() && G().search ? G().search.intro : D.search.intro)),
       subtabs('apply', [['search', 'Search'], ['cv', 'CV studio'], ['letters', 'Letters']], 'search'),
+      epigraph(tab),
       tab === 'cv' ? viewCV() : tab === 'letters' ? viewLetters() : isGlobal() && G().search ? viewSearchGlobal() : viewSearch());
   }
 
@@ -800,7 +841,7 @@
       if (tpl.logAs === 'closed') { app.status = 'closed'; }
       CC.upsertApp(app, { silent: true });
       CC.update((s) => { s.letters.appId = app.id; });
-      toast(`Saved to tracker: ${app.company}`);
+      toast(withMoment(`Saved to tracker: ${app.company}.`, tpl.logAs));
     };
     return h('div', { class: 'stack', style: { gap: '22px' } },
       h('div', { class: 'stack', style: { gap: '10px' } }, groups.map((g) => h('div', { class: 'stack', style: { gap: '6px' } },
@@ -831,6 +872,7 @@
               CC.saveToDrive(`Cover_Letter_${slug(f.company || 'company')}.docx`, new Blob([Docx.build(blocks, { title: 'Cover letter', author: D.person.full })], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' }));
             }, '', 'download') : null,
             btn('Save to tracker', save, '', 'check')),
+          moment('beforeSend') ? h('p', { class: 'small muted theo-line' }, icon('lotus', 16), h('span', null, moment('beforeSend'))) : null,
           h('p', { class: 'small faint' }, 'Highlighted words in [brackets] still need your details.'),
           aiBox({
             id: 'ai-letter', title: 'Ask Claude: write it for this job', desc: 'Paste the job description. Claude drafts this message from your CV, honestly, in a warm professional tone. Edit before sending.',
@@ -857,6 +899,7 @@
     return h('div', { class: 'view' },
       h('div', { class: 'view-head' }, h('span', { class: 'eyebrow' }, 'Tracker'), h('h1', null, 'Everything you’ve sent'),
         h('p', { class: 'lede' }, 'One place for every application, follow-up and message. The tool reminds you a week after you apply.')),
+      epigraph('tracker'),
       h('div', { class: 'pipeline' },
         STATUSES.map(([k, l]) => pipe(k, l, counts[k])),
         pipe('due', 'Follow-up due', all.filter(due).length)),
@@ -891,9 +934,10 @@
           const next = { ...a, status: e.target.value };
           if (next.status === 'applied' && !next.appliedOn) { next.appliedOn = CC.iso(); next.followUpOn = CC.addDays(next.appliedOn, 7); }
           CC.upsertApp(next);
-          if (next.status === 'offer') toast('An offer. Take a breath and enjoy this.');
+          if (moment(next.status)) toast(moment(next.status));
+          else if (next.status === 'offer') toast('An offer. Take a breath and enjoy this.');
         } }, STATUSES.map(([k, l]) => h('option', { value: k }, l))),
-        a.status === 'applied' ? btn('Followed up', () => { CC.upsertApp({ ...a, followups: [...(a.followups || []), CC.iso()], followUpOn: CC.addDays(CC.iso(), 7) }); toast('Logged. Next nudge in a week.'); }, 'small') : null,
+        a.status === 'applied' ? btn('Followed up', () => { CC.upsertApp({ ...a, followups: [...(a.followups || []), CC.iso()], followUpOn: CC.addDays(CC.iso(), 7) }); toast(withMoment('Logged. Next nudge in a week.', 'followup')); }, 'small') : null,
         btn('Edit', () => setUi('editApp', a.id), 'small ghost'),
         a.link ? ext(a.link, 'Posting', 'small') : null));
   }
@@ -966,6 +1010,7 @@
       h('div', { class: 'view-head' }, h('span', { class: 'eyebrow' }, 'Prepare'), h('h1', null, tab === 'offer' ? 'Choosing a steady employer' : 'Interviews, calmly'),
         h('p', { class: 'lede' }, tab === 'offer' ? D.interview.offerIntro : D.interview.intro)),
       subtabs('prep', [['interview', 'Interview'], ['offer', 'Stability & offers']], 'interview'),
+      epigraph(tab === 'offer' ? 'offer' : 'interview'),
       tab === 'offer' ? viewOffer() : viewInterview());
   }
   function viewInterview() {
@@ -991,7 +1036,9 @@
         h('div', { class: 'card' }, h('p', { style: { whiteSpace: 'pre-wrap' } }, CV.marked(D.interview.intro_answers[track])), h('div', { class: 'row' }, copyBtn(D.interview.intro_answers[track])),
           h('div', { class: 'chips' }, CV.TRACKS.map((k) => h('button', { type: 'button', class: 'chip', 'aria-pressed': String(track === k), onclick: () => CC.update((s) => { s.cv.track = k; }) }, D.cv.tracks[k].label))))),
       h('section', { class: 'section' }, sectionHead('Practise one question', 'Say it out loud. Two minutes is plenty.'),
-        h('div', { class: 'card raised' }, h('span', { class: 'eyebrow' }, q.group), h('h3', null, q.q), h('div', { class: 'row' }, timerEl, startBtn, btn('Another question', () => setUi('practiceQ', pick + 1 + (dayOfYear() % 3)), 'small ghost')),
+        h('div', { class: 'card raised' },
+          theoOn() ? h('div', { class: 'note warm' }, h('b', null, 'Before you begin'), h('span', { class: 'small' }, TH().interviewCentering)) : null,
+          h('span', { class: 'eyebrow' }, q.group), h('h3', null, q.q), h('div', { class: 'row' }, timerEl, startBtn, btn('Another question', () => setUi('practiceQ', pick + 1 + (dayOfYear() % 3)), 'small ghost')),
           h('details', { class: 'acc' }, h('summary', null, 'See a suggested answer'), h('div', { class: 'acc-body' }, h('p', { class: 'small muted' }, q.why), h('p', { style: { whiteSpace: 'pre-wrap' } }, CV.marked(q.answer)))),
           aiBox({
             id: 'ai-practice', title: 'Ask Claude for feedback on your answer', desc: 'Type (or paste a voice-note transcript of) your answer. You get kind, specific feedback and a tighter version.',
@@ -1030,6 +1077,59 @@
 
   // ---------- CARE ----------
   let breathTimer = null;
+  let seedTimer = null;
+  /** Sit with today's seed thought: a quiet countdown of 3, 5 or 10 minutes. */
+  function seedSitting() {
+    const mins = ui('seedMins', 3);
+    const clock = h('span', { class: 'num seed-clock', 'aria-live': 'off' }, `${mins}:00`);
+    let left = mins * 60;
+    const show = () => { clock.textContent = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`; };
+    const sit = btn('Sit quietly', () => {
+      if (seedTimer) { clearInterval(seedTimer); seedTimer = null; sit.lastChild.textContent = 'Sit quietly'; left = mins * 60; show(); return; }
+      sit.lastChild.textContent = 'Stop';
+      seedTimer = setInterval(() => {
+        if (!clock.isConnected) { clearInterval(seedTimer); seedTimer = null; return; }
+        left -= 1; show();
+        if (left <= 0) { clearInterval(seedTimer); seedTimer = null; sit.lastChild.textContent = 'Sit quietly'; left = mins * 60; toast('Time. Carry one line of it with you.'); }
+      }, 1000);
+    }, 'small primary', 'lotus');
+    return h('div', { class: 'stack', style: { gap: '8px' } },
+      h('p', { class: 'small' }, TH().care.seedNote),
+      h('div', { class: 'row' }, clock, sit,
+        h('div', { class: 'chips', role: 'group', 'aria-label': 'Minutes' }, [3, 5, 10].map((m) => h('button', { type: 'button', class: 'chip', 'aria-pressed': String(m === mins), onclick: () => { clearInterval(seedTimer); seedTimer = null; setUi('seedMins', m); } }, `${m} min`)))));
+  }
+  function theoToggle() {
+    if (!TH()) return null;
+    const on = theoOn();
+    return h('div', { class: `note ${on ? '' : 'warm'} theo-toggle` },
+      h('div', { class: 'row between' }, h('b', null, icon('lotus', 18), ` ${TH().label}: ${on ? 'on' : 'off'}`), btn(on ? 'Turn off' : 'Turn on', () => setTheo(!on), 'small')),
+      h('span', { class: 'small' }, on ? TH().toggleOn : TH().toggleOff));
+  }
+  function theoCare() {
+    const TC = TH().care;
+    const r = region();
+    return [
+      h('section', { class: 'section', id: 'theosophy' }, sectionHead('Theosophy in your day', TC.intro),
+        h('div', { class: 'grid two' },
+          seedCard(seedSitting()),
+          h('div', { class: 'card prayer' }, h('h3', null, TC.prayer.title),
+            h('div', { class: 'prayer-lines' }, TC.prayer.lines.map((l) => h('span', null, l))),
+            h('p', { class: 'small faint' }, TC.prayer.source), h('p', { class: 'small muted' }, TC.prayer.note))),
+        h('div', { class: 'card soft' }, h('h3', null, TC.objects.title), h('p', { class: 'small muted' }, TC.objects.intro),
+          h('ol', { class: 'objects' }, TC.objects.items.map((o) => h('li', null, h('span', { class: 'obj' }, o.object), h('span', { class: 'small muted' }, o.forYou)))),
+          h('p', { class: 'small faint' }, TC.objects.source)),
+        h('div', { class: 'grid' }, TC.practices.map((x) => h('div', { class: 'card soft' }, h('div', { class: 'row between' }, h('b', null, x.name), h('span', { class: 'pill plain num' }, `${x.minutes} min`)), h('p', { class: 'small' }, x.how), h('p', { class: 'small faint' }, x.source))))),
+      h('section', { class: 'section' }, sectionHead('Through a theosophical lens', 'The same heavy thoughts, met with the teachings you study.'),
+        h('div', { class: 'stack', style: { gap: '0' } }, TC.reframes.map((x) => h('details', { class: 'acc' }, h('summary', null, `“${x.thought}”`),
+          h('div', { class: 'acc-body' }, h('p', null, x.reframe), x.quote ? h('figure', { class: 'epigraph small-ep' }, h('blockquote', null, x.quote), x.source ? h('figcaption', null, x.source) : null) : null))))),
+      h('section', { class: 'section' }, sectionHead(TC.stairs.title, TC.stairs.note),
+        h('details', { class: 'acc stairs' }, h('summary', null, 'Read it slowly'), h('div', { class: 'acc-body' }, h('p', { class: 'stairs-text' }, TC.stairs.text), h('p', { class: 'small faint' }, TC.stairs.source)))),
+      h('section', { class: 'section' }, sectionHead('Study and fellowship', 'Free texts to read in small doses, and places to find fellow students.'),
+        h('div', { class: 'grid' },
+          TC.reading.map((b) => h('div', { class: 'card soft' }, h('b', null, b.title), h('span', { class: 'small faint' }, b.author), h('p', { class: 'small' }, b.why), b.url ? ext(b.url, 'Read free online', 'small') : null)),
+          TC.community.filter((c) => c.region === 'both' || c.region === r).map((c) => h('div', { class: 'card' }, h('b', null, c.name), h('p', { class: 'small' }, c.what), c.url ? ext(c.url, 'Website', 'small') : null)))),
+    ];
+  }
   function viewCare() {
     const C = D.care;
     const t = CC.iso();
@@ -1058,24 +1158,31 @@
       breathTimer = setInterval(step, 1000);
     }, 'primary');
     const journal = S().journal[t] || '';
+    const tc = theoOn() ? theoCare() : null;
     return h('div', { class: 'view' },
       h('div', { class: 'view-head' }, h('span', { class: 'eyebrow' }, 'Care'), h('h1', null, 'Look after the person doing the searching'),
         h('p', { class: 'lede' }, C.intro)),
+      theoToggle(),
+      epigraph('care'),
       h('div', { class: 'grid two' },
         h('section', { class: 'card' }, h('h3', null, 'Two minutes of calm'), h('div', { class: 'breath-wrap' }, h('div', { class: 'breath', 'aria-live': 'polite' }, ring, label), bBtn),
           h('p', { class: 'small muted' }, C.breathNote)),
         h('section', { class: 'card' }, h('h3', null, 'Today’s page'), h('p', { style: { fontFamily: 'var(--font-display)', fontSize: '1.15rem' } }, prompt),
           h('textarea', { id: 'journal-today', rows: 6, value: journal, placeholder: 'Write as much or as little as you like. Only you can see this.', oninput: (e) => CC.update((s) => { s.journal[t] = e.target.value; }, { silent: true }) }),
           h('p', { class: 'small faint' }, 'Saved privately as you type.'))),
+      tc ? tc[0] : null,
       h('section', { class: 'section' }, sectionHead('When your mind says…', 'Gentle, realistic answers to the thoughts that visit during a job search.'),
         h('div', { class: 'stack', style: { gap: '0' } }, C.reframes.map((r) => h('details', { class: 'acc' }, h('summary', null, `“${r.thought}”`), h('div', { class: 'acc-body' }, h('p', null, r.reframe)))))),
+      tc ? tc.slice(1, 3) : null,
       h('section', { class: 'section' }, sectionHead('Small practices that help', 'Each takes five minutes or less.'),
         h('div', { class: 'grid' }, C.practices.map((p) => h('div', { class: 'card soft' }, h('div', { class: 'row between' }, h('b', null, p.name), h('span', { class: 'pill plain num' }, `${p.minutes} min`)), h('p', { class: 'small' }, p.how), h('p', { class: 'small faint' }, p.evidence))))),
       h('section', { class: 'section' }, sectionHead('A sustainable week', 'Searching is work. Work needs rest.'),
         h('ul', { class: 'dots' }, C.rhythm.map((x) => h('li', null, x)))),
       h('section', { class: 'section' }, sectionHead('Things that are true about you', null),
         h('div', { class: 'grid' }, C.affirmations.map((a) => h('div', { class: 'card soft' }, h('p', { style: { fontFamily: 'var(--font-display)', fontSize: '1.1rem' } }, a))))),
+      tc ? tc.slice(3) : null,
       h('section', { class: 'section' }, sectionHead('If it gets heavy', C.helpIntro),
+        theoOn() ? h('div', { class: 'note care' }, h('span', null, TH().care.balance)) : null,
         h('div', { class: 'grid' }, C.helplines.map((x) => h('div', { class: 'card' }, h('b', null, x.name),
           h('div', { class: 'row' }, h('a', { href: `tel:${x.number.replace(/[^+\d]/g, '')}`, target: '_top', class: 'num', style: { fontSize: '1.25rem', fontWeight: 700 } }, x.number), copyBtn(x.number, 'Copy number')),
           h('p', { class: 'small muted' }, [x.hours, x.languages].filter(Boolean).join(' · ')), x.url ? ext(x.url, 'Website', 'small') : null)))));
@@ -1109,6 +1216,7 @@
     const active = document.activeElement && document.activeElement.id;
     const sel = active && document.activeElement.selectionStart;
     clearInterval(breathTimer);
+    clearInterval(seedTimer); seedTimer = null;
     main().replaceChildren(VIEWS[currentView]());
     document.querySelectorAll('[data-nav]').forEach((a) => a.setAttribute('aria-current', a.dataset.nav === currentView ? 'page' : 'false'));
     if (active) {
@@ -1117,6 +1225,13 @@
     }
     renderStatus();
     renderRegion();
+    renderMotto();
+  }
+  function renderMotto() {
+    const el = document.getElementById('cc-motto');
+    if (!el) return;
+    el.hidden = !theoOn();
+    if (theoOn()) { const m = TH().motto; el.textContent = `${m.text} · ${m.sanskrit}`; el.title = m.source; }
   }
   const STATUS_TEXT = { sheet: 'Saved to your Sheet', syncing: 'Saving…', locked: 'Private link needed', none: 'Not saving — back up' };
   function renderStatus() {
@@ -1135,7 +1250,7 @@
   }
 
   function buildNav() {
-    const items = [['today', 'Today', 'sun'], ['explore', 'Explore', 'compass'], ['apply', 'Apply', 'send'], ['tracker', 'Tracker', 'list'], ['prepare', 'Prepare', 'chat'], ['care', 'Care', 'leaf']];
+    const items = [['today', 'Today', 'sun'], ['explore', 'Explore', 'compass'], ['apply', 'Apply', 'send'], ['tracker', 'Tracker', 'list'], ['prepare', 'Prepare', 'chat'], ['care', 'Care', 'lotus']];
     const nav = document.getElementById('nav');
     const bar = document.getElementById('tabbar');
     nav.replaceChildren(...items.map(([id, label]) => h('a', { href: `#${id}`, 'data-nav': id }, label)));

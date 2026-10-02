@@ -119,6 +119,26 @@ const SPEC = {
     stories: A(T({ title: S, use: S, situation: S, action: S, result: S }), 5),
     ask: A(S, 8), salary: A(S, 4), offer: A(S, 8), stability: A(T({ signal: S, how: S }), 6),
   }),
+  theosophy: T({
+    label: S, toggleOn: S, toggleOff: S,
+    motto: T({ text: S, sanskrit: S, source: S }),
+    epigraphs: T(Object.fromEntries(['today', 'paths', 'companies', 'abroad', 'search', 'cv', 'letters', 'tracker', 'interview', 'offer', 'care']
+      .map((k) => [k, T({ quote: S, source: S, note: S })]))),
+    seeds: A(T({ quote: S, source: S, reflection: S }), 21),
+    moments: T({ applied: S, followup: S, interview: S, offer: S, closed: S, beforeSend: S, dayDone: S }),
+    pool: A(T({ id: S, title: S, sub: S, minutes: N, energy: A(ENERGY, 1), href: HREF, care: opt(B) }), 4),
+    interviewCentering: S,
+    care: T({
+      intro: S, seedNote: S, balance: S,
+      objects: T({ title: S, intro: S, items: A(T({ object: S, forYou: S }), 3), source: S }),
+      prayer: T({ title: S, lines: A(S, 3), source: S, note: S }),
+      practices: A(T({ name: S, how: S, minutes: N, source: S }), 5),
+      reframes: A(T({ thought: S, reframe: S, quote: opt(S), source: opt(S) }), 6),
+      stairs: T({ title: S, text: S, source: S, note: S }),
+      reading: A(T({ title: S, author: S, why: S, url: '' }), 4),
+      community: A(T({ name: S, what: S, url: '', region: oneOf('india', 'global', 'both') }), 2),
+    }),
+  }),
 };
 const only = process.argv.slice(2);
 for (const [k, spec] of Object.entries(SPEC)) {
@@ -140,7 +160,7 @@ if (D.cv && D.cv.jobs && D.cv.numbers) {
 }
 const ids = (arr, name) => { const seen = new Set(); for (const x of arr || []) { if (seen.has(x.id)) errors.push(`${name}: duplicate id ${x.id}`); seen.add(x.id); } };
 ids(D.roles, 'roles'); ids(D.companies, 'companies'); if (D.history) ids(D.history.applied, 'history.applied');
-if (D.history && D.companies) for (const x of [...D.history.applied, ...(D.history.ideas || [])]) if (x.companyId && !D.companies.some((c) => c.id === x.companyId)) errors.push(`history: unknown companyId ${x.companyId}`); ids(D.today && D.today.pool, 'today.pool'); ids(D.today && D.today.firstWeek, 'today.firstWeek'); ids(D.letters && D.letters.templates, 'letters.templates'); ids(D.interview && D.interview.questions, 'interview.questions');
+if (D.history && D.companies) for (const x of [...D.history.applied, ...(D.history.ideas || [])]) if (x.companyId && !D.companies.some((c) => c.id === x.companyId)) errors.push(`history: unknown companyId ${x.companyId}`); ids([...((D.today && D.today.pool) || []), ...((D.theosophy && D.theosophy.pool) || [])], 'today.pool + theosophy.pool'); ids(D.today && D.today.firstWeek, 'today.firstWeek'); ids(D.letters && D.letters.templates, 'letters.templates'); ids(D.interview && D.interview.questions, 'interview.questions');
 if (D.search && D.search.platforms) ids(D.search.platforms, 'search.platforms');
 if (D.global && D.global.search) {
   const G = D.global.search;

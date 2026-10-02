@@ -5,6 +5,14 @@ directory, search links for Indian and global job sites, and a CV studio with Wo
 templates, an application tracker, interview prep and a care corner. An India/Global switch in the top bar
 changes the search sites, companies, CV notes and plan.
 
+Because she studies Theosophy, a layer of theosophical reflections runs through the app. It adds a short
+passage under each page heading, a daily seed thought, a line at key moments (sending, follow-ups, interviews,
+offers, closed applications) and an optional practice in the daily plan. Care also gets a Theosophy section
+with a seed-thought sitting timer, the Universal Prayer, the three Objects, practices, the Golden Stairs and
+free reading. Quotations are verbatim from public-domain texts and are listed in `src/data/theosophy.js`. The
+layer never appears in anything employers see, such as the CV, letters or interview answers. She can switch it
+off or on in Care.
+
 It runs as a **Google Apps Script web app** with a **Google Sheet** as its database. Updating the page never
 touches the data.
 
