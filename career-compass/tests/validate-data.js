@@ -59,6 +59,12 @@ const SPEC = {
     helplines: A(T({ name: S, number: S, hours: S, languages: '', url: '' }), 2),
   }),
   explore: T({ intro: S, lanesNote: S, marketNotes: A(S, 3) }),
+  history: T({
+    channels: S, appliedNote: S, pastNext: S,
+    applied: A(T({ id: S, name: S, companyId: '' }), 1),
+    ideas: A(T({ companyId: S, role: S, note: S })),
+    firstRound: T({ title: S, body: S, points: A(T({ title: S, body: S }), 2) }),
+  }),
   roles: A(T({ id: S, title: S, lane: LANE, variants: A(S, 2), why: S, gaps: '', salary: '', hybrid: oneOf('high', 'medium', 'low'), hybridWhy: S, upskill: A(T({ name: S, provider: S, cost: '', url: '', duration: '' })), employers: A(S) }), 15),
   companies: A(T({ id: S, name: S, category: S, cities: A(S, 1), hyd: B, careers: '', roles: A(S, 1), functions: S, work: S, lane: LANE, fit: S }), 25),
   remote: T({
@@ -119,7 +125,8 @@ if (D.cv && D.cv.jobs && D.cv.numbers) {
   for (const j of D.cv.jobs) for (const b of j.bullets || []) for (const m of `${b.tn || ''} ${Object.values(b.altn || {}).join(' ')}`.matchAll(/\{(\w+)\}/g)) if (!keys.has(m[1])) errors.push(`cv.jobs.${j.id}: unknown number token {${m[1]}}`);
 }
 const ids = (arr, name) => { const seen = new Set(); for (const x of arr || []) { if (seen.has(x.id)) errors.push(`${name}: duplicate id ${x.id}`); seen.add(x.id); } };
-ids(D.roles, 'roles'); ids(D.companies, 'companies'); ids(D.today && D.today.pool, 'today.pool'); ids(D.today && D.today.firstWeek, 'today.firstWeek'); ids(D.letters && D.letters.templates, 'letters.templates'); ids(D.interview && D.interview.questions, 'interview.questions');
+ids(D.roles, 'roles'); ids(D.companies, 'companies'); if (D.history) ids(D.history.applied, 'history.applied');
+if (D.history && D.companies) for (const x of [...D.history.applied, ...(D.history.ideas || [])]) if (x.companyId && !D.companies.some((c) => c.id === x.companyId)) errors.push(`history: unknown companyId ${x.companyId}`); ids(D.today && D.today.pool, 'today.pool'); ids(D.today && D.today.firstWeek, 'today.firstWeek'); ids(D.letters && D.letters.templates, 'letters.templates'); ids(D.interview && D.interview.questions, 'interview.questions');
 if (D.search && D.search.platforms) ids(D.search.platforms, 'search.platforms');
 if (errors.length) { console.log(`${errors.length} problem(s):\n- ${errors.slice(0, 80).join('\n- ')}`); process.exitCode = 1; }
 else console.log(`OK: ${only.length ? only.join(', ') : 'all parts'} valid`);

@@ -1,5 +1,6 @@
 window.CC_DATA_PARTS = window.CC_DATA_PARTS || {};
 window.CC_DATA_PARTS.today = {
+  ...(window.CC_DATA_PARTS.today || {}), /* keeps today.plan from plan.js, which loads first (sorted file order) */
   heroLine: 'One gentle step at a time. Tell the plan how much you have in you today, and it will fit itself to you.',
   doneLine: 'You did what you set out to do. The rest of the day is yours.',
   weekNote: 'These count effort, which is the part you control. Replies come on their own timetable.',
@@ -12,7 +13,8 @@ window.CC_DATA_PARTS.today = {
   pool: [
     { id: 'breathe', title: 'Two minutes of slow breathing', sub: 'In the Care section. Then a glass of water, and a short walk if you can.', minutes: 5, energy: ['low', 'okay', 'good'], href: '#care', care: true },
     { id: 'alerts', title: 'Check your saved job alerts', sub: 'Naukri and LinkedIn, last 7 days only. Shortlist up to three that fit.', minutes: 15, energy: ['low', 'okay', 'good'], href: '#search' },
-    { id: 'apply-one', title: 'Apply to one shortlisted role on the company site', sub: 'Use the matching CV version and adjust the headline to the job.', minutes: 30, energy: ['okay', 'good'], href: '#cv' },
+    { id: 'apply-one', title: 'Apply to one shortlisted role on the company site', sub: 'Use the matching CV version, then send one short message to a person at that company.', minutes: 30, energy: ['okay', 'good'], href: '#cv' },
+    { id: 'past-person', title: 'Find one person at a company you applied to before', sub: 'A recruiter or a former colleague. Ask kindly about current openings and what the team looks for.', minutes: 15, energy: ['okay', 'good'], href: '#tracker' },
     { id: 'reconnect', title: 'Message one former colleague', sub: 'A warm hello and a short update. Ask about referrals only if they work somewhere you are applying.', minutes: 10, energy: ['okay', 'good'], href: '#letters' },
     { id: 'naukri-refresh', title: 'Refresh your Naukri profile', sub: 'Edit one line or re-upload your CV. Fresh profiles show up higher for recruiters.', minutes: 5, energy: ['low', 'okay', 'good'], href: '#cv' },
     { id: 'apply-two', title: 'Send a second tailored application', sub: 'Same care as the first, then log both in the tracker.', minutes: 30, energy: ['good'], href: '#letters' },
@@ -29,7 +31,7 @@ window.CC_DATA_PARTS.today = {
     { id: 'informational', title: 'Ask someone for a 15-minute chat about their role', sub: 'People in complaint handling or customer success are usually glad to describe their work.', minutes: 15, energy: ['good'], href: '#letters' },
   ],
   firstWeek: [
-    { id: 'cv-fill', title: 'Fill in the missing CV details', sub: 'Titles and months for your two recent roles, your BPL end month, and any numbers you remember.', href: '#cv', hrefLabel: 'Open CV studio', minutes: 30 },
+    { id: 'cv-fill', title: 'Fill in the missing CV details', sub: 'Your BPL end month, any numbers you remember, and whether to show your two short roles. If you show them, add their titles and months.', href: '#cv', hrefLabel: 'Open CV studio', minutes: 30 },
     { id: 'cv-download', title: 'Download your three CV versions', sub: 'One for clinical roles, one for MedTech quality and support, one for customer success and training.', href: '#cv', hrefLabel: 'Open CV studio', minutes: 10 },
     { id: 'linkedin', title: 'Update your LinkedIn headline and About', sub: 'Copy them from the profile kit, check your photo, and turn on Open to Work.', href: '#cv', hrefLabel: 'Open profile kit', minutes: 30 },
     { id: 'naukri', title: 'Update your Naukri profile', sub: 'Resume headline, profile summary, key skills, notice period set to immediate, and Hyderabad plus Remote as locations.', href: '#cv', hrefLabel: 'Open profile kit', minutes: 30 },

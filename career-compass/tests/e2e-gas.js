@@ -55,12 +55,24 @@ const nav = (page, token) => page.evaluate((t) => { const a = document.querySele
   const d1 = await openDevice(browser, gas);
   const p1 = d1.page;
   await waitSynced(p1, 'device1 initial load');
-  check(gas.sheet('Applications').table().length === 3, `seed applications written to Sheet (got ${gas.sheet('Applications') && gas.sheet('Applications').table().length})`);
+  const seeded = gas.sheet('Applications').table();
+  check(seeded.length === 12, `pre-filled tracker written to Sheet: 9 past + 3 ideas (got ${seeded.length})`);
+  check(seeded.filter((a) => a.status === 'applied').map((a) => a.company).includes('Edan'), 'past applications include Edan');
+  await nav(p1, 'companies');
+  await p1.waitForTimeout(100);
+  check((await p1.textContent('#main')).includes('Applied before'), 'company cards mark companies she already applied to');
+  await p1.click('button.chip:has-text("New to you")');
+  await p1.waitForTimeout(100);
+  const freshNames = await p1.$$eval('article.card h3', (hs) => hs.map((x) => x.textContent));
+  check(!freshNames.some((n) => /GE HealthCare|Philips|Siemens|Mindray|Samsung/.test(n)), `New to you hides companies already tried (${freshNames.slice(0, 5).join(', ')})`);
+  await nav(p1, 'today');
 
   await p1.click('#energy-good');
   await nav(p1, 'companies');
   await p1.waitForTimeout(100);
-  await p1.click('text=Add to tracker >> nth=3');
+  await p1.click('button.chip:has-text("All")');
+  await p1.waitForTimeout(100);
+  await p1.click('text=Add to tracker >> nth=0');
   await nav(p1, 'letters');
   await p1.waitForTimeout(100);
   await p1.fill('#lf-company', 'Medtronic');

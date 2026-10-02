@@ -7,6 +7,24 @@
   const main = () => document.getElementById('main');
 
   // ---------- defaults ----------
+  /** First-run tracker: the applications she has already sent, plus a few new doors to try. Fixed ids keep devices in step. */
+  function seedApps() {
+    const H = D.history;
+    const byId = (id) => D.companies.find((c) => c.id === id);
+    if (!H) {
+      return D.companies.filter((c) => c.hyd).slice(0, 3).map((c) => ({ id: `seed-${c.id}`, companyId: c.id, company: c.name, role: c.roles[0] || '', platform: 'Company site', link: c.careers || '', status: 'idea', region: 'india', createdAt: 0, updatedAt: 0, messages: [], followups: [], seed: true }));
+    }
+    const past = H.applied.map((a) => ({
+      id: a.id, companyId: a.companyId || '', company: a.name, role: '', platform: H.channels, link: '', status: 'applied', appliedOn: '', followUpOn: '',
+      notes: H.appliedNote, region: 'india', createdAt: 0, updatedAt: 0, messages: [], followups: [], past: true,
+    }));
+    const ideas = (H.ideas || []).map((x) => {
+      const c = byId(x.companyId);
+      if (!c) return null;
+      return { id: `seed-${x.companyId}-${slug(x.role)}`, companyId: c.id, company: c.name, role: x.role, platform: 'Company site', link: c.careers || '', status: 'idea', notes: x.note, region: 'india', createdAt: 0, updatedAt: 0, messages: [], followups: [], seed: true };
+    }).filter(Boolean);
+    return [...ideas, ...past];
+  }
   const defaultState = () => ({
     v: 1,
     updatedAt: 0,
@@ -22,11 +40,7 @@
     wins: [],
     journal: {},
     saved: { roles: [], companies: [] },
-    apps: D.companies.filter((c) => c.hyd).slice(0, 3).map((c) => ({
-      id: `seed-${c.id}`, company: c.name, role: c.roles[0] || '', platform: 'Company site', link: c.careers || '', status: 'idea',
-      notes: 'A suggested first target. Check their careers site for current openings, or delete this if it does not feel right.',
-      createdAt: 0, updatedAt: 0, messages: [], followups: [], seed: true,
-    })),
+    apps: seedApps(),
     ui: {},
   });
 
@@ -201,6 +215,18 @@
     h('div', { class: 'meter-top' }, h('span', null, label), h('span', { class: 'num muted' }, `${value} / ${goal}`)),
     h('div', { class: 'dots-row', 'aria-hidden': 'true' }, Array.from({ length: Math.max(goal, value) }, (_, i) => h('i', { class: i < value ? (i < goal ? 'on' : 'on extra') : '' }))));
 
+  function firstRoundCard() {
+    const F = D.history.firstRound;
+    const open = !ui('firstRoundClosed', false);
+    const det = h('details', { class: 'acc', open },
+      h('summary', null, F.title),
+      h('div', { class: 'acc-body' },
+        h('p', null, F.body),
+        h('ul', { class: 'clean' }, F.points.map((p) => h('li', { class: 'stack', style: { gap: '2px' } }, h('b', null, p.title), h('span', { class: 'muted' }, p.body)))),
+        h('div', { class: 'row' }, h('a', { href: '#companies', class: 'btn small primary' }, 'See companies you have not tried'), h('a', { href: '#tracker', class: 'btn small' }, 'Your past applications'))));
+    det.addEventListener('toggle', () => { if (det.open === ui('firstRoundClosed', false)) CC.update((s) => { s.ui.firstRoundClosed = !det.open; }, { silent: true }); });
+    return det;
+  }
   function viewToday() {
     const t = CC.iso();
     const day = S().daily[t] || {};
@@ -244,6 +270,8 @@
         h('div', { class: 'acc-body' },
           h('ol', { style: { margin: 0, paddingLeft: '1.2em', display: 'grid', gap: '8px' } }, planData.points.map((p) => h('li', null, h('b', null, p.title), ' ', h('span', { class: 'muted' }, p.body)))),
           planData.note ? h('p', { class: 'small faint' }, planData.note) : null)) : null,
+
+      !isGlobal() && D.history && D.history.firstRound ? firstRoundCard() : null,
 
       day.energy ? h('section', { class: 'section' },
         sectionHead('Today’s gentle plan', D.today.energy[day.energy].note),
@@ -345,8 +373,9 @@
     const source = isGlobal() && Array.isArray(G().companies) ? G().companies : D.companies;
     const cats = [...new Set(source.map((c) => c.category))].sort();
     const q = (f.q || '').toLowerCase();
+    const tried = new Set(CC.apps().filter((a) => a.status !== 'idea').map((a) => a.companyId).filter(Boolean));
     const list = source.filter((c) =>
-      (f.lane === 'all' || c.lane === f.lane || (f.lane === 'saved' && S().saved.companies.includes(c.id))) &&
+      (f.lane === 'all' || c.lane === f.lane || (f.lane === 'saved' && S().saved.companies.includes(c.id)) || (f.lane === 'fresh' && !tried.has(c.id))) &&
       (isGlobal() || !f.hyd || c.hyd) && (f.cat === 'all' || c.category === f.cat) &&
       (!q || `${c.name} ${c.category} ${c.roles.join(' ')} ${c.functions}`.toLowerCase().includes(q)));
     const setF = (patch) => setUi('cf', { ...f, ...patch });
@@ -356,7 +385,7 @@
     return h('div', { class: 'section' },
       h('div', { class: 'filters' },
         h('div', { class: 'chips', role: 'group', 'aria-label': 'Filter by lane' },
-          [['all', 'All'], ['same', 'Same field'], ['adjacent', 'Adjacent'], ['new', 'New direction'], ['saved', 'Starred']].map(([id, label]) =>
+          [['all', 'All'], ['fresh', 'New to you'], ['same', 'Same field'], ['adjacent', 'Adjacent'], ['new', 'New direction'], ['saved', 'Starred']].map(([id, label]) =>
             h('button', { type: 'button', class: 'chip', 'aria-pressed': String(f.lane === id), onclick: () => setF({ lane: id }) }, label))),
         h('div', { class: 'toolbar' }, search,
           h('select', { id: 'company-cat', 'aria-label': 'Category', value: f.cat, onchange: (e) => setF({ cat: e.target.value }) },
@@ -373,10 +402,12 @@
     const li = `https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(`${c.name} ${kw}`)}&location=${isGlobal() ? 'Worldwide' : 'India'}`;
     const reviews = `https://www.google.com/search?q=${encodeURIComponent(`${c.name} ${isGlobal() ? '' : 'India '}reviews Glassdoor${isGlobal() ? '' : ' AmbitionBox'}`)}`;
     const findCareers = `https://www.google.com/search?q=${encodeURIComponent(`${c.name} ${isGlobal() ? '' : 'India '}careers official site`)}`;
-    const inTracker = CC.apps().some((a) => a.company === c.name);
+    const mine = CC.apps().filter((a) => a.companyId === c.id || a.company === c.name);
+    const inTracker = mine.length > 0;
+    const appliedBefore = mine.some((a) => a.past || a.status === 'applied' || a.status === 'closed');
     return h('article', { class: 'card' },
       h('div', { class: 'rc-top' }, h('div', { class: 'stack', style: { gap: '6px' } }, h('h3', null, c.name),
-        h('div', { class: 'rc-meta' }, lanePill(c.lane), h('span', { class: 'pill plain' }, c.category), c.hyd && !isGlobal() ? h('span', { class: 'pill good' }, 'Hyderabad') : null)),
+        h('div', { class: 'rc-meta' }, lanePill(c.lane), h('span', { class: 'pill plain' }, c.category), c.hyd && !isGlobal() ? h('span', { class: 'pill good' }, 'Hyderabad') : null, appliedBefore ? h('span', { class: 'pill warn' }, 'Applied before') : null)),
         starBtn(starred, () => CC.update((s) => { s.saved.companies = toggleIn(s.saved.companies, c.id); }), starred ? 'Unstar company' : 'Star company')),
       h('p', null, c.fit),
       h('dl', { class: 'stack', style: { gap: '8px', margin: 0 } },
@@ -391,7 +422,7 @@
         ext(reviews, 'Reviews', 'btn small ghost'),
         btn(inTracker ? 'In tracker' : 'Add to tracker', () => {
           if (inTracker) { go('tracker'); return; }
-          CC.upsertApp({ id: CC.uid(), company: c.name, role: kw, platform: 'Company site', link: c.careers || '', status: 'idea', region: region(), createdAt: Date.now(), messages: [], followups: [] });
+          CC.upsertApp({ id: CC.uid(), companyId: c.id, company: c.name, role: kw, platform: 'Company site', link: c.careers || '', status: 'idea', region: region(), createdAt: Date.now(), messages: [], followups: [] });
           toast(`${c.name} added to your tracker`);
         }, 'small ghost', inTracker ? 'check' : 'plus')));
   }
@@ -608,16 +639,16 @@
     const recent = st.recent;
     const modeInfo = D.cv.recent.modes;
     const recentEditor = h('div', { class: 'card' },
-      h('h4', null, 'Your two recent short roles'),
+      h('h4', null, 'Show your two short roles on this CV?'),
       h('p', { class: 'small muted' }, D.cv.recent.why),
       h('div', { class: 'chips', role: 'radiogroup', 'aria-label': 'How to show them' }, Object.entries(modeInfo).map(([k, v]) =>
         h('button', { type: 'button', class: 'chip', role: 'radio', 'aria-checked': String(recent.mode === k), 'aria-pressed': String(recent.mode === k), onclick: () => CC.update((s) => { s.cv.recent.mode = k; }) }, v.label))),
       h('p', { class: 'small' }, modeInfo[recent.mode] ? modeInfo[recent.mode].note : ''),
-      recent.items.map((it, i) => h('div', { class: 'form-grid' },
+      recent.mode === 'omit' ? null : recent.items.map((it, i) => h('div', { class: 'form-grid' },
         field(`rec-${i}-title`, `Title at ${it.org}`, textInput(`rec-${i}-title`, it.title, (v) => quiet((s) => { s.cv.recent.items[i].title = v; }), { placeholder: 'e.g. Application Specialist' })),
         field(`rec-${i}-start`, 'Start', textInput(`rec-${i}-start`, it.start, (v) => quiet((s) => { s.cv.recent.items[i].start = v; }), { placeholder: 'e.g. May 2025' })),
         field(`rec-${i}-end`, 'End', textInput(`rec-${i}-end`, it.end, (v) => quiet((s) => { s.cv.recent.items[i].end = v; }), { placeholder: 'e.g. Jun 2025' })))),
-      field('rec-reason', 'One-line reason (factual, no blame)', textInput('rec-reason', recent.reason || D.cv.recent.reason, (v) => quiet((s) => { s.cv.recent.reason = v; })), 'Keep it short and true. Interviews are where you explain more.'));
+      recent.mode === 'omit' ? null : field('rec-reason', 'One-line reason (factual, no blame)', textInput('rec-reason', recent.reason || D.cv.recent.reason, (v) => quiet((s) => { s.cv.recent.reason = v; })), 'Keep it short and true. Interviews are where you explain more.'));
 
     const numbers = h('details', { class: 'acc' }, h('summary', null, 'Numbers you remember (makes bullets stronger)'),
       h('div', { class: 'acc-body' }, h('p', { class: 'small muted' }, D.cv.numbersNote),
@@ -835,10 +866,12 @@
       h('div', { class: 'row small muted' },
         a.region === 'global' ? h('span', { class: 'pill adjacent' }, 'Global') : null,
         a.platform ? h('span', null, a.platform) : null,
-        a.appliedOn ? h('span', { class: 'num' }, `Applied ${CC.fmt(a.appliedOn)}`) : null,
+        a.appliedOn ? h('span', { class: 'num' }, `Applied ${CC.fmt(a.appliedOn)}`) : a.past ? h('span', null, 'Applied earlier') : null,
         a.status === 'applied' && a.followUpOn ? h('span', { class: `num${isDue ? ' due' : ''}` }, isDue ? 'Follow-up due' : `Follow up ${CC.fmt(a.followUpOn)}`) : null,
         (a.messages || []).length ? h('span', null, `${a.messages.length} message${a.messages.length > 1 ? 's' : ''}`) : null),
       a.notes ? h('p', { class: 'small' }, a.notes) : null,
+      a.past && a.status === 'applied' && D.history ? h('div', { class: 'note' }, h('span', { class: 'small' }, D.history.pastNext),
+        h('div', { class: 'row' }, btn('Write to someone there', () => { CC.update((s) => { s.letters.tpl = ['after-portal', 'recruiter-inmail'].find((id) => D.letters.templates.some((t) => t.id === id)) || s.letters.tpl; s.letters.appId = a.id; s.letters.fields = { ...s.letters.fields, company: a.company, role: a.role || '', contact: '' }; s.ui.apply = 'letters'; }); go('letters'); }, 'small primary'))) : null,
       h('div', { class: 'row' },
         h('select', { id: `st-${a.id}`, 'aria-label': 'Status', value: a.status, style: { width: 'auto' }, onchange: (e) => {
           const next = { ...a, status: e.target.value };

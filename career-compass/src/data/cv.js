@@ -200,11 +200,11 @@ window.CC_DATA_PARTS.cv = {
     items: [{ org: 'Trimed Solutions Pvt Ltd' }, { org: 'Docto Technologies Pvt Ltd' }],
     compactTitle: 'Short-term roles',
     reason: 'Both roles were closed by the employers for business reasons within the first months.',
-    why: 'Two short roles after a long steady career are common after layoffs, and they say nothing bad about your work. Showing them briefly and calmly is safer than leaving a gap, because background checks and your PF (EPFO/UAN) history can show them anyway.',
+    why: 'Your two recent roles lasted about a month each and ended for business reasons. Whether they appear on your CV is your choice.',
     modes: {
-      compact: { label: 'One short entry (recommended)', note: 'Both roles appear together as one brief entry with a factual reason. It is honest and keeps attention on your 13 years.' },
-      full: { label: 'Separate entries', note: 'Each role gets its own heading. Choose this if one of them is directly relevant to the job you are applying for.' },
-      omit: { label: 'Leave off the CV', note: 'Possible for very short roles, but you must still list them on any background-verification form and mention them if asked about recent work. A gap with no explanation often invites more questions.' },
+      compact: { label: 'Yes, as one short line', note: 'Recommended. Both roles sit together in one brief entry with a factual reason, so your 13 years stay the focus and nothing looks hidden.' },
+      full: { label: 'Yes, as separate entries', note: 'Each role gets its own heading. Useful if one of them matches the job you are applying for.' },
+      omit: { label: 'No, leave them off', note: 'That is a fair choice for roles this short. Two things keep it safe. List both roles on any background-verification form that asks for every employer, and look at your EPFO passbook on the UAN member portal, because PF records can show them. If an interviewer asks about this year, a calm one-line answer is ready in Prepare.' },
     },
   },
   education: {
